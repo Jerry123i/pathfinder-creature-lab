@@ -1,0 +1,28 @@
+@import "tailwindcss";
+@import "tailwindcss/preflight.css" layer(base);
+
+@layer base {
+    h1 {
+        font-size: var(--text-3xl);
+    }
+    h2 {
+        font-size: var(--text-xl);
+    }
+    h3 {
+        font-size: var(--text-lg);
+    }
+    a {
+        color: var(--color-blue-600);
+        text-decoration-line: underline;
+    }
+
+    select{
+        background-color: lightgray;
+        border: 1px solid black;
+    }
+
+    option select{
+        outline-color: red;
+        outline-width: thick;
+    }
+}

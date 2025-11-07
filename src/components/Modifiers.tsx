@@ -135,6 +135,9 @@ export const Merfolk : CreatureAdjustment = {
 
 export function applyAllAdjustments(baseCreature : StatBlockProp, adjustments : CreatureAdjustment[]) : StatBlockProp
 {
+    if (adjustments.length === 0)
+        return  baseCreature;
+    
     let creature = cloneStatBlock(baseCreature);
 
     adjustments.sort((a,b)=> a.priority-b.priority);

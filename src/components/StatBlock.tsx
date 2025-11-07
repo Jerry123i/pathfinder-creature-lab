@@ -4,10 +4,11 @@
 export interface StatBlockProp{
     _id : string;
     name : string;
-    system : GameSystems;
+    system : CreatureSystems;
+    items : CreatureItem[];
 }
 
-export interface GameSystems{
+export interface CreatureSystems {
     abilities : Abilities;
     details : Details;
     attributes : Attributes;
@@ -16,7 +17,7 @@ export interface GameSystems{
     saves : {fortitude : ValueHolder, reflex : ValueHolder, will : ValueHolder};
 }
 
-export function modifyAllSaves(creature : GameSystems, value : number){
+export function modifyAllSaves(creature : CreatureSystems, value : number){
     creature.saves.reflex.value += value;
     creature.saves.fortitude.value += value;
     creature.saves.will.value += value;
@@ -29,6 +30,43 @@ export interface Attributes{
     speed : ValueHolder;
 }
 
+export interface CreatureItem {
+    _id: string
+    img: string
+    name: string
+    sort: number
+    system: ItemSystem
+    type: string
+    _stats?: Stats
+}
+export interface CreatureItemStrike extends CreatureItem{
+    system: StrikeSystem
+}
+
+function GetStrikes(value : StatBlockProp): CreatureItemStrike[]{
+    
+    return value.items.filter(item => item.type === "melee") as CreatureItemStrike[]; 
+}
+
+function GetSpells(value : StatBlockProp): CreatureItem[]{
+    return value.items.filter(item => item.type === "spell");
+}
+
+export interface ItemSystem {
+    description: StringHolder,
+}
+
+export interface StrikeSystem extends ItemSystem {
+    bonus : ValueHolder,
+    weaponType? : StringHolder,
+    range: {increment : number, max: number},
+    traits : {rarity?: string, value : string[]}
+}
+
+export interface Stats{
+    compendiumSource : string;
+}
+
 export interface Mod{
     mod :number;
 }
@@ -37,6 +75,15 @@ export interface ValueHolder{
     type?: string;
     saveDetail?: number;
     value :number;
+}
+
+export interface StringHolder{
+    value : string;
+}
+
+export interface DamageRollInfo{
+    damage: number;
+    damageType: string;
 }
 
 export interface Abilities{
@@ -69,7 +116,7 @@ export interface SkillList{
 
 type SkillName = keyof SkillList;
 
-export function modifyAllSkills(creature: GameSystems, value: number) {
+export function modifyAllSkills(creature: CreatureSystems, value: number) {
     const { skills } = creature;
     if (!skills) return;
 
@@ -80,7 +127,7 @@ export function modifyAllSkills(creature: GameSystems, value: number) {
 }
 
 //TODO implement this
-export function modifySkill(creature : GameSystems, name : SkillName, value : number)
+export function modifySkill(creature : CreatureSystems, name : SkillName, value : number)
 {
     if (creature === undefined)
         return;
@@ -134,11 +181,46 @@ function statBlock(value : StatBlockProp) {
             {printMod(value.system.abilities.wis, "WIS")}{";"}
             {printMod(value.system.abilities.cha, "CHA")}
         </p>
+        <hr />
+        <h2>Strikes</h2>
+        <ul>
+            {GetStrikes(value).map(i => <li>{PrintStrike(i)}</li>)}
+        </ul>
+        <h2>Spells</h2>
+        <ul>
+            {GetSpells(value).map(item => <li>{item.name} - {item.type}</li>)}
+        </ul>
+    </>)
+}
+
+function PrintStrike(item : CreatureItemStrike)
+{
+    if (item.system.weaponType === undefined){
+        item.system.weaponType = {value:"melee"};
+        
+        if (item.system.range !== undefined){
+            if (item.system.range?.increment > 0)
+                item.system.weaponType = {value:"ranged"};
+        }
+        
+    }
+        
+    
+    let map : number;
+    map = 5;
+    
+    if (item.system.traits.value.includes("agile"))
+        map = 4;
+    
+    return (<>
+        <b>{item.system.weaponType.value}</b> {item.name} {printNumberWithSignal(item.system.bonus.value)} [{printNumberWithSignal(item.system.bonus.value-map)}/{printNumberWithSignal(item.system.bonus.value- (map*2))}]
+        Damage Dice
     </>)
 }
 
 export function cloneStatBlock(statBlock: StatBlockProp): StatBlockProp {
     return {
+        items: statBlock.items,
         _id: crypto.randomUUID(), // give it a new unique ID
         name: statBlock.name,
         system: {
@@ -169,7 +251,7 @@ export function cloneStatBlock(statBlock: StatBlockProp): StatBlockProp {
                 reflex: { ...statBlock.system.saves.reflex },
                 will: { ...statBlock.system.saves.will },
             },
-        },
+        }
     };
 }
 
@@ -211,7 +293,12 @@ function printValue(value: ValueHolder, name: string)
 
 function printValueWithSignal(value: ValueHolder, name: string) {
     const val = value.value;
-    return <> <b>{name}</b> {val < 0 ? "-":"+"}{val}</>;
+    return <> <b>{name}</b> {val < 0 ? "":"+"}{val}</>;
+}
+
+function printNumberWithSignal(value: number) {
+    const val = value;
+    return <>{val < 0 ? "":"+"}{val}</>;
 }
 
 // function SkillsList(value : Skill[] )

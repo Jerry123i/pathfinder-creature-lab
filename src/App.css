@@ -1,3 +1,28 @@
-@import "tailwindcss";
-@import "tailwindcss/preflight.css" layer(base);
+/*@import "tailwindcss";*/
+/*@import "tailwindcss/preflight.css" layer(base);*/
 
+/*.product-name{*/
+/*    @apply text-2xl font-bold;*/
+/*}*/
+
+/*@layer base {*/
+/*    h1 {*/
+/*        font-size: var(--text-3xl);*/
+/*    }*/
+
+/*    h2 {*/
+/*        font-size: var(--text-xl);*/
+/*    }*/
+
+/*    h3 {*/
+/*        font-size: var(--text-lg);*/
+/*    }*/
+/*    button{*/
+/*        background-color: var(--color-gray-100);*/
+/*        outline-color: black;*/
+/*        outline-width: medium;*/
+/*        margin: 5px;*/
+/*        padding-left: 4px;*/
+/*        padding-right: 4px;*/
+/*    }*/
+/*}*/

@@ -6,12 +6,10 @@ import type {CreatureAdjustment} from "./components/Modifiers.tsx";
 import statBlock from "./components/StatBlock.tsx";
 import {useState} from "react";
 
-import {buttonBase} from "./tailwindStyles.tsx";
-import {buttonSelected} from "./tailwindStyles.tsx";
-
 
 // eslint-disable-next-line react-refresh/only-export-components
 export function loadMonsters(){
+    console.log("Load Monsters");
     const modules = import.meta.glob("./assets/monsters/*.json", {eager:true});
     return Object.values(modules) as StatBlockProp[];
 }
@@ -22,6 +20,10 @@ function App(){
     const [selectedAdjustmentIndexes, setSelectedAdjustments] = useState<number[]>([]);
 
     const monsters = loadMonsters();
+
+    console.log(monsters[0].name); // "Monadic Deva"
+    console.log(monsters[0].img);  // "systems/pf2e/icons/default-icons/npc.svg"
+    console.log(monsters[0].items.length); // large number
 
     const currentBaseCreature = monsters[creatureSelectIndex];
 
@@ -62,7 +64,7 @@ function CreatureAdjustmentButtons(selectedAdjustments :number[], selectedArrayS
     return (
         <div>
         {CreatureAdjustmentList.map((item : CreatureAdjustment, index: number) =>
-            (<button type="button" className={selectedAdjustments.includes(index)?buttonSelected:buttonBase} key={item._id}
+            (<button key={item._id}
                      onClick={()=>{
                          //On Click
                          selectedArraySetter(handleCreatureAdjustmentClick(selectedAdjustments, index))

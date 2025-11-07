@@ -61,6 +61,20 @@ export interface StrikeSystem extends ItemSystem {
     weaponType? : StringHolder,
     range: {increment : number, max: number},
     traits : {rarity?: string, value : string[]}
+    damageRolls : Record<string, DamageRollInfo>
+}
+
+function GetDamagesInfo(value : StrikeSystem): DamageRollInfo
+{
+    const roll = value.damageRolls!;
+    const keys = Object.keys(roll);
+    
+    for(const key of keys){
+        const damageRoll = roll[key] as DamageRollInfo;
+        return damageRoll;
+    }
+    
+    return {damage:0, damageType:"null"};
 }
 
 export interface Stats{
@@ -204,7 +218,6 @@ function PrintStrike(item : CreatureItemStrike)
         }
         
     }
-        
     
     let map : number;
     map = 5;
@@ -214,7 +227,7 @@ function PrintStrike(item : CreatureItemStrike)
     
     return (<>
         <b>{item.system.weaponType.value}</b> {item.name} {printNumberWithSignal(item.system.bonus.value)} [{printNumberWithSignal(item.system.bonus.value-map)}/{printNumberWithSignal(item.system.bonus.value- (map*2))}]
-        Damage Dice
+        {GetDamagesInfo(item.system).damage} {GetDamagesInfo(item.system).damageType}
     </>)
 }
 

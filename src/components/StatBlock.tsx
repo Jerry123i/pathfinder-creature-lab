@@ -1,33 +1,56 @@
 ﻿import {Fragment} from "react";
 
 
-export interface StatBlockProp{
-    _id : string;
-    name : string;
-    system : CreatureSystems;
-    items : CreatureItem[];
+export interface StatBlockProp {
+    _id: string;
+    name: string;
+    system: CreatureSystems;
+    items: CreatureItem[];
 }
 
 export interface CreatureSystems {
-    abilities : Abilities;
-    details : Details;
-    attributes : Attributes;
-    perception : Mod;
-    skills : SkillList;
-    saves : {fortitude : ValueHolder, reflex : ValueHolder, will : ValueHolder};
+    abilities: Abilities;
+    details: Details;
+    attributes: Attributes;
+    perception: Mod;
+    skills: SkillList;
+    saves: { fortitude: ValueHolder, reflex: ValueHolder, will: ValueHolder };
 }
 
-export function modifyAllSaves(creature : CreatureSystems, value : number){
+export function modifyAllSaves(creature: CreatureSystems, value: number) {
     creature.saves.reflex.value += value;
     creature.saves.fortitude.value += value;
     creature.saves.will.value += value;
 }
 
-export interface Attributes{
-    ac : ValueHolder;
-    allSaves : string;
-    hp : ValueHolder;
-    speed : ValueHolder;
+export function modifyAllStrikes(creature: StatBlockProp, hitValue: number, damageValue:number)
+{
+    const strikes = GetStrikes(creature);
+    
+    for (let i = 0, len = strikes.length; i < len; ++i)
+    {
+        strikes[i].system.bonus.value += hitValue;
+        const rawDamage = GetDamagesInfo(strikes[i].system);
+        
+        for (let j = 0, lenj = rawDamage.length; j < lenj; ++j)
+        {
+            if(j>0)
+                break;
+            const damage = GetDice(rawDamage[j]);
+            damage.modifier += damageValue;
+
+            rawDamage[j].damage = DiceString(damage);    
+        }
+        
+    }
+    
+}
+
+export interface Attributes {
+    ac: ValueHolder;
+    allSaves: string;
+    hp: ValueHolder;
+    speed: ValueHolder;
 }
 
 export interface CreatureItem {
@@ -39,16 +62,17 @@ export interface CreatureItem {
     type: string
     _stats?: Stats
 }
-export interface CreatureItemStrike extends CreatureItem{
+
+export interface CreatureItemStrike extends CreatureItem {
     system: StrikeSystem
 }
 
-function GetStrikes(value : StatBlockProp): CreatureItemStrike[]{
-    
-    return value.items.filter(item => item.type === "melee") as CreatureItemStrike[]; 
+function GetStrikes(value: StatBlockProp): CreatureItemStrike[] {
+
+    return value.items.filter(item => item.type === "melee") as CreatureItemStrike[];
 }
 
-function GetSpells(value : StatBlockProp): CreatureItem[]{
+function GetSpells(value: StatBlockProp): CreatureItem[] {
     return value.items.filter(item => item.type === "spell");
 }
 
@@ -57,81 +81,111 @@ export interface ItemSystem {
 }
 
 export interface StrikeSystem extends ItemSystem {
-    bonus : ValueHolder,
-    weaponType? : StringHolder,
-    range: {increment : number, max: number},
-    traits : {rarity?: string, value : string[]}
-    damageRolls : Record<string, DamageRollInfo>
+    bonus: ValueHolder,
+    weaponType?: StringHolder,
+    range: { increment: number, max: number },
+    traits: { rarity?: string, value: string[] }
+    damageRolls: Record<string, DamageRollInfo>
 }
 
-function GetDamagesInfo(value : StrikeSystem): DamageRollInfo
-{
+function GetDamagesInfo(value: StrikeSystem): DamageRollInfo[] {
     const roll = value.damageRolls!;
     const keys = Object.keys(roll);
+
+    const damages :  DamageRollInfo[] = [];
     
-    for(const key of keys){
+    for (const key of keys) {
         const damageRoll = roll[key] as DamageRollInfo;
-        return damageRoll;
+        damages.push(damageRoll);
     }
     
-    return {damage:0, damageType:"null"};
+    return damages;
 }
 
-export interface Stats{
-    compendiumSource : string;
+export interface Stats {
+    compendiumSource: string;
 }
 
-export interface Mod{
-    mod :number;
+export interface Mod {
+    mod: number;
 }
 
-export interface ValueHolder{
+export interface ValueHolder {
     type?: string;
     saveDetail?: number;
-    value :number;
+    value: number;
 }
 
-export interface StringHolder{
-    value : string;
+export interface StringHolder {
+    value: string;
 }
 
-export interface DamageRollInfo{
-    damage: number;
+export interface DamageRollInfo {
+    damage: string;
     damageType: string;
 }
 
-export interface Abilities{
-    cha : Mod;
-    con : Mod;
-    dex : Mod;
-    int : Mod;
-    str : Mod;
-    wis : Mod;
+export interface DiceAndModifier{
+    diceType : number;
+    diceNumber : number;
+    modifier : number;
 }
 
-export interface SkillList{
+export function GetDice(value: DamageRollInfo): DiceAndModifier {
+    const pattern = /(\d+)d(\d+)([+-]\d+)?/i; // matches e.g. 2d6, 3d10+5, 12d4-3
+    const match = value.damage.toString().match(pattern);
+
+    if (!match) {
+        throw new Error(`Invalid dice format: ${value.damage}`);
+    }
+
+    const diceNumber = parseInt(match[1], 10);
+    const diceType = parseInt(match[2], 10);
+    const modifier = match[3] ? parseInt(match[3], 10) : 0;
+
+    return {
+        diceType,
+        diceNumber,
+        modifier
+    };
+}
+
+export function DiceString(value : DiceAndModifier): string{
+    return (value.diceNumber.toString() + "d" + value.diceType.toString() + (value.modifier === 0 ? "" : printNumberWithSignalString(value.modifier)) )
+}
+
+export interface Abilities {
+    cha: Mod;
+    con: Mod;
+    dex: Mod;
+    int: Mod;
+    str: Mod;
+    wis: Mod;
+}
+
+export interface SkillList {
     acrobatics?: Skill;
     arcana?: Skill;
     athletics?: Skill;
     crafting?: Skill;
     deception?: Skill;
     diplomacy?: Skill;
-    intimidation? : Skill;
-    medicine? : Skill;
-    nature? : Skill;
-    occultism? : Skill;
-    performance? : Skill;
-    religion? : Skill;
-    society? : Skill;
-    stealth? : Skill;
-    survival? : Skill;
-    thievery? : Skill;
+    intimidation?: Skill;
+    medicine?: Skill;
+    nature?: Skill;
+    occultism?: Skill;
+    performance?: Skill;
+    religion?: Skill;
+    society?: Skill;
+    stealth?: Skill;
+    survival?: Skill;
+    thievery?: Skill;
 }
 
 type SkillName = keyof SkillList;
 
 export function modifyAllSkills(creature: CreatureSystems, value: number) {
-    const { skills } = creature;
+    const {skills} = creature;
     if (!skills) return;
 
     for (const key of Object.keys(skills) as SkillName[]) {
@@ -141,34 +195,33 @@ export function modifyAllSkills(creature: CreatureSystems, value: number) {
 }
 
 //TODO implement this
-export function modifySkill(creature : CreatureSystems, name : SkillName, value : number)
-{
+export function modifySkill(creature: CreatureSystems, name: SkillName, value: number) {
     if (creature === undefined)
         return;
-    
+
     let skill = creature.skills[name];
-    
-    if (skill === undefined){
+
+    if (skill === undefined) {
         skill = new class implements Skill {
             base = value;
         }
         return
     }
-    
+
     skill.base = value;
 }
 
-export interface Skill{
+export interface Skill {
     base: number;
 }
 
-export interface Details{
-    level : ValueHolder;
+export interface Details {
+    level: ValueHolder;
     publicNotes: string;
 }
 
 
-function statBlock(value : StatBlockProp) {
+function statBlock(value: StatBlockProp) {
 
     return (<>
         <h1 style={{display: "flex", justifyContent: "space-between", alignItems: "center"}}>
@@ -184,7 +237,7 @@ function statBlock(value : StatBlockProp) {
         {printValueWithSignal(value.system.saves.fortitude, "Fort")}{";"}
         {printValueWithSignal(value.system.saves.reflex, "Ref")}{";"}
         {printValueWithSignal(value.system.saves.will, "Will")}
-        
+
         <br/>
         {printValue(value.system.attributes.hp, "HP")}
         <p>
@@ -195,7 +248,7 @@ function statBlock(value : StatBlockProp) {
             {printMod(value.system.abilities.wis, "WIS")}{";"}
             {printMod(value.system.abilities.cha, "CHA")}
         </p>
-        <hr />
+        <hr/>
         <h2>Strikes</h2>
         <ul>
             {GetStrikes(value).map(i => <li>{PrintStrike(i)}</li>)}
@@ -207,70 +260,43 @@ function statBlock(value : StatBlockProp) {
     </>)
 }
 
-function PrintStrike(item : CreatureItemStrike)
-{
-    if (item.system.weaponType === undefined){
-        item.system.weaponType = {value:"melee"};
-        
-        if (item.system.range !== undefined){
+function PrintStrike(item: CreatureItemStrike) {
+    if (item.system.weaponType === undefined) {
+        item.system.weaponType = {value: "melee"};
+
+        if (item.system.range !== undefined) {
             if (item.system.range?.increment > 0)
-                item.system.weaponType = {value:"ranged"};
+                item.system.weaponType = {value: "ranged"};
         }
-        
+
     }
-    
-    let map : number;
+
+    let map: number;
     map = 5;
-    
+
     if (item.system.traits.value.includes("agile"))
         map = 4;
-    
+
     return (<>
-        <b>{item.system.weaponType.value}</b> {item.name} {printNumberWithSignal(item.system.bonus.value)} [{printNumberWithSignal(item.system.bonus.value-map)}/{printNumberWithSignal(item.system.bonus.value- (map*2))}]
-        {GetDamagesInfo(item.system).damage} {GetDamagesInfo(item.system).damageType}
+        <b>{item.system.weaponType.value}</b> {item.name} {printNumberWithSignalElement(item.system.bonus.value)} [{printNumberWithSignalElement(item.system.bonus.value - map)}/{printNumberWithSignalElement(item.system.bonus.value - (map * 2))}]
+        {GetDamagesInfo(item.system).map(dmg => (<> {dmg.damage} {dmg.damageType}</>))}
     </>)
 }
 
 export function cloneStatBlock(statBlock: StatBlockProp): StatBlockProp {
     return {
-        items: statBlock.items,
-        _id: crypto.randomUUID(), // give it a new unique ID
+        _id: crypto.randomUUID(), // give the clone a new id
         name: statBlock.name,
-        system: {
-            abilities: {
-                str: { mod: statBlock.system.abilities.str.mod },
-                dex: { mod: statBlock.system.abilities.dex.mod },
-                con: { mod: statBlock.system.abilities.con.mod },
-                int: { mod: statBlock.system.abilities.int.mod },
-                wis: { mod: statBlock.system.abilities.wis.mod },
-                cha: { mod: statBlock.system.abilities.cha.mod },
-            },
-            details: {
-                level: { ...statBlock.system.details.level },
-                publicNotes: statBlock.system.details.publicNotes,
-            },
-            attributes: {
-                ac: { ...statBlock.system.attributes.ac },
-                allSaves: statBlock.system.attributes.allSaves,
-                hp: { ...statBlock.system.attributes.hp },
-                speed: { ...statBlock.system.attributes.speed },
-            },
-            perception: { ...statBlock.system.perception },
-            skills: Object.fromEntries(
-                Object.entries(statBlock.system.skills).map(([k, v]) => [k, v ? { base: v.base } : v])
-            ) as SkillList,
-            saves: {
-                fortitude: { ...statBlock.system.saves.fortitude },
-                reflex: { ...statBlock.system.saves.reflex },
-                will: { ...statBlock.system.saves.will },
-            },
-        }
+        system: JSON.parse(JSON.stringify(statBlock.system)) as CreatureSystems,
+        items: statBlock.items.map(item => ({
+            ...JSON.parse(JSON.stringify(item))
+        }))
     };
 }
 
 
-function printMod(mod: Mod, name: string)
-{
+
+function printMod(mod: Mod, name: string) {
     const val = mod.mod;
 
     if (val === 0) return <> <b>{name}</b> 0</>;
@@ -298,20 +324,24 @@ function printSkills(list: SkillList) {
     );
 }
 
-function printValue(value: ValueHolder, name: string)
-{
+function printValue(value: ValueHolder, name: string) {
     const val = value.value;
     return <> <b>{name}</b> {val}</>;
 }
 
 function printValueWithSignal(value: ValueHolder, name: string) {
     const val = value.value;
-    return <> <b>{name}</b> {val < 0 ? "":"+"}{val}</>;
+    return <> <b>{name}</b> {val < 0 ? "" : "+"}{val}</>;
 }
 
-function printNumberWithSignal(value: number) {
+function printNumberWithSignalElement(value: number) {
     const val = value;
-    return <>{val < 0 ? "":"+"}{val}</>;
+    return <>{val < 0 ? "" : "+"}{val}</>;
+}
+
+function printNumberWithSignalString(value: number) {
+    const val = value;
+    return ((val < 0 ? "" : "+")+(val));
 }
 
 // function SkillsList(value : Skill[] )

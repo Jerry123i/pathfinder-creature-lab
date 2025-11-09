@@ -1,6 +1,7 @@
 ﻿import type {StatBlockProp} from "./StatBlock.tsx";
 import {modifyAllSaves} from "./StatBlock.tsx";
 import {modifyAllSkills} from "./StatBlock.tsx";
+import {modifyAllStrikes} from "./StatBlock.tsx";
 import {cloneStatBlock} from "./StatBlock.tsx";
 
 export interface CreatureAdjustment {
@@ -40,6 +41,7 @@ export const Elite : CreatureAdjustment = {
             hpIncreaseValue = 30;
         
         sb.system.attributes.hp.value += hpIncreaseValue;
+        modifyAllStrikes(sb, 2, 2);
         
         return sb;
     }
@@ -76,6 +78,7 @@ export const Weak : CreatureAdjustment = {
         console.log("val " + hpDecreaseValue);
         
         sb.system.attributes.hp.value -= hpDecreaseValue;
+        modifyAllStrikes(sb, -2, -2);
 
         return sb;
     }

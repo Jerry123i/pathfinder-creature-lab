@@ -1,5 +1,11 @@
 ﻿import {Fragment} from "react";
 import type {CreatureSystems} from "./StatBlock.tsx";
+import type {AbilityName} from "./Abilities.tsx";
+
+export interface Skill {
+    base: number;
+}
+
 
 export interface SkillList {
     acrobatics?: Skill;
@@ -32,25 +38,49 @@ export function modifyAllSkills(creature: CreatureSystems, value: number) {
     }
 }
 
-//TODO implement this
-export function modifySkill(creature: CreatureSystems, name: SkillName, value: number) {
-    if (creature === undefined)
-        return;
-
-    let skill = creature.skills[name];
-
-    if (skill === undefined) {
-        skill = new class implements Skill {
-            base = value;
-        }
-        return
-    }
-
-    skill.base = value;
+export function ModifyAssociatedSkills(creatureSkills: SkillList,  ability : AbilityName, value: number)
+{
+    switch (ability){
+        case "cha":
+            TryModifySkill(creatureSkills, "deception", value)
+            TryModifySkill(creatureSkills, "diplomacy", value)
+            TryModifySkill(creatureSkills, "intimidation", value)
+            TryModifySkill(creatureSkills, "performance", value)
+            break;
+        case "con":
+            break;
+        case "dex":
+            TryModifySkill(creatureSkills, "acrobatics", value)
+            TryModifySkill(creatureSkills, "stealth", value)
+            TryModifySkill(creatureSkills, "thievery", value)
+            break;
+        case "int":
+            TryModifySkill(creatureSkills, "arcana", value)
+            TryModifySkill(creatureSkills, "crafting", value)
+            TryModifySkill(creatureSkills, "occultism", value)
+            TryModifySkill(creatureSkills, "society", value)
+            break;
+        case "str":
+            TryModifySkill(creatureSkills, "athletics", value)
+            break;
+        case "wis":
+            TryModifySkill(creatureSkills, "medicine", value)
+            TryModifySkill(creatureSkills, "religion", value)
+            TryModifySkill(creatureSkills, "nature", value)
+            TryModifySkill(creatureSkills, "survival", value)
+            break;
+    }    
 }
 
-export interface Skill {
-    base: number;
+export function TryModifySkill(skills: SkillList, name: SkillName, value: number) {
+    if (skills === undefined)
+        return;
+    
+    
+    const skill = skills?.[name];
+    if (!skill) return;
+
+    skill.base += value;
 }
 
 export function printSkills(list: SkillList) {

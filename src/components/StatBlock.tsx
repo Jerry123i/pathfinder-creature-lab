@@ -1,7 +1,8 @@
 ﻿import {Fragment} from "react";
 import {GetStrikes, PrintStrike, type StrikeSystem} from "./Strikes.tsx";
-import {printSkills, type SkillList} from "./PrintSkills.tsx";
+import {printSkills, type SkillList} from "./Skills.tsx";
 import type {Abilities} from "./Abilities.tsx";
+import {GetSpells, PrintSpells} from "./Spells.tsx";
 
 
 export interface StatBlockProp {
@@ -41,14 +42,6 @@ export interface CreatureItem {
     system: ItemSystem
     type: string
     _stats?: Stats
-}
-
-export interface CreatureItemStrike extends CreatureItem {
-    system: StrikeSystem
-}
-
-function GetSpells(value: StatBlockProp): CreatureItem[] {
-    return value.items.filter(item => item.type === "spell");
 }
 
 export interface ItemSystem {
@@ -146,9 +139,7 @@ function statBlock(value: StatBlockProp) {
             {GetStrikes(value).map(i => <li>{PrintStrike(i)}</li>)}
         </ul>
         <h2>Spells</h2>
-        <ul>
-            {GetSpells(value).map(item => <li>{item.name} - {item.type}</li>)}
-        </ul>
+            {PrintSpells(value)}
     </>)
 }
 

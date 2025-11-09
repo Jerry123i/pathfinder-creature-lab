@@ -2,7 +2,8 @@
 import {modifyAllSaves} from "./StatBlock.tsx";
 import {cloneStatBlock} from "./StatBlock.tsx";
 import {modifyAllStrikes} from "./Strikes.tsx";
-import {modifyAllSkills} from "./PrintSkills.tsx";
+import {modifyAllSkills} from "./Skills.tsx";
+import {ModifyAbilitiesAndRelatedStats} from "./Abilities.tsx";
 
 export interface CreatureAdjustment {
     _id: string;
@@ -94,9 +95,9 @@ export const Goblin : CreatureAdjustment = {
         console.log("Goblin");
         const sb = cloneStatBlock(statblock);
         
-        sb.system.abilities.dex.mod += 1;
-        sb.system.abilities.cha.mod += 1;
-        sb.system.abilities.wis.mod -= 1;
+        ModifyAbilitiesAndRelatedStats(sb,  "dex", 1);
+        ModifyAbilitiesAndRelatedStats(sb,  "cha", 1);
+        ModifyAbilitiesAndRelatedStats(sb,  "wis", -1);
         
         return sb;
     }
@@ -110,10 +111,10 @@ export const Minotaur : CreatureAdjustment = {
     apply: (statblock: StatBlockProp) =>
     {
         const sb = cloneStatBlock(statblock);
-        
-        sb.system.abilities.str.mod += 1;
-        sb.system.abilities.con.mod += 1;
-        sb.system.abilities.cha.mod -= 1;
+
+        ModifyAbilitiesAndRelatedStats(sb,  "str", 1);
+        ModifyAbilitiesAndRelatedStats(sb,  "con", 1);
+        ModifyAbilitiesAndRelatedStats(sb,  "cha", -1);
 
         return sb;
     }
@@ -128,9 +129,9 @@ export const Merfolk : CreatureAdjustment = {
     {
         const sb = cloneStatBlock(statblock);
 
-        sb.system.abilities.dex.mod += 1;
-        sb.system.abilities.cha.mod += 1;
-        sb.system.abilities.con.mod -= 1;
+        ModifyAbilitiesAndRelatedStats(sb,  "dex", 1);
+        ModifyAbilitiesAndRelatedStats(sb,  "cha", 1);
+        ModifyAbilitiesAndRelatedStats(sb,  "con", -1);
 
         return sb;
     }

@@ -7,8 +7,20 @@
     type StatBlockProp,
     type StringHolder,
     type ValueHolder,
-    printNumberWithSignalElement
+    printNumberWithSignalElement, type CreatureItem
 } from "./StatBlock.tsx";
+
+export interface StrikeSystem extends ItemSystem {
+    bonus: ValueHolder,
+    weaponType?: StringHolder,
+    range: { increment: number, max: number },
+    traits: { rarity?: string, value: string[] }
+    damageRolls: Record<string, DamageRollInfo>
+}
+
+export interface CreatureItemStrike extends CreatureItem {
+    system: StrikeSystem
+}
 
 export function modifyAllStrikes(creature: StatBlockProp, hitValue: number, damageValue: number) {
     const strikes = GetStrikes(creature);
@@ -31,14 +43,6 @@ export function modifyAllStrikes(creature: StatBlockProp, hitValue: number, dama
 export function GetStrikes(value: StatBlockProp): CreatureItemStrike[] {
 
     return value.items.filter(item => item.type === "melee") as CreatureItemStrike[];
-}
-
-export interface StrikeSystem extends ItemSystem {
-    bonus: ValueHolder,
-    weaponType?: StringHolder,
-    range: { increment: number, max: number },
-    traits: { rarity?: string, value: string[] }
-    damageRolls: Record<string, DamageRollInfo>
 }
 
 function GetDamagesInfo(value: StrikeSystem): DamageRollInfo[] {

@@ -1,4 +1,7 @@
 ﻿import {Fragment} from "react";
+import {GetStrikes, PrintStrike, type StrikeSystem} from "./Strikes.tsx";
+import {printSkills, type SkillList} from "./PrintSkills.tsx";
+import type {Abilities} from "./Abilities.tsx";
 
 
 export interface StatBlockProp {
@@ -23,29 +26,6 @@ export function modifyAllSaves(creature: CreatureSystems, value: number) {
     creature.saves.will.value += value;
 }
 
-export function modifyAllStrikes(creature: StatBlockProp, hitValue: number, damageValue:number)
-{
-    const strikes = GetStrikes(creature);
-    
-    for (let i = 0, len = strikes.length; i < len; ++i)
-    {
-        strikes[i].system.bonus.value += hitValue;
-        const rawDamage = GetDamagesInfo(strikes[i].system);
-        
-        for (let j = 0, lenj = rawDamage.length; j < lenj; ++j)
-        {
-            if(j>0)
-                break;
-            const damage = GetDice(rawDamage[j]);
-            damage.modifier += damageValue;
-
-            rawDamage[j].damage = DiceString(damage);    
-        }
-        
-    }
-    
-}
-
 export interface Attributes {
     ac: ValueHolder;
     allSaves: string;
@@ -67,39 +47,12 @@ export interface CreatureItemStrike extends CreatureItem {
     system: StrikeSystem
 }
 
-function GetStrikes(value: StatBlockProp): CreatureItemStrike[] {
-
-    return value.items.filter(item => item.type === "melee") as CreatureItemStrike[];
-}
-
 function GetSpells(value: StatBlockProp): CreatureItem[] {
     return value.items.filter(item => item.type === "spell");
 }
 
 export interface ItemSystem {
     description: StringHolder,
-}
-
-export interface StrikeSystem extends ItemSystem {
-    bonus: ValueHolder,
-    weaponType?: StringHolder,
-    range: { increment: number, max: number },
-    traits: { rarity?: string, value: string[] }
-    damageRolls: Record<string, DamageRollInfo>
-}
-
-function GetDamagesInfo(value: StrikeSystem): DamageRollInfo[] {
-    const roll = value.damageRolls!;
-    const keys = Object.keys(roll);
-
-    const damages :  DamageRollInfo[] = [];
-    
-    for (const key of keys) {
-        const damageRoll = roll[key] as DamageRollInfo;
-        damages.push(damageRoll);
-    }
-    
-    return damages;
 }
 
 export interface Stats {
@@ -154,67 +107,6 @@ export function DiceString(value : DiceAndModifier): string{
     return (value.diceNumber.toString() + "d" + value.diceType.toString() + (value.modifier === 0 ? "" : printNumberWithSignalString(value.modifier)) )
 }
 
-export interface Abilities {
-    cha: Mod;
-    con: Mod;
-    dex: Mod;
-    int: Mod;
-    str: Mod;
-    wis: Mod;
-}
-
-export interface SkillList {
-    acrobatics?: Skill;
-    arcana?: Skill;
-    athletics?: Skill;
-    crafting?: Skill;
-    deception?: Skill;
-    diplomacy?: Skill;
-    intimidation?: Skill;
-    medicine?: Skill;
-    nature?: Skill;
-    occultism?: Skill;
-    performance?: Skill;
-    religion?: Skill;
-    society?: Skill;
-    stealth?: Skill;
-    survival?: Skill;
-    thievery?: Skill;
-}
-
-type SkillName = keyof SkillList;
-
-export function modifyAllSkills(creature: CreatureSystems, value: number) {
-    const {skills} = creature;
-    if (!skills) return;
-
-    for (const key of Object.keys(skills) as SkillName[]) {
-        const skill = skills[key];
-        if (skill) skill.base += value;
-    }
-}
-
-//TODO implement this
-export function modifySkill(creature: CreatureSystems, name: SkillName, value: number) {
-    if (creature === undefined)
-        return;
-
-    let skill = creature.skills[name];
-
-    if (skill === undefined) {
-        skill = new class implements Skill {
-            base = value;
-        }
-        return
-    }
-
-    skill.base = value;
-}
-
-export interface Skill {
-    base: number;
-}
-
 export interface Details {
     level: ValueHolder;
     publicNotes: string;
@@ -260,29 +152,6 @@ function statBlock(value: StatBlockProp) {
     </>)
 }
 
-function PrintStrike(item: CreatureItemStrike) {
-    if (item.system.weaponType === undefined) {
-        item.system.weaponType = {value: "melee"};
-
-        if (item.system.range !== undefined) {
-            if (item.system.range?.increment > 0)
-                item.system.weaponType = {value: "ranged"};
-        }
-
-    }
-
-    let map: number;
-    map = 5;
-
-    if (item.system.traits.value.includes("agile"))
-        map = 4;
-
-    return (<>
-        <b>{item.system.weaponType.value}</b> {item.name} {printNumberWithSignalElement(item.system.bonus.value)} [{printNumberWithSignalElement(item.system.bonus.value - map)}/{printNumberWithSignalElement(item.system.bonus.value - (map * 2))}]
-        {GetDamagesInfo(item.system).map(dmg => (<> {dmg.damage} {dmg.damageType}</>))}
-    </>)
-}
-
 export function cloneStatBlock(statBlock: StatBlockProp): StatBlockProp {
     return {
         _id: crypto.randomUUID(), // give the clone a new id
@@ -294,34 +163,12 @@ export function cloneStatBlock(statBlock: StatBlockProp): StatBlockProp {
     };
 }
 
-
-
 function printMod(mod: Mod, name: string) {
     const val = mod.mod;
 
     if (val === 0) return <> <b>{name}</b> 0</>;
     if (val < 0) return <> <b>{name}</b> {val}</>;
     return <> <b>{name}</b> +{val}</>;
-}
-
-function printSkills(list: SkillList) {
-    const keys = Object.keys(list) as (keyof SkillList)[];
-    const definedSkills = keys.filter(k => list[k]);
-
-    if (definedSkills.length === 0) return <p>No skills</p>;
-
-    return (
-        <>
-            {definedSkills.map((skillInterfaceKey) => {
-                const skill = list[skillInterfaceKey]!;
-                let skillName = skillInterfaceKey;
-                skillName = skillName[0].toUpperCase() + skillName.slice(1);
-                return (
-                    <Fragment key={skillInterfaceKey}>{skillName} {skill.base >= 0 ? "+" : ""}{skill.base}; </Fragment>
-                );
-            })}
-        </>
-    );
 }
 
 function printValue(value: ValueHolder, name: string) {
@@ -334,12 +181,12 @@ function printValueWithSignal(value: ValueHolder, name: string) {
     return <> <b>{name}</b> {val < 0 ? "" : "+"}{val}</>;
 }
 
-function printNumberWithSignalElement(value: number) {
+export function printNumberWithSignalElement(value: number) {
     const val = value;
     return <>{val < 0 ? "" : "+"}{val}</>;
 }
 
-function printNumberWithSignalString(value: number) {
+export function printNumberWithSignalString(value: number) {
     const val = value;
     return ((val < 0 ? "" : "+")+(val));
 }

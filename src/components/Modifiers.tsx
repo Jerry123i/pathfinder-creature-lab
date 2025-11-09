@@ -1,8 +1,8 @@
 ﻿import type {StatBlockProp} from "./StatBlock.tsx";
 import {modifyAllSaves} from "./StatBlock.tsx";
-import {modifyAllSkills} from "./StatBlock.tsx";
-import {modifyAllStrikes} from "./StatBlock.tsx";
 import {cloneStatBlock} from "./StatBlock.tsx";
+import {modifyAllStrikes} from "./Strikes.tsx";
+import {modifyAllSkills} from "./PrintSkills.tsx";
 
 export interface CreatureAdjustment {
     _id: string;

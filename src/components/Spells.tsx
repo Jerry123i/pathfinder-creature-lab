@@ -20,6 +20,15 @@ export function GetSpellcastingEntry(value: StatBlockProp) : SpellcastingItem
     return notFound;
 }
 
+export function ModifySpellDc(creature : StatBlockProp, value : number)
+{
+    if (!HasSpells(creature))
+        return;
+    
+    GetSpellcastingEntry(creature).system.spelldc.dc += value;
+    GetSpellcastingEntry(creature).system.spelldc.value += value;
+}
+
 export interface SpellcastingItem extends CreatureItem{
     system: SpellcasterEntrySystem;
 }
@@ -31,7 +40,7 @@ export interface SpellcasterEntrySystem extends ItemSystem{
 
 export interface SpellSystem extends ItemSystem {
     level: ValueHolder;
-    location: {heightenedLevel: number, value:number};
+    location: {heightenedLevel: number, value:number}; //TODO this declaration might be dangerous
 }
 
 export interface CreatureItemSpell extends CreatureItem {
@@ -46,7 +55,11 @@ function GetActiveLevel(spell : SpellSystem): number{
     return spell.level.value
 }
 
-export function PrintSpells(creature: StatBlockProp) {
+export function HasSpells(creature : StatBlockProp){
+    return GetSpells(creature).length > 0;
+}
+
+export function PrintSpells(creature: StatBlockProp) { //TODO Separate different spellcasting entries
     const spells = GetSpells(creature);
 
     spells.sort((a, b) => GetActiveLevel(a.system) - GetActiveLevel(b.system));

@@ -1,8 +1,7 @@
-﻿import {Fragment} from "react";
-import {GetStrikes, PrintStrike, type StrikeSystem} from "./Strikes.tsx";
+﻿import {GetStrikes, PrintStrike} from "./Strikes.tsx";
 import {printSkills, type SkillList} from "./Skills.tsx";
 import type {Abilities} from "./Abilities.tsx";
-import {GetSpells, PrintSpells} from "./Spells.tsx";
+import {HasSpells, PrintSpells} from "./Spells.tsx";
 
 
 export interface StatBlockProp {
@@ -10,6 +9,7 @@ export interface StatBlockProp {
     name: string;
     system: CreatureSystems;
     items: CreatureItem[];
+    spellsAnnotation : string;
 }
 
 export interface CreatureSystems {
@@ -19,12 +19,28 @@ export interface CreatureSystems {
     perception: Mod;
     skills: SkillList;
     saves: { fortitude: ValueHolder, reflex: ValueHolder, will: ValueHolder };
+    traits: {rarity: string, size: {value: string}, value: string[]};
 }
 
 export function modifyAllSaves(creature: CreatureSystems, value: number) {
     creature.saves.reflex.value += value;
     creature.saves.fortitude.value += value;
     creature.saves.will.value += value;
+}
+
+export function AddTrait(creature: StatBlockProp, value : string)
+{
+    if (creature.system.traits.value.includes(value))
+        return;
+    
+    creature.system.traits.value.push(value)
+}
+
+export function RemoveTrait(creature : StatBlockProp, value : string){
+    if (!creature.system.traits.value.includes(value))
+        return;
+    
+    delete creature.system.traits.value[creature.system.traits.value.indexOf(value)];
 }
 
 export interface Attributes {
@@ -113,6 +129,7 @@ function statBlock(value: StatBlockProp) {
             <span>{value.name}</span>
             <span>{value.system.details.level.value}</span>
         </h1>
+        {printTraits(value)}
         <p dangerouslySetInnerHTML={{__html: value.system.details.publicNotes}}></p>
         <hr/>
         {printMod(value.system.perception, "Perception")}<br/>
@@ -138,8 +155,11 @@ function statBlock(value: StatBlockProp) {
         <ul>
             {GetStrikes(value).map(i => <li>{PrintStrike(i)}</li>)}
         </ul>
-        <h2>Spells</h2>
+        {HasSpells(value)? (<>
+            <h2>Spells</h2>
             {PrintSpells(value)}
+        </>): <></>}
+        
     </>)
 }
 
@@ -152,6 +172,16 @@ export function cloneStatBlock(statBlock: StatBlockProp): StatBlockProp {
             ...JSON.parse(JSON.stringify(item))
         }))
     };
+}
+
+function printTraits(value : StatBlockProp) {
+    return(
+        <>
+            [{value.system.traits.rarity}]
+            [{value.system.traits.size?.value}]
+            {value.system.traits.value.map( trait => <>[{trait}]</>)}
+        </>
+    )
 }
 
 function printMod(mod: Mod, name: string) {
@@ -181,25 +211,6 @@ export function printNumberWithSignalString(value: number) {
     const val = value;
     return ((val < 0 ? "" : "+")+(val));
 }
-
-// function SkillsList(value : Skill[] )
-// {
-//     if (value == null)
-//         return <p>No skills</p>
-//    
-//     return(<>
-//         <hr />
-//         <ul className="list-group">
-//             {value.map((skill)=>(
-//                 <>
-//                     <h3>{skill.name}</h3>
-//                     <p>{skill.description}<br />{skill.damage}</p>
-//                 </>
-//             ))}
-//         </ul>
-//         </>
-//     )
-// }
 
 export default statBlock;
 

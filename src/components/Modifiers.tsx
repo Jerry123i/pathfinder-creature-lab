@@ -1,9 +1,10 @@
-﻿import type {StatBlockProp} from "./StatBlock.tsx";
+﻿import {AddTrait, RemoveTrait, type StatBlockProp} from "./StatBlock.tsx";
 import {modifyAllSaves} from "./StatBlock.tsx";
 import {cloneStatBlock} from "./StatBlock.tsx";
 import {modifyAllStrikes} from "./Strikes.tsx";
 import {modifyAllSkills} from "./Skills.tsx";
 import {ModifyAbilitiesAndRelatedStats} from "./Abilities.tsx";
+import {ModifySpellDc} from "./Spells.tsx";
 
 export interface CreatureAdjustment {
     _id: string;
@@ -43,6 +44,7 @@ export const Elite : CreatureAdjustment = {
         
         sb.system.attributes.hp.value += hpIncreaseValue;
         modifyAllStrikes(sb, 2, 2);
+        ModifySpellDc(sb, 2);
         
         return sb;
     }
@@ -80,6 +82,67 @@ export const Weak : CreatureAdjustment = {
         
         sb.system.attributes.hp.value -= hpDecreaseValue;
         modifyAllStrikes(sb, -2, -2);
+        ModifySpellDc(sb, -2);
+
+        return sb;
+    }
+}
+
+export const Dwarf : CreatureAdjustment = {
+    _id: "adj_dwarf",
+    name: "Dwarf",
+    description: "Dwarves are a short, stocky people who are often stubborn, fierce, and devoted.",
+    priority: 1,
+    apply: (statblock: StatBlockProp) =>
+    {
+        const sb = cloneStatBlock(statblock);
+
+        ModifyAbilitiesAndRelatedStats(sb,  "con", 1);
+        ModifyAbilitiesAndRelatedStats(sb,  "wis", 1);
+        ModifyAbilitiesAndRelatedStats(sb,  "cha", -1);
+
+        RemoveTrait(sb, "human");
+        AddTrait(sb,  "dwarf");
+
+        return sb;
+    }
+}
+
+export const Elf : CreatureAdjustment = {
+    _id: "adj_elf",
+    name: "Elf",
+    description: "Elves are a tall, long-lived people with a strong tradition of art and magic.",
+    priority: 1,
+    apply: (statblock: StatBlockProp) =>
+    {
+        const sb = cloneStatBlock(statblock);
+
+        ModifyAbilitiesAndRelatedStats(sb,  "dex", 1);
+        ModifyAbilitiesAndRelatedStats(sb,  "int", 1);
+        ModifyAbilitiesAndRelatedStats(sb,  "con", -1);
+
+        RemoveTrait(sb, "human");
+        AddTrait(sb,  "elf");
+
+        return sb;
+    }
+}
+
+export const Gnome : CreatureAdjustment = {
+    _id: "adj_gnome",
+    name: "Gnome",
+    description: "Gnomes are short and hardy folk, with an unquenchable curiosity and eccentric habits.",
+    priority: 1,
+    apply: (statblock: StatBlockProp) =>
+    {
+        const sb = cloneStatBlock(statblock);
+
+        ModifyAbilitiesAndRelatedStats(sb,  "con", 1);
+        ModifyAbilitiesAndRelatedStats(sb,  "cha", 1);
+        ModifyAbilitiesAndRelatedStats(sb,  "str", -1);
+
+        RemoveTrait(sb, "human");
+        AddTrait(sb,  "gnome");
 
         return sb;
     }
@@ -92,13 +155,75 @@ export const Goblin : CreatureAdjustment = {
     priority: 1,
     apply: (statblock: StatBlockProp) =>
     {
-        console.log("Goblin");
         const sb = cloneStatBlock(statblock);
         
         ModifyAbilitiesAndRelatedStats(sb,  "dex", 1);
         ModifyAbilitiesAndRelatedStats(sb,  "cha", 1);
         ModifyAbilitiesAndRelatedStats(sb,  "wis", -1);
         
+        RemoveTrait(sb, "human");
+        AddTrait(sb,  "goblin");
+        
+        return sb;
+    }
+}
+
+export const Halfling : CreatureAdjustment = {
+    _id: "adj_halfling",
+    name: "Halfling",
+    description: "Halflings are a short, resilient people who exhibit remarkable curiosity and humor.",
+    priority: 1,
+    apply: (statblock: StatBlockProp) =>
+    {
+        const sb = cloneStatBlock(statblock);
+
+        ModifyAbilitiesAndRelatedStats(sb,  "dex", 1);
+        ModifyAbilitiesAndRelatedStats(sb,  "wis", 1);
+        ModifyAbilitiesAndRelatedStats(sb,  "str", -1);
+
+        RemoveTrait(sb, "human");
+        AddTrait(sb,  "halfling");
+
+        return sb;
+    }
+}
+
+export const Leshy : CreatureAdjustment = {
+    _id: "adj_leshy",
+    name: "Leshy",
+    description: "Leshies are immortal nature spirits placed in small plant bodies, seeking to experience the world.",
+    priority: 1,
+    apply: (statblock: StatBlockProp) =>
+    {
+        const sb = cloneStatBlock(statblock);
+
+        ModifyAbilitiesAndRelatedStats(sb,  "con", 1);
+        ModifyAbilitiesAndRelatedStats(sb,  "wis", 1);
+        ModifyAbilitiesAndRelatedStats(sb,  "int", -1);
+
+        RemoveTrait(sb, "human");
+        RemoveTrait(sb, "humanoid");
+        AddTrait(sb,  "leshy");
+        AddTrait(sb,  "plant");
+
+        return sb;
+    }
+}
+
+export const Orc : CreatureAdjustment = {
+    _id: "adj_orc",
+    name: "Orc",
+    description: "Orcs are proud, strong people with hardened physiques who value physical might and glory in combat.",
+    priority: 1,
+    apply: (statblock: StatBlockProp) =>
+    {
+        const sb = cloneStatBlock(statblock);
+
+        ModifyAbilitiesAndRelatedStats(sb,  "str", 1);
+
+        RemoveTrait(sb, "human");
+        AddTrait(sb,  "orc");
+
         return sb;
     }
 }
@@ -116,6 +241,9 @@ export const Minotaur : CreatureAdjustment = {
         ModifyAbilitiesAndRelatedStats(sb,  "con", 1);
         ModifyAbilitiesAndRelatedStats(sb,  "cha", -1);
 
+        RemoveTrait(sb, "human");
+        AddTrait(sb,  "minotaur");
+        
         return sb;
     }
 }
@@ -133,6 +261,9 @@ export const Merfolk : CreatureAdjustment = {
         ModifyAbilitiesAndRelatedStats(sb,  "cha", 1);
         ModifyAbilitiesAndRelatedStats(sb,  "con", -1);
 
+        RemoveTrait(sb, "human");
+        AddTrait(sb,  "merfolk");
+        
         return sb;
     }
 }
@@ -153,4 +284,4 @@ export function applyAllAdjustments(baseCreature : StatBlockProp, adjustments : 
     return creature;
     
 }
-export const CreatureAdjustmentList = [Elite, Weak, Goblin, Minotaur, Merfolk];
+export const CreatureAdjustmentList = [Elite, Weak, Dwarf, Elf, Gnome, Goblin, Halfling, Leshy, Minotaur, Merfolk, Orc];

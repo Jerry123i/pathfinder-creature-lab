@@ -6,11 +6,14 @@ import {modifyAllSkills} from "./Skills.tsx";
 import {ModifyAbilitiesAndRelatedStats} from "./Abilities.tsx";
 import {ModifySpellDc} from "./Spells.tsx";
 
+type ModifierType = "Level" | "Ancestry" | "CreatureType";
+
 export interface CreatureAdjustment {
     _id: string;
     description: string;
     name: string;
     priority: number;
+    type : ModifierType;
 
     apply: (statblock: StatBlockProp) => StatBlockProp;
 }
@@ -20,6 +23,7 @@ export const Elite : CreatureAdjustment = {
     name: "Elite",
     description: "Sometimes you’ll want a creature that’s just a bit more powerful than normal so that you can present a challenge that would otherwise be trivial or show that one enemy is stronger than its kin.", 
     priority: -9,
+    type: "Level",
     apply: (statblock: StatBlockProp) =>
     {
         console.log("Elite");
@@ -55,6 +59,7 @@ export const Weak : CreatureAdjustment = {
     name: "Weak",
     description: "Sometimes you’ll want a creature that’s weaker than normal so you can use a creature that would otherwise be too challenging or show that one enemy is weaker than its kin.",
     priority: -9,
+    type: "Level",
     apply: (statblock: StatBlockProp) =>
     {
         const sb = cloneStatBlock(statblock);
@@ -93,6 +98,7 @@ export const Dwarf : CreatureAdjustment = {
     name: "Dwarf",
     description: "Dwarves are a short, stocky people who are often stubborn, fierce, and devoted.",
     priority: 1,
+    type: "Ancestry",
     apply: (statblock: StatBlockProp) =>
     {
         const sb = cloneStatBlock(statblock);
@@ -113,6 +119,7 @@ export const Elf : CreatureAdjustment = {
     name: "Elf",
     description: "Elves are a tall, long-lived people with a strong tradition of art and magic.",
     priority: 1,
+    type: "Ancestry",
     apply: (statblock: StatBlockProp) =>
     {
         const sb = cloneStatBlock(statblock);
@@ -133,6 +140,7 @@ export const Gnome : CreatureAdjustment = {
     name: "Gnome",
     description: "Gnomes are short and hardy folk, with an unquenchable curiosity and eccentric habits.",
     priority: 1,
+    type: "Ancestry",
     apply: (statblock: StatBlockProp) =>
     {
         const sb = cloneStatBlock(statblock);
@@ -153,6 +161,7 @@ export const Goblin : CreatureAdjustment = {
     name: "Goblin",
     description: "Goblins are a short, scrappy, energetic people who have spent millennia maligned and feared.",
     priority: 1,
+    type: "Ancestry",
     apply: (statblock: StatBlockProp) =>
     {
         const sb = cloneStatBlock(statblock);
@@ -173,6 +182,7 @@ export const Halfling : CreatureAdjustment = {
     name: "Halfling",
     description: "Halflings are a short, resilient people who exhibit remarkable curiosity and humor.",
     priority: 1,
+    type: "Ancestry",
     apply: (statblock: StatBlockProp) =>
     {
         const sb = cloneStatBlock(statblock);
@@ -193,6 +203,7 @@ export const Leshy : CreatureAdjustment = {
     name: "Leshy",
     description: "Leshies are immortal nature spirits placed in small plant bodies, seeking to experience the world.",
     priority: 1,
+    type: "Ancestry",
     apply: (statblock: StatBlockProp) =>
     {
         const sb = cloneStatBlock(statblock);
@@ -215,6 +226,7 @@ export const Orc : CreatureAdjustment = {
     name: "Orc",
     description: "Orcs are proud, strong people with hardened physiques who value physical might and glory in combat.",
     priority: 1,
+    type: "Ancestry",
     apply: (statblock: StatBlockProp) =>
     {
         const sb = cloneStatBlock(statblock);
@@ -233,6 +245,7 @@ export const Minotaur : CreatureAdjustment = {
     name: "Minotaur",
     description: "Minotaurs are horned, bovine humanoids who originate from an ancient divine curse. Minotaurs are large, strong, and masters of crafts and puzzles, inclinations that lead many minotaurs to explore architecture and stonework. Minotaurs are most at home in labyrinths, whether natural, artificial, or psychological.",
     priority: 1,
+    type: "Ancestry",
     apply: (statblock: StatBlockProp) =>
     {
         const sb = cloneStatBlock(statblock);
@@ -253,6 +266,7 @@ export const Merfolk : CreatureAdjustment = {
     name: "Merfolk",
     description: "Merfolk are a half-human, half-fish aquatic people who live in every ocean and sea of Golarion. Merfolk use magic as other peoples might use common tools, especially to control water, create omens, and in their beguiling songs.",
     priority: 1,
+    type: "Ancestry",
     apply: (statblock: StatBlockProp) =>
     {
         const sb = cloneStatBlock(statblock);

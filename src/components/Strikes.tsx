@@ -9,6 +9,7 @@
     type ValueHolder,
     printNumberWithSignalElement, type CreatureItem
 } from "./StatBlock.tsx";
+import {type CreatureItemSpell, GetSpells, type SpellcastingItem} from "./Spells.tsx";
 
 export interface StrikeSystem extends ItemSystem {
     bonus: ValueHolder,

@@ -1,7 +1,8 @@
-﻿import {GetStrikes, PrintStrike} from "./Strikes.tsx";
+﻿import {type CreatureItemStrike, GetStrikes, PrintStrike} from "./Strikes.tsx";
 import {printSkills, type SkillList} from "./Skills.tsx";
 import type {Abilities} from "./Abilities.tsx";
-import {HasSpells, PrintSpells} from "./Spells.tsx";
+import {type CreatureItemSpell, GetSpells, HasSpells, PrintSpells} from "./Spells.tsx";
+import {capitalize} from "./TypeScriptHelpFunctions.tsx";
 
 
 export interface StatBlockProp {
@@ -58,6 +59,22 @@ export interface CreatureItem {
     system: ItemSystem
     type: string
     _stats?: Stats
+}
+
+export function GetGenericAbilities(value: StatBlockProp): CreatureItem[] {
+    const spells = GetSpells(value);
+    const strikes = GetStrikes(value);
+
+    const allItems = value.items;
+
+    return allItems.filter(item => {
+        return (
+            !spells.includes(item as CreatureItemSpell) 
+            && !strikes.includes(item as CreatureItemStrike)
+            && item.type != "weapon"
+            && item.type != "spellcastingEntry"
+        )
+    })
 }
 
 export interface ItemSystem {
@@ -155,11 +172,13 @@ function statBlock(value: StatBlockProp) {
         <ul>
             {GetStrikes(value).map(i => <li>{PrintStrike(i)}</li>)}
         </ul>
+        <ul>
+            {GetGenericAbilities(value).map(abilities => (<li><h3>{abilities.name}</h3><p dangerouslySetInnerHTML={{__html: parseAbilityDescription(abilities.system.description.value)}}></p></li>))}
+        </ul>
         {HasSpells(value)? (<>
             <h2>Spells</h2>
             {PrintSpells(value)}
         </>): <></>}
-        
     </>)
 }
 
@@ -177,11 +196,53 @@ export function cloneStatBlock(statBlock: StatBlockProp): StatBlockProp {
 function printTraits(value : StatBlockProp) {
     return(
         <>
-            [{value.system.traits.rarity}]
-            [{value.system.traits.size?.value}]
-            {value.system.traits.value.map( trait => <>[{trait}]</>)}
+            [{capitalize(value.system.traits.rarity)}]
+            [{capitalize(value.system.traits.size?.value)}]
+            {value.system.traits.value.map( trait => <>[{capitalize(trait)}]</>)}
         </>
     )
+}
+
+export function parseAbilityDescription(input: string): string {
+    let output = input;
+
+    
+    output = output.replace(
+        /@UUID\[[^\]]*\.Item\.[^\]]*]\{([^}]*)\}/g,
+        (_match, label) => `<b>${label}</b>`
+    );
+
+    output = output.replace(
+        /@UUID\[[^\]]*\.Item\.([^\]]*)\]/g,
+        (_match, name) => `<b>${name}</b>`
+    );
+
+    output = output.replace(
+        /@Damage\[(\d+d\d+)(?:\[(\w+)\])?(?:[^\]]*)\]/g,
+        (_match, dice, type) => `<b>${dice}${type ? " " + type : ""}</b>`
+    );
+
+    output = output.replace(
+        /@Check\[(fortitude|reflex|will)\|dc:(\d+)[^\]]*\]/gi,
+        (_match, save, dc) => `<b>DC ${dc} ${capitalize(save)}</b>`
+    );
+
+    output = output.replace(
+        /@Template\[(emanation|cone|burst|aura|line)\|distance:(\d+)\]/gi,
+        (_match, shape, distance) => `<b>${distance}ft ${shape}</b>`
+    );
+
+    output = output.replace(
+        /\[\[\/gmr [^\]]*]]\{([^}]*)\}/g,
+        (_match, content) => `<b>${content}</b>`
+    );
+    
+    output = output.replace(
+        /@Localize\[PF2E\.NPC\.Abilities\.Glossary\..+]/g,
+        (_match) => ""
+    );
+
+    return output;
 }
 
 function printMod(mod: Mod, name: string) {

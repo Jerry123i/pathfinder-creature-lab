@@ -10,7 +10,7 @@ export interface StatBlockProp {
     name: string;
     system: CreatureSystems;
     items: CreatureItem[];
-    spellsAnnotation : string;
+    spellsAnnotation: string;
 }
 
 export interface CreatureSystems {
@@ -25,7 +25,7 @@ export interface CreatureSystems {
 
 export interface Traits {
     rarity: string;
-    size: {value: string};
+    size: { value: string };
     value: string[];
 }
 
@@ -35,18 +35,17 @@ export function modifyAllSaves(creature: CreatureSystems, value: number) {
     creature.saves.will.value += value;
 }
 
-export function AddTrait(creature: StatBlockProp, value : string)
-{
+export function AddTrait(creature: StatBlockProp, value: string) {
     if (creature.system.traits.value.includes(value))
         return;
-    
+
     creature.system.traits.value.push(value)
 }
 
-export function RemoveTrait(creature : StatBlockProp, value : string){
+export function RemoveTrait(creature: StatBlockProp, value: string) {
     if (!creature.system.traits.value.includes(value))
         return;
-    
+
     delete creature.system.traits.value[creature.system.traits.value.indexOf(value)];
 }
 
@@ -54,7 +53,9 @@ export interface Attributes {
     ac: ValueHolder;
     allSaves: string;
     hp: ValueHolder;
-    speed: ValueHolder;
+    speed: SpeedValue;
+    resistances: TypedValue[];
+    immunities : {type: string}[];
 }
 
 export interface CreatureItem {
@@ -75,7 +76,7 @@ export function GetGenericAbilities(value: StatBlockProp): CreatureItem[] {
 
     return allItems.filter(item => {
         return (
-            !spells.includes(item as CreatureItemSpell) 
+            !spells.includes(item as CreatureItemSpell)
             && !strikes.includes(item as CreatureItemStrike)
             && item.type != "weapon"
             && item.type != "spellcastingEntry"
@@ -102,6 +103,16 @@ export interface ValueHolder {
     value: number;
 }
 
+export interface TypedValue {
+    type: string;
+    value: string;
+}
+
+export interface SpeedValue {
+    value: number;
+    otherSpeeds: TypedValue[];
+}
+
 export interface StringHolder {
     value: string;
 }
@@ -111,10 +122,10 @@ export interface DamageRollInfo {
     damageType: string;
 }
 
-export interface DiceAndModifier{
-    diceType : number;
-    diceNumber : number;
-    modifier : number;
+export interface DiceAndModifier {
+    diceType: number;
+    diceNumber: number;
+    modifier: number;
 }
 
 export function GetDice(value: DamageRollInfo): DiceAndModifier {
@@ -136,8 +147,8 @@ export function GetDice(value: DamageRollInfo): DiceAndModifier {
     };
 }
 
-export function DiceString(value : DiceAndModifier): string{
-    return (value.diceNumber.toString() + "d" + value.diceType.toString() + (value.modifier === 0 ? "" : printNumberWithSignalString(value.modifier)) )
+export function DiceString(value: DiceAndModifier): string {
+    return (value.diceNumber.toString() + "d" + value.diceType.toString() + (value.modifier === 0 ? "" : printNumberWithSignalString(value.modifier)))
 }
 
 export interface Details {
@@ -153,7 +164,9 @@ function statBlock(value: StatBlockProp) {
             <span>{value.name}</span>
             <span>{value.system.details.level.value}</span>
         </h1>
-        {printTraits(value.system.traits, (s, i) => {return "["+s.toString()+"]"})}
+        {printTraits(value.system.traits, (s, i) => {
+            return "[" + s.toString() + "]"
+        })}
         <p dangerouslySetInnerHTML={{__html: value.system.details.publicNotes}}></p>
         <hr/>
         {printMod(value.system.perception, "Perception")}<br/>
@@ -166,6 +179,29 @@ function statBlock(value: StatBlockProp) {
 
         <br/>
         {printValue(value.system.attributes.hp, "HP")}
+        {value.system.attributes.resistances === undefined ? null : (
+            <>
+                <b> Resistances:</b>{" "}
+                {value.system.attributes.resistances.map(res => (
+                    <>{capitalize(res.type)} {res.value} </>
+                ))}
+            </>
+        )}
+        {value.system.attributes.immunities === undefined ? null : (
+            <>
+                <b> Immunities:</b>{" "}
+                {value.system.attributes.immunities.map((imu, index) => (
+                    <>{index===0?null:", "}{capitalize(imu.type)}</>
+                ))}
+            </>
+        )}
+        <br/>
+        {printValue(value.system.attributes.speed, "Speed")}ft
+        {value.system.attributes.speed.otherSpeeds.length > 0 ?
+            value.system.attributes.speed.otherSpeeds.map(value => {
+                return (<>; <b>{capitalize(value.type)}</b> {value.value}ft</>)
+            })
+            : null}
         <p>
             {printMod(value.system.abilities.str, "STR")}{";"}
             {printMod(value.system.abilities.dex, "DEX")}{";"}
@@ -181,16 +217,17 @@ function statBlock(value: StatBlockProp) {
         </ul>
         <ul>
             {GetGenericAbilities(value).map(abilityItem => (<li><h3>{abilityItem.name}</h3>
-                {abilityItem.system.traits.value?.length > 0?
-                    <p>({printTraits(abilityItem.system.traits, (s, i)=>{
-                        return i!=0 ? (", " + s) : (s);
-                    })})</p>: null}
-                <p dangerouslySetInnerHTML={{__html: parseAbilityDescription(abilityItem.system.description.value)}}></p></li>))}
+                {abilityItem.system.traits.value?.length > 0 ?
+                    <p>({printTraits(abilityItem.system.traits, (s, i) => {
+                        return i != 0 ? (", " + s) : (s);
+                    })})</p> : null}
+                <p dangerouslySetInnerHTML={{__html: parseAbilityDescription(abilityItem.system.description.value)}}></p>
+            </li>))}
         </ul>
-        {HasSpells(value)? (<>
+        {HasSpells(value) ? (<>
             <h2>Spells</h2>
             {PrintSpells(value)}
-        </>): <></>}
+        </>) : <></>}
     </>)
 }
 
@@ -230,7 +267,7 @@ function printTraits(value: Traits, stringTransform: (s: string, i: number) => s
 export function parseAbilityDescription(input: string): string {
     let output = input;
 
-    
+
     output = output.replace(
         /@UUID\[[^\]]*\.Item\.[^\]]*]\{([^}]*)\}/g,
         (_match, label) => `<b>${label}</b>`
@@ -260,7 +297,7 @@ export function parseAbilityDescription(input: string): string {
         /\[\[\/gmr [^\]]*]]\{([^}]*)\}/g,
         (_match, content) => `<b>${content}</b>`
     );
-    
+
     output = output.replace(
         /@Localize\[PF2E\.NPC\.Abilities\.Glossary\..+]/g,
         (_match) => ""
@@ -294,7 +331,7 @@ export function printNumberWithSignalElement(value: number) {
 
 export function printNumberWithSignalString(value: number) {
     const val = value;
-    return ((val < 0 ? "" : "+")+(val));
+    return ((val < 0 ? "" : "+") + (val));
 }
 
 export default statBlock;

@@ -79,6 +79,7 @@ export function GetGenericAbilities(value: StatBlockProp): CreatureItem[] {
             !spells.includes(item as CreatureItemSpell)
             && !strikes.includes(item as CreatureItemStrike)
             && item.type != "weapon"
+            && item.type != "armor"
             && item.type != "spellcastingEntry"
         )
     })
@@ -154,6 +155,7 @@ export function DiceString(value: DiceAndModifier): string {
 export interface Details {
     level: ValueHolder;
     publicNotes: string;
+    languages: {details : string, value : string[]}
 }
 
 
@@ -168,6 +170,11 @@ function statBlock(value: StatBlockProp) {
             return "[" + s.toString() + "]"
         })}
         <p dangerouslySetInnerHTML={{__html: value.system.details.publicNotes}}></p>
+        {value.system.details.languages.value.length > 0 && (<><b>Languages: </b> {value.system.details.languages.value.map((l, index) =>
+        {
+            return ((index===0?"":", ") + capitalize(l))
+        }
+        )}</>)}
         <hr/>
         {printMod(value.system.perception, "Perception")}<br/>
         <b>Skills</b> {printSkills(value.system.skills)}<br/>

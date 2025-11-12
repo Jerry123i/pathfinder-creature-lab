@@ -20,7 +20,13 @@ export interface CreatureSystems {
     perception: Mod;
     skills: SkillList;
     saves: { fortitude: ValueHolder, reflex: ValueHolder, will: ValueHolder };
-    traits: {rarity: string, size: {value: string}, value: string[]};
+    traits: Traits;
+}
+
+export interface Traits {
+    rarity: string;
+    size: {value: string};
+    value: string[];
 }
 
 export function modifyAllSaves(creature: CreatureSystems, value: number) {
@@ -79,6 +85,7 @@ export function GetGenericAbilities(value: StatBlockProp): CreatureItem[] {
 
 export interface ItemSystem {
     description: StringHolder,
+    traits: Traits
 }
 
 export interface Stats {
@@ -146,7 +153,7 @@ function statBlock(value: StatBlockProp) {
             <span>{value.name}</span>
             <span>{value.system.details.level.value}</span>
         </h1>
-        {printTraits(value)}
+        {printTraits(value.system.traits, (s, i) => {return "["+s.toString()+"]"})}
         <p dangerouslySetInnerHTML={{__html: value.system.details.publicNotes}}></p>
         <hr/>
         {printMod(value.system.perception, "Perception")}<br/>
@@ -173,7 +180,12 @@ function statBlock(value: StatBlockProp) {
             {GetStrikes(value).map(i => <li>{PrintStrike(i)}</li>)}
         </ul>
         <ul>
-            {GetGenericAbilities(value).map(abilities => (<li><h3>{abilities.name}</h3><p dangerouslySetInnerHTML={{__html: parseAbilityDescription(abilities.system.description.value)}}></p></li>))}
+            {GetGenericAbilities(value).map(abilityItem => (<li><h3>{abilityItem.name}</h3>
+                {abilityItem.system.traits.value.length > 0?
+                    <p>({printTraits(abilityItem.system.traits, (s, i)=>{
+                        return i!=0 ? (", " + s) : (s);
+                    })})</p>: null}
+                <p dangerouslySetInnerHTML={{__html: parseAbilityDescription(abilityItem.system.description.value)}}></p></li>))}
         </ul>
         {HasSpells(value)? (<>
             <h2>Spells</h2>
@@ -193,15 +205,27 @@ export function cloneStatBlock(statBlock: StatBlockProp): StatBlockProp {
     };
 }
 
-function printTraits(value : StatBlockProp) {
-    return(
-        <>
-            [{capitalize(value.system.traits.rarity)}]
-            [{capitalize(value.system.traits.size?.value)}]
-            {value.system.traits.value.map( trait => <>[{capitalize(trait)}]</>)}
-        </>
-    )
+function printTraits(value: Traits, stringTransform: (s: string, i: number) => string) {
+    const parts: string[] = [];
+
+    if (value?.rarity && value.rarity.toLowerCase() !== "common") {
+        parts.push(capitalize(value.rarity));
+    }
+
+    if (value?.size?.value) {
+        parts.push(capitalize(value.size.value));
+    }
+
+    const traits = value?.value ?? [];
+    const startIndex = parts.length;
+    const transformedParts = [
+        ...parts.map((part, i) => stringTransform(part, i)),
+        ...traits.map((trait, index) => stringTransform(capitalize(trait), startIndex + index)),
+    ];
+
+    return <>{transformedParts}</>;
 }
+
 
 export function parseAbilityDescription(input: string): string {
     let output = input;

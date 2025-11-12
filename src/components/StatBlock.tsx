@@ -181,7 +181,7 @@ function statBlock(value: StatBlockProp) {
         </ul>
         <ul>
             {GetGenericAbilities(value).map(abilityItem => (<li><h3>{abilityItem.name}</h3>
-                {abilityItem.system.traits.value.length > 0?
+                {abilityItem.system.traits.value?.length > 0?
                     <p>({printTraits(abilityItem.system.traits, (s, i)=>{
                         return i!=0 ? (", " + s) : (s);
                     })})</p>: null}

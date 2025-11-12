@@ -4,7 +4,7 @@ import {CreatureAdjustmentList} from "./components/Modifiers.tsx";
 import {applyAllAdjustments} from "./components/Modifiers.tsx";
 import type {CreatureAdjustment} from "./components/Modifiers.tsx";
 import statBlock from "./components/StatBlock.tsx";
-import {useState} from "react";
+import {cloneElement, useState} from "react";
 
 
 // eslint-disable-next-line react-refresh/only-export-components
@@ -20,10 +20,6 @@ function App(){
     const [selectedAdjustmentIndexes, setSelectedAdjustments] = useState<number[]>([]);
 
     const monsters = loadMonsters();
-
-    console.log(monsters[0].name); // "Monadic Deva"
-    console.log(monsters[0].img);  // "systems/pf2e/icons/default-icons/npc.svg"
-    console.log(monsters[0].items.length); // large number
 
     const currentBaseCreature = monsters[creatureSelectIndex];
 
@@ -60,15 +56,61 @@ function DropDown(list: StatBlockProp[], onValueChange: (i: number) => void) {
 
 function CreatureAdjustmentButtons(selectedAdjustments :number[], selectedArraySetter : ((i : number[]) => void))
 {
+    CreatureAdjustmentList.sort((a,b)=>{
+        if(a.type === b.type)
+            return a.name.localeCompare(b.name);
+        
+        if (a.type === "Level")
+            return -1;
+        if (b.type === "Level")
+            return 1;
+        
+        if (a.type === "Ancestry")
+            return -1;
+        if (b.type === "Ancestry")
+            return 1;
+        
+        if (a.type === "Elemental")
+            return -1;
+        if (b.type === "Elemental")
+            return 1;
+
+        if (a.type === "Undead")
+            return -1;
+        if (b.type === "Undead")
+            return 1;
+        
+        if (a.type === "CreatureType")
+            return -1;
+        if (b.type === "CreatureType")
+            return 1;
+        
+        return -1;
+    })
+    
+    let lastType = "";
     
     return (
         <div>
         {CreatureAdjustmentList.map((item : CreatureAdjustment, index: number) =>
-            (<button key={item._id}
-                     onClick={()=>{
-                         //On Click
-                         selectedArraySetter(handleCreatureAdjustmentClick(selectedAdjustments, index))
-                     }}>{item.name}</button>)
+            {
+                const header = (lastType === item.type ? null : <h3>{item.type}</h3>);
+                
+                lastType = item.type;
+                
+                const button =(<button key={item._id}
+                         onClick={()=>{
+                             //On Click
+                             selectedArraySetter(handleCreatureAdjustmentClick(selectedAdjustments, index))
+                         }}>{item.name}</button>)
+                
+                return(
+                    <>
+                        {header}
+                        {button}
+                    </>
+                );
+            }
         )}
     </div>)
 }

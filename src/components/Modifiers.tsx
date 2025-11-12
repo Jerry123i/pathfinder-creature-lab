@@ -6,7 +6,7 @@ import {modifyAllSkills} from "./Skills.tsx";
 import {ModifyAbilitiesAndRelatedStats} from "./Abilities.tsx";
 import {ModifySpellDc} from "./Spells.tsx";
 
-type ModifierType = "Level" | "Ancestry" | "CreatureType";
+type ModifierType = "Level" | "Ancestry" | "Elemental" | "Undead" | "CreatureType";
 
 export interface CreatureAdjustment {
     _id: string;

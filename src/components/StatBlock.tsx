@@ -4,6 +4,11 @@ import type {Abilities} from "./Abilities.tsx";
 import {type CreatureItemSpell, GetSpells, HasSpells, PrintSpells} from "./Spells.tsx";
 import {capitalize} from "./TypeScriptHelpFunctions.tsx";
 
+//TODO
+//Weapon traits & attack abilities
+//Special skills
+//Action markers
+//Telepathy
 
 export interface StatBlockProp {
     _id: string;
@@ -286,8 +291,8 @@ export function parseAbilityDescription(input: string): string {
     );
 
     output = output.replace(
-        /@Damage\[(\d+d\d+)(?:\[(\w+)\])?(?:[^\]]*)\]/g,
-        (_match, dice, type) => `<b>${dice}${type ? " " + type : ""}</b>`
+        /@Damage\[\(?(\d+d\d+(?:\+\d+)?)\)?\[(\w+)(?:,(\w+))?\](?:\|\w+\:[\w+\-]+)?\]/g,
+        (_match, dice, type, type2) => `<b>${dice}${type ? " " + type : ""}${type2 ? " " + type2 : ""}</b>`
     );
 
     output = output.replace(

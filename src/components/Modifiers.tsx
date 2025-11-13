@@ -33,7 +33,7 @@ export const Elite : CreatureAdjustment = {
         sb.system.attributes.ac.value += 2;
         modifyAllSaves(sb.system, 2);
         sb.system.perception.mod += 2;
-        modifyAllSkills(sb.system, 2);
+        modifyAllSkills(sb ,sb.system, 2);
         //add attacks
         let hpIncreaseValue = 30;
         
@@ -68,7 +68,7 @@ export const Weak : CreatureAdjustment = {
         sb.system.attributes.ac.value -= 2;
         modifyAllSaves(sb.system, -2);
         sb.system.perception.mod -= 2;
-        modifyAllSkills(sb.system, -2);
+        modifyAllSkills(sb,sb.system, -2);
         //add attacks
         let hpDecreaseValue = 0;
 

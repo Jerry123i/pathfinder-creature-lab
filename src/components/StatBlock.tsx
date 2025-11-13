@@ -5,7 +5,6 @@ import {type CreatureItemSpell, GetSpells, HasSpells, PrintSpells} from "./Spell
 import {capitalize} from "./TypeScriptHelpFunctions.tsx";
 
 //TODO
-//Special skills & Lore
 //Action markers
 //Telepathy
 
@@ -72,6 +71,10 @@ export interface CreatureItem {
     _stats?: Stats
 }
 
+export interface CreatureItemLore extends CreatureItem{
+    system : LoreItemSystem;
+}
+
 export function GetGenericAbilities(value: StatBlockProp): CreatureItem[] {
     const spells = GetSpells(value);
     const strikes = GetStrikes(value);
@@ -85,8 +88,13 @@ export function GetGenericAbilities(value: StatBlockProp): CreatureItem[] {
             && item.type != "weapon"
             && item.type != "armor"
             && item.type != "spellcastingEntry"
+            && item.type != "lore"
         )
     })
+}
+
+export function GetLoreItems(value : StatBlockProp) {
+    return value.items.filter(item => item.type === "lore") as CreatureItemLore[];
 }
 
 export function GetAbilityNameFromSlug(creature: StatBlockProp,slug: string): string
@@ -103,6 +111,10 @@ export interface ItemSystem {
     description: StringHolder,
     traits: Traits,
     slug: string
+}
+
+export interface LoreItemSystem extends ItemSystem {
+    mod: ValueHolder;
 }
 
 export interface Stats {
@@ -192,7 +204,7 @@ function statBlock(value: StatBlockProp) {
         )}</>)}
         <hr/>
         {printMod(value.system.perception, "Perception")}<br/>
-        <b>Skills</b> {printSkills(value.system.skills)}<br/>
+        <b>Skills</b> {printSkills(value,  value.system.skills)}<br/>
         <hr/>
         {printValue(value.system.attributes.ac, "AC")}{";"}
         {printValueWithSignal(value.system.saves.fortitude, "Fort")}{";"}

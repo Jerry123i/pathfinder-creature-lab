@@ -14,7 +14,31 @@ export type AbilityName = keyof Abilities;
 
 export function ModifyAbilitiesAndRelatedStats(creature : StatBlockProp ,ability : AbilityName, value : number)
 {
-    ModifyAssociatedSkills(creature.system.skills, ability, value);
+    ModifyAssociatedSkills(creature, ability, value);
+    
+    const allAbilities = creature.system.abilities;
+    
+    switch (ability){
+        case "cha":
+            allAbilities.cha.mod += value;
+            break;
+        case "con":
+            allAbilities.con.mod += value;
+            break;
+        case "dex":
+            allAbilities.dex.mod += value;
+            break;
+        case "int":
+            allAbilities.int.mod += value;
+            break;
+        case "str":
+            allAbilities.str.mod += value;
+            break;
+        case "wis":
+            allAbilities.wis.mod += value;
+            break;
+
+    }
     
     if (ability === "wis")
         creature.system.perception.mod += value;

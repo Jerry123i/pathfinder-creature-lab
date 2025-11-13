@@ -5,8 +5,7 @@ import {type CreatureItemSpell, GetSpells, HasSpells, PrintSpells} from "./Spell
 import {capitalize} from "./TypeScriptHelpFunctions.tsx";
 
 //TODO
-//Weapon traits & attack abilities
-//Special skills
+//Special skills & Lore
 //Action markers
 //Telepathy
 
@@ -90,9 +89,20 @@ export function GetGenericAbilities(value: StatBlockProp): CreatureItem[] {
     })
 }
 
+export function GetAbilityNameFromSlug(creature: StatBlockProp,slug: string): string
+{
+    const match = creature.items.filter(item => {return item.system.slug === slug});
+    
+    if (match.length === 0)
+        return slug;
+    
+    return match[0].name;
+}
+
 export interface ItemSystem {
     description: StringHolder,
-    traits: Traits
+    traits: Traits,
+    slug: string
 }
 
 export interface Stats {
@@ -171,7 +181,7 @@ function statBlock(value: StatBlockProp) {
             <span>{value.name}</span>
             <span>{value.system.details.level.value}</span>
         </h1>
-        {printTraits(value.system.traits, (s, i) => {
+        {printTraitsTransform(value.system.traits, (s, i) => {
             return "[" + s.toString() + "]"
         })}
         <p dangerouslySetInnerHTML={{__html: value.system.details.publicNotes}}></p>
@@ -225,14 +235,12 @@ function statBlock(value: StatBlockProp) {
         <hr/>
         <h2>Strikes</h2>
         <ul>
-            {GetStrikes(value).map(i => <li>{PrintStrike(i)}</li>)}
+            {GetStrikes(value).map(i => <li>{PrintStrike(value,i)}</li>)}
         </ul>
         <ul>
             {GetGenericAbilities(value).map(abilityItem => (<li><h3>{abilityItem.name}</h3>
                 {abilityItem.system.traits.value?.length > 0 ?
-                    <p>({printTraits(abilityItem.system.traits, (s, i) => {
-                        return i != 0 ? (", " + s) : (s);
-                    })})</p> : null}
+                    <p>({printTraitsSeparator(abilityItem.system.traits, " ,")})</p> : null}
                 <p dangerouslySetInnerHTML={{__html: parseAbilityDescription(abilityItem.system.description.value)}}></p>
             </li>))}
         </ul>
@@ -254,7 +262,7 @@ export function cloneStatBlock(statBlock: StatBlockProp): StatBlockProp {
     };
 }
 
-function printTraits(value: Traits, stringTransform: (s: string, i: number) => string) {
+export function printTraitsTransform (value: Traits, stringTransform: (s: string, i: number) => string) {
     const parts: string[] = [];
 
     if (value?.rarity && value.rarity.toLowerCase() !== "common") {
@@ -275,6 +283,12 @@ function printTraits(value: Traits, stringTransform: (s: string, i: number) => s
     return <>{transformedParts}</>;
 }
 
+export function printTraitsSeparator (value: Traits, separator: string) {
+    
+    return printTraitsTransform(value,  (s,i)=>{
+        return i===0? s : (separator) + s;
+    })
+}
 
 export function parseAbilityDescription(input: string): string {
     let output = input;

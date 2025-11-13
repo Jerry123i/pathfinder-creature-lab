@@ -1,8 +1,16 @@
 ﻿import type {CreatureItem, ItemSystem, StatBlockProp, ValueHolder} from "./StatBlock.tsx";
-import {es2015} from "globals";
-import {Fragment, type ReactNode} from "react";
+import {Fragment} from "react";
 
 export type SpellTraditions = "arcane" | "divine" | "primal" | "occult";
+
+export interface SpellcastingItem extends CreatureItem{
+    system: SpellcasterEntrySystem;
+}
+
+export interface SpellcasterEntrySystem extends ItemSystem{
+    spelldc : {dc:number, mod: number, value:number};
+    tradition : {value:SpellTraditions}
+}
 
 export function GetSpells(value: StatBlockProp): CreatureItemSpell[] {
     return value.items.filter(item => item.type === "spell") as CreatureItemSpell[];
@@ -27,15 +35,6 @@ export function ModifySpellDc(creature : StatBlockProp, value : number)
     
     GetSpellcastingEntry(creature).system.spelldc.dc += value;
     GetSpellcastingEntry(creature).system.spelldc.value += value;
-}
-
-export interface SpellcastingItem extends CreatureItem{
-    system: SpellcasterEntrySystem;
-}
-
-export interface SpellcasterEntrySystem extends ItemSystem{
-    spelldc : {dc:number, mod: number, value:number};
-    tradition : {value:SpellTraditions}
 }
 
 export interface SpellSystem extends ItemSystem {

@@ -1,5 +1,4 @@
 ﻿import {
-    type CreatureItemStrike,
     type DamageRollInfo,
     DiceString,
     GetDice,
@@ -7,21 +6,22 @@
     type StatBlockProp,
     type StringHolder,
     type ValueHolder,
-    printNumberWithSignalElement, type CreatureItem
+    printNumberWithSignalElement, type CreatureItem, printTraitsTransform, printTraitsSeparator, GetAbilityNameFromSlug
 } from "./StatBlock.tsx";
-import {type CreatureItemSpell, GetSpells, type SpellcastingItem} from "./Spells.tsx";
+
+export interface CreatureItemStrike extends CreatureItem {
+    system: StrikeSystem
+}
 
 export interface StrikeSystem extends ItemSystem {
     bonus: ValueHolder,
     weaponType?: StringHolder,
     range: { increment: number, max: number },
-    traits: { rarity?: string, value: string[] }
     damageRolls: Record<string, DamageRollInfo>
+    attackEffects?: {custom: string, value: string[]}
 }
 
-export interface CreatureItemStrike extends CreatureItem {
-    system: StrikeSystem
-}
+
 
 export function modifyAllStrikes(creature: StatBlockProp, hitValue: number, damageValue: number) {
     const strikes = GetStrikes(creature);
@@ -60,7 +60,7 @@ function GetDamagesInfo(value: StrikeSystem): DamageRollInfo[] {
     return damages;
 }
 
-export function PrintStrike(item: CreatureItemStrike) {
+export function PrintStrike(creature: StatBlockProp,item: CreatureItemStrike) {
     if (item.system.weaponType === undefined) {
         item.system.weaponType = {value: "melee"};
 
@@ -71,14 +71,32 @@ export function PrintStrike(item: CreatureItemStrike) {
 
     }
 
-    let map: number;
-    map = 5;
+    let atkPenalty: number;
+    atkPenalty = 5;
 
-    if (item.system.traits.value.includes("agile"))
-        map = 4;
+    const traits = item.system.traits;
+    traits.value = traits.value.filter(item => {return item !== "unarmed"})
+    
+    if (traits.value.includes("agile"))
+        atkPenalty = 4;
 
+    let attackEffectsString = "";
+    
+    if (item.system.attackEffects !== undefined) 
+    {
+        if (item.system.attackEffects.value.length !== 0)
+        {
+            attackEffectsString = "plus ";
+            
+            for (let i = 0; i < item.system.attackEffects.value.length; i++) {
+                attackEffectsString += GetAbilityNameFromSlug(creature, item.system.attackEffects.value[i]);
+            }
+        }
+            
+    }
+    
     return (<>
-        <b>{item.system.weaponType.value}</b> {item.name} {printNumberWithSignalElement(item.system.bonus.value)} [{printNumberWithSignalElement(item.system.bonus.value - map)}/{printNumberWithSignalElement(item.system.bonus.value - (map * 2))}]
-        {GetDamagesInfo(item.system).map(dmg => (<> {dmg.damage} {dmg.damageType}</>))}
+        <b>{item.system.weaponType.value}</b> {item.name} {printNumberWithSignalElement(item.system.bonus.value)} [{printNumberWithSignalElement(item.system.bonus.value - atkPenalty)}/{printNumberWithSignalElement(item.system.bonus.value - (atkPenalty * 2))}]
+        {traits.value.length > 0 && <>({printTraitsSeparator(traits, ", ")})</>} {GetDamagesInfo(item.system).map(dmg => (<> {dmg.damage} {dmg.damageType}</>))} {attackEffectsString !== "" && <> {attackEffectsString}</>}
     </>)
 }

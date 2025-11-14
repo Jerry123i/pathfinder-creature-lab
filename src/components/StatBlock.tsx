@@ -89,6 +89,7 @@ export function GetGenericAbilities(value: StatBlockProp): CreatureItem[] {
             && item.type != "armor"
             && item.type != "spellcastingEntry"
             && item.type != "lore"
+            && item.type != "equipment"
         )
     })
 }
@@ -111,7 +112,7 @@ export interface ItemSystem {
     description: StringHolder,
     traits: Traits,
     slug: string,
-    actions: ValueHolder,
+    actions: ValueHolder | null,
     actionType : StringHolder
 }
 
@@ -188,6 +189,30 @@ export interface Details {
 }
 
 
+function GetActionIcon(value: CreatureItem) 
+{
+    if (value.system.actionType === undefined)
+        return null;
+    if (value.system.actionType.value === undefined)
+        return null;
+    
+    if (value.system.actionType.value === "reaction")
+        return (<>R </>);
+    if (value.system.actionType.value === "passive")
+        return null;
+    
+    if (value.system.actions === undefined)
+        return null;
+    if (value.system.actions?.value === undefined)
+        return null;
+    
+    if (value.system.actions.value === 0)
+        return null;
+    
+    return (<>{value.system.actions.value}A </>)
+    
+}
+
 function statBlock(value: StatBlockProp) {
 
     return (<>
@@ -253,9 +278,7 @@ function statBlock(value: StatBlockProp) {
         </ul>
         <ul>
             {GetGenericAbilities(value).map(abilityItem => (<li>
-                <h3>{abilityItem.system.actions.value !== null && (<>{abilityItem.system.actions.value}A </>)}
-                    {abilityItem.system.actionType.value === "reaction" && (<>R </>)}
-                    {abilityItem.name}</h3>
+                <h3>{GetActionIcon(abilityItem)}{abilityItem.name}</h3>
                 {abilityItem.system.traits.value?.length > 0 ?
                     <p>({printTraitsSeparator(abilityItem.system.traits, " ,")})</p> : null}
                 <p dangerouslySetInnerHTML={{__html: parseAbilityDescription(abilityItem.system.description.value)}}></p>

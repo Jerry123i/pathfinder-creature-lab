@@ -45,7 +45,7 @@ export function RemoveTrait(creature: StatBlockProp, value: string) {
     if (!creature.system.traits.value.includes(value))
         return;
 
-    delete creature.system.traits.value[creature.system.traits.value.indexOf(value)];
+    creature.system.traits.value = creature.system.traits.value.filter(x => x != value); 
 }
 
 export interface Attributes {

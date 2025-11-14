@@ -9,7 +9,6 @@ import {cloneElement, useState} from "react";
 
 // eslint-disable-next-line react-refresh/only-export-components
 export function loadMonsters(){
-    console.log("Load Monsters");
     const modules = import.meta.glob("./assets/monsters/*.json", {eager:true});
     return Object.values(modules) as StatBlockProp[];
 }
@@ -117,7 +116,6 @@ function CreatureAdjustmentButtons(selectedAdjustments :number[], selectedArrayS
 
 function handleCreatureAdjustmentClick(existingArray : number[] ,value : number) : number[]
 {
-    console.log(existingArray);
     let newArray = structuredClone(existingArray);
 
     if (!newArray.includes(value)){

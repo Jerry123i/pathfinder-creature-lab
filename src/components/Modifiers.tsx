@@ -22,11 +22,11 @@ export const Elite : CreatureAdjustment = {
     _id: "adj_elite",
     name: "Elite",
     description: "Sometimes you’ll want a creature that’s just a bit more powerful than normal so that you can present a challenge that would otherwise be trivial or show that one enemy is stronger than its kin.", 
-    priority: -9,
+    priority: 9,
     type: "Level",
     apply: (statblock: StatBlockProp) =>
     {
-        console.log("Elite");
+
         const sb = cloneStatBlock(statblock);
         const initLevel = statblock.system.details.level.value;
         sb.system.details.level.value += (initLevel < 1) ? 2 : 1;
@@ -50,6 +50,8 @@ export const Elite : CreatureAdjustment = {
         modifyAllStrikes(sb, 2, 2);
         ModifySpellDc(sb, 2);
         
+        sb.name = "Elite " + sb.name;
+        
         return sb;
     }
 }
@@ -58,7 +60,7 @@ export const Weak : CreatureAdjustment = {
     _id: "adj_weak",
     name: "Weak",
     description: "Sometimes you’ll want a creature that’s weaker than normal so you can use a creature that would otherwise be too challenging or show that one enemy is weaker than its kin.",
-    priority: -9,
+    priority: 9,
     type: "Level",
     apply: (statblock: StatBlockProp) =>
     {
@@ -89,6 +91,8 @@ export const Weak : CreatureAdjustment = {
         modifyAllStrikes(sb, -2, -2);
         ModifySpellDc(sb, -2);
 
+        sb.name = "Weak " + sb.name;
+        
         return sb;
     }
 }
@@ -110,6 +114,8 @@ export const Dwarf : CreatureAdjustment = {
         RemoveTrait(sb, "human");
         AddTrait(sb,  "dwarf");
 
+        sb.name = "Dwarf " + sb.name;
+        
         return sb;
     }
 }
@@ -131,6 +137,8 @@ export const Elf : CreatureAdjustment = {
         RemoveTrait(sb, "human");
         AddTrait(sb,  "elf");
 
+        sb.name = "Elf " + sb.name;
+        
         return sb;
     }
 }
@@ -152,6 +160,8 @@ export const Gnome : CreatureAdjustment = {
         RemoveTrait(sb, "human");
         AddTrait(sb,  "gnome");
 
+        sb.name = "Gnome " + sb.name;
+        
         return sb;
     }
 }
@@ -172,6 +182,8 @@ export const Goblin : CreatureAdjustment = {
         
         RemoveTrait(sb, "human");
         AddTrait(sb,  "goblin");
+
+        sb.name = "Goblin " + sb.name;
         
         return sb;
     }
@@ -194,6 +206,8 @@ export const Halfling : CreatureAdjustment = {
         RemoveTrait(sb, "human");
         AddTrait(sb,  "halfling");
 
+        sb.name = "Halfling " + sb.name;
+        
         return sb;
     }
 }
@@ -217,6 +231,8 @@ export const Leshy : CreatureAdjustment = {
         AddTrait(sb,  "leshy");
         AddTrait(sb,  "plant");
 
+        sb.name = "Leshy " + sb.name;
+        
         return sb;
     }
 }
@@ -236,6 +252,8 @@ export const Orc : CreatureAdjustment = {
         RemoveTrait(sb, "human");
         AddTrait(sb,  "orc");
 
+        sb.name = "Orc " + sb.name;
+        
         return sb;
     }
 }
@@ -256,6 +274,8 @@ export const Minotaur : CreatureAdjustment = {
 
         RemoveTrait(sb, "human");
         AddTrait(sb,  "minotaur");
+
+        sb.name = "Minotaur " + sb.name;
         
         return sb;
     }
@@ -277,6 +297,8 @@ export const Merfolk : CreatureAdjustment = {
 
         RemoveTrait(sb, "human");
         AddTrait(sb,  "merfolk");
+
+        sb.name = "Merfolk " + sb.name;
         
         return sb;
     }

@@ -110,7 +110,9 @@ export function GetAbilityNameFromSlug(creature: StatBlockProp,slug: string): st
 export interface ItemSystem {
     description: StringHolder,
     traits: Traits,
-    slug: string
+    slug: string,
+    actions: ValueHolder,
+    actionType : StringHolder
 }
 
 export interface LoreItemSystem extends ItemSystem {
@@ -128,7 +130,7 @@ export interface Mod {
 export interface ValueHolder {
     type?: string;
     saveDetail?: number;
-    value: number;
+    value: number | null;
 }
 
 export interface TypedValue {
@@ -250,7 +252,10 @@ function statBlock(value: StatBlockProp) {
             {GetStrikes(value).map(i => <li>{PrintStrike(value,i)}</li>)}
         </ul>
         <ul>
-            {GetGenericAbilities(value).map(abilityItem => (<li><h3>{abilityItem.name}</h3>
+            {GetGenericAbilities(value).map(abilityItem => (<li>
+                <h3>{abilityItem.system.actions.value !== null && (<>{abilityItem.system.actions.value}A </>)}
+                    {abilityItem.system.actionType.value === "reaction" && (<>R </>)}
+                    {abilityItem.name}</h3>
                 {abilityItem.system.traits.value?.length > 0 ?
                     <p>({printTraitsSeparator(abilityItem.system.traits, " ,")})</p> : null}
                 <p dangerouslySetInnerHTML={{__html: parseAbilityDescription(abilityItem.system.description.value)}}></p>

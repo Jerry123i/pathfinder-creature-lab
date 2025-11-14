@@ -4,10 +4,6 @@ import type {Abilities} from "./Abilities.tsx";
 import {type CreatureItemSpell, GetSpells, HasSpells, PrintSpells} from "./Spells.tsx";
 import {capitalize} from "./TypeScriptHelpFunctions.tsx";
 
-//TODO
-//Action markers
-//Telepathy
-
 export interface StatBlockProp {
     _id: string;
     name: string;
@@ -90,6 +86,8 @@ export function GetGenericAbilities(value: StatBlockProp): CreatureItem[] {
             && item.type != "spellcastingEntry"
             && item.type != "lore"
             && item.type != "equipment"
+            && item.system.slug != "telepathy"
+            && item.system.slug != "constant-spells"
         )
     })
 }
@@ -228,7 +226,7 @@ function statBlock(value: StatBlockProp) {
         {
             return ((index===0?"":", ") + capitalize(l))
         }
-        )}</>)}
+        )}</>)}{value.system.details.languages?.details && (<>, ({value.system.details.languages?.details})</>)}
         <hr/>
         {printMod(value.system.perception, "Perception")}<br/>
         <b>Skills</b> {printSkills(value,  value.system.skills)}<br/>

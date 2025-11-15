@@ -4,7 +4,7 @@ import {CreatureAdjustmentList} from "./components/Modifiers.tsx";
 import {applyAllAdjustments} from "./components/Modifiers.tsx";
 import type {CreatureAdjustment} from "./components/Modifiers.tsx";
 import statBlock from "./components/StatBlock.tsx";
-import {cloneElement, useState} from "react";
+import {useState} from "react";
 
 
 // eslint-disable-next-line react-refresh/only-export-components
@@ -30,14 +30,14 @@ function App(){
     const adjustedCreature = applyAllAdjustments(currentBaseCreature, selectedAdjustments)
 
     return (
-        <div style={{display: "flex", alignItems: "flex-start"}}>
+        <div className="flex bg-gray-50">
             {/* Sidebar */}
-            <div style={{width: "220px", marginRight: "20px"}}>
+            <div className="border-amber-100 border-r-4 p-3">
                 {DropDown(monsters, setCreature)}
             </div>
 
             {/* Main Content */}
-            <div style={{flex: 1}}>
+            <div className="p-3">
                 {CreatureAdjustmentButtons(selectedAdjustmentIndexes, setSelectedAdjustments)}
                 {statBlock(adjustedCreature)}
             </div>
@@ -46,7 +46,7 @@ function App(){
 }
 
 function DropDown(list: StatBlockProp[], onValueChange: (i: number) => void) {
-    return(<select onChange={(e) => onValueChange(Number(e.target.value))}>
+    return (<select className="bg-amber-50 p-1 pb-2 justify-center rounded-md" onChange={(e) => onValueChange(Number(e.target.value))}>
         {list.map((item: StatBlockProp, index) =>
             (<option value={index} key={item._id}>{item.name}</option>))
         })
@@ -89,29 +89,43 @@ function CreatureAdjustmentButtons(selectedAdjustments :number[], selectedArrayS
     
     let lastType = "";
     
-    return (
-        <div>
-        {CreatureAdjustmentList.map((item : CreatureAdjustment, index: number) =>
-            {
-                const header = (lastType === item.type ? null : <h3>{item.type}</h3>);
-                
-                lastType = item.type;
-                
-                const button =(<button key={item._id}
-                         onClick={()=>{
-                             //On Click
-                             selectedArraySetter(handleCreatureAdjustmentClick(selectedAdjustments, index))
-                         }}>{item.name}</button>)
-                
-                return(
-                    <>
-                        {header}
-                        {button}
-                    </>
-                );
+    let workingGroup = [];
+    const finalValue  = [];
+
+    const pressedButton = " bg-green-100 text-green-950 outline-green-100 outline-1"
+    for (let i = 0; i < CreatureAdjustmentList.length; i++)
+    {
+        const item = CreatureAdjustmentList[i];
+        
+        if (lastType !== item.type)
+        {   
+            lastType = item.type;
+
+            if (i !== 0){
+                finalValue.push(<div className="p-1 space-x-2 space-y-1">{workingGroup}</div>);
+                workingGroup = [];
             }
-        )}
-    </div>)
+            
+            const header = <h3 className="font-bold">{">"} {item.type}</h3>;
+            workingGroup.push(header);
+        }
+
+        const button =(<button className={("px-2 py-0.5 border-white border-1 rounded-md") + (selectedAdjustments.includes(i)? pressedButton : "")} key={item._id}
+                               onClick={()=>{
+                                   //On Click
+                                   selectedArraySetter(handleCreatureAdjustmentClick(selectedAdjustments, i))
+                               }}>{item.name}</button>)
+        
+        workingGroup.push(button);
+        
+        if (i === CreatureAdjustmentList.length - 1)
+        {
+            finalValue.push(<div className="p-1 space-x-2 space-y-1">{workingGroup}</div>);
+            workingGroup = [];
+        }
+    }
+    
+    return <div className="bg-green-900 text-green-50">{finalValue}</div>;
 }
 
 function handleCreatureAdjustmentClick(existingArray : number[] ,value : number) : number[]

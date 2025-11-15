@@ -304,6 +304,38 @@ export const Merfolk : CreatureAdjustment = {
     }
 }
 
+export const Zombie : CreatureAdjustment = {
+    _id: "adj_zombie",
+    name: "Zombie",
+    description: "",
+    priority: 1,
+    type: "Undead",
+    apply: (statblock: StatBlockProp) =>
+    {
+        const sb = cloneStatBlock(statblock);
+
+        sb.name = "Zombie " + sb.name;
+
+        return sb;
+    }
+}
+
+export const Vampire : CreatureAdjustment = {
+    _id: "adj_vampire",
+    name: "Vampire",
+    description: "",
+    priority: 1,
+    type: "Undead",
+    apply: (statblock: StatBlockProp) =>
+    {
+        const sb = cloneStatBlock(statblock);
+
+        sb.name = "Vampire " + sb.name;
+
+        return sb;
+    }
+}
+
 export function applyAllAdjustments(baseCreature : StatBlockProp, adjustments : CreatureAdjustment[]) : StatBlockProp
 {
     if (adjustments.length === 0)
@@ -320,4 +352,4 @@ export function applyAllAdjustments(baseCreature : StatBlockProp, adjustments : 
     return creature;
     
 }
-export const CreatureAdjustmentList = [Elite, Weak, Dwarf, Elf, Gnome, Goblin, Halfling, Leshy, Minotaur, Merfolk, Orc];
+export const CreatureAdjustmentList = [Elite, Weak, Dwarf, Elf, Gnome, Goblin, Halfling, Leshy, Minotaur, Merfolk, Orc, Zombie, Vampire];

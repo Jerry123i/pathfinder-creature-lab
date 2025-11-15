@@ -3,6 +3,7 @@ import {printSkills, type SkillList} from "./Skills.tsx";
 import type {Abilities} from "./Abilities.tsx";
 import {type CreatureItemSpell, GetSpells, HasSpells, PrintSpells} from "./Spells.tsx";
 import {capitalize} from "./TypeScriptHelpFunctions.tsx";
+import {Fragment} from "react";
 
 export interface StatBlockProp {
     _id: string;
@@ -218,8 +219,8 @@ function statBlock(value: StatBlockProp) {
             <span>{value.name}</span>
             <span>{value.system.details.level.value}</span>
         </h1>
-        {printTraitsTransform(value.system.traits, (s, i) => {
-            return "[" + s.toString() + "]"
+        {printTraitsTransformElement(value.system.traits, (s, i) => {
+            return (<p className="inline-block bg-[#531004] text-white border-double border-2 border-[#d5c489] font-semibold text-[1.0em] not-italic px-[5px] text-left indent-0 my-[0.1em]">{s.toString()}</p>)
         })}
         <p dangerouslySetInnerHTML={{__html: value.system.details.publicNotes}}></p>
         {value.system.details.languages.value.length > 0 && (<><b>Languages: </b> {value.system.details.languages.value.map((l, index) =>
@@ -301,6 +302,27 @@ export function cloneStatBlock(statBlock: StatBlockProp): StatBlockProp {
 }
 
 export function printTraitsTransform (value: Traits, stringTransform: (s: string, i: number) => string) {
+    const parts: string[] = [];
+
+    if (value?.rarity && value.rarity.toLowerCase() !== "common") {
+        parts.push(capitalize(value.rarity));
+    }
+
+    if (value?.size?.value) {
+        parts.push(capitalize(value.size.value));
+    }
+
+    const traits = value?.value ?? [];
+    const startIndex = parts.length;
+    const transformedParts = [
+        ...parts.map((part, i) => stringTransform(part, i)),
+        ...traits.map((trait, index) => stringTransform(capitalize(trait), startIndex + index)),
+    ];
+
+    return <>{transformedParts}</>;
+}
+
+export function printTraitsTransformElement (value: Traits, stringTransform: (s: string, i: number) => Element) {
     const parts: string[] = [];
 
     if (value?.rarity && value.rarity.toLowerCase() !== "common") {

@@ -177,7 +177,11 @@ function GetActionIcon(value: CreatureItem)
         return null;
     
     if (value.system.actionType.value === "reaction")
-        return (<>R </>);
+        return (<span className="font-[Pathfinder2eActions]">R</span>);
+
+    if (value.system.actionType.value === "free")
+        return (<span className="font-[Pathfinder2eActions]">F</span>);
+    
     if (value.system.actionType.value === "passive")
         return null;
     
@@ -189,8 +193,14 @@ function GetActionIcon(value: CreatureItem)
     if (value.system.actions.value === 0)
         return null;
     
-    return (<>{value.system.actions.value}A </>)
-    
+    switch (value.system.actions.value){
+        case 1:
+            return (<span className="font-[Pathfinder2eActions]">A</span>);
+        case 2:
+            return (<span className="font-[Pathfinder2eActions]">D</span>);
+        default:
+            return (<span className="font-[Pathfinder2eActions]">T</span>);
+    }
 }
 
 function statBlock(value: StatBlockProp) {
@@ -343,12 +353,22 @@ function printValueWithSignal(value: ValueHolder, name: string) {
     return <> <b>{name}</b> {val < 0 ? "" : "+"}{val}</>;
 }
 
-export function printNumberWithSignalElement(value: number) {
+export function printNumberWithSignalElement(value: number | null) {
+    
+    if (value == null) {
+        return printNumberWithSignalElement(0);
+    }
+    
     const val = value;
     return <>{val < 0 ? "" : "+"}{val}</>;
 }
 
-export function printNumberWithSignalString(value: number) {
+export function printNumberWithSignalString(value: number | null) {
+    
+    if (value == null){
+        return printNumberWithSignalString(0);
+    }
+    
     const val = value;
     return ((val < 0 ? "" : "+") + (val));
 }

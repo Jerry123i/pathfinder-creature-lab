@@ -1,7 +1,7 @@
 ﻿import {type CreatureItemStrike, GetStrikes, PrintStrike} from "./Strikes.tsx";
 import {printSkills, type SkillList} from "./Skills.tsx";
 import type {Abilities} from "./Abilities.tsx";
-import {type CreatureItemSpell, GetSpells, HasSpells, PrintSpells} from "./Spells.tsx";
+import {type CreatureItemSpell, GetSpells, HasSpells, PrintAllSpells} from "./Spells.tsx";
 import {capitalize} from "./TypeScriptHelpFunctions.tsx";
 import {Fragment} from "react";
 import {GetTraitColor, printTraitsSeparator, printTraitsTransformElement, type Traits} from "./Traits.tsx";
@@ -312,7 +312,7 @@ function statBlock(value: StatBlockProp) {
         </ul>
         {HasSpells(value) ? (<>
             <h2>Spells</h2>
-            {PrintSpells(value)}
+            {PrintAllSpells(value)}
         </>) : <></>}
     </>)
 }

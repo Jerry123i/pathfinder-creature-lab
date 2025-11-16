@@ -16,6 +16,34 @@ export function GetSpells(value: StatBlockProp): CreatureItemSpell[] {
     return value.items.filter(item => item.type === "spell") as CreatureItemSpell[];
 }
 
+function GetSpellCastingLists(value: StatBlockProp): SpellcastingList[] {
+    const spellcastingEntries = value.items.filter(item => item.type === "spellcastingEntry") as SpellcastingItem[];
+    const spells = value.items.filter(item => item.type === "spell") as CreatureItemSpell[];
+    
+    const finalList :SpellcastingList[] = [];
+    
+    for(const spellList of spellcastingEntries)
+    {
+        finalList.push( {id: spellList._id, name:spellList.name, spells: [], dc: spellList.system.spelldc.dc, tradition: spellList.system.tradition} )
+    }
+    
+    for (const spell of spells)
+    {
+        finalList.find(list => {return list.id === spell.system.location.value})?.spells.push(spell);
+    }
+    
+    return finalList
+    
+}
+
+export interface SpellcastingList{
+    id: string;
+    name: string;
+    dc : number;
+    tradition : {value:SpellTraditions}
+    spells: CreatureItemSpell[];
+}
+
 export function GetSpellcastingEntry(value: StatBlockProp) : SpellcastingItem
 {
     for (let i = 0; i < value.items.length; i++)
@@ -39,7 +67,7 @@ export function ModifySpellDc(creature : StatBlockProp, value : number)
 
 export interface SpellSystem extends ItemSystem {
     level: ValueHolder;
-    location: {heightenedLevel: number, value:number}; //TODO this declaration might be dangerous
+    location: {heightenedLevel: number, value:string}; //TODO this declaration might be dangerous
 }
 
 export interface CreatureItemSpell extends CreatureItem {
@@ -48,29 +76,42 @@ export interface CreatureItemSpell extends CreatureItem {
 
 function GetActiveLevel(spell : SpellSystem): number{
     
-    if (spell.location?.heightenedLevel > spell.level.value)
+    if (spell.location?.heightenedLevel > (spell.level.value ?? 0))
         return spell.location.heightenedLevel;
     
-    return spell.level.value
+    return (spell.level.value ?? 0)
 }
 
 export function HasSpells(creature : StatBlockProp){
     return GetSpells(creature).length > 0;
 }
 
-export function PrintSpells(creature: StatBlockProp) { //TODO Separate different spellcasting entries
-    const spells = GetSpells(creature);
-
-    spells.sort((a, b) => GetActiveLevel(a.system) - GetActiveLevel(b.system));
+export function PrintAllSpells(creature: StatBlockProp) { //TODO Separate different spellcasting entries
+    const allSpellLists = GetSpellCastingLists(creature);
     
-    const spellcasting = GetSpellcastingEntry(creature);
+    const spellListsCombination = []
+    
+    for (const spellList of allSpellLists)
+    {
+        spellListsCombination.push(PrintSpellcastingEntry(spellList));
+    }
+    
+    return (<span className="space-y-4">{spellListsCombination}</span>);
+}
+
+function PrintSpellcastingEntry(list: SpellcastingList)
+{
+    const spells = list.spells;
+    
+    spells.sort((a, b) => GetActiveLevel(a.system) - GetActiveLevel(b.system));
+
     let lastLevel = -1;
 
     return (
-        <table className="table-auto rounded-xl border-1 border-black p-2">
+        <table className="w-80 table-auto rounded-xl border-1 border-black p-2">
             <thead>
             <tr>
-                <th className="bg-violet-300 px-2 py-0.5">{spellcasting.name} : DC{spellcasting.system.spelldc.dc}</th>
+                <th className="bg-violet-300 px-2 py-0.5">{list.name} : DC{list.dc}</th>
             </tr>
             </thead>
             <tbody>
@@ -97,7 +138,6 @@ export function PrintSpells(creature: StatBlockProp) { //TODO Separate different
             </tbody>
         </table>
     );
-
 }
 
 //<th key={spell._id}>{spell.name}</th>

@@ -9,6 +9,7 @@
     printNumberWithSignalElement, type CreatureItem, GetAbilityNameFromSlug
 } from "./StatBlock.tsx";
 import {printTraitsSeparator, printTraitsTransform} from "./Traits.tsx";
+import {capitalize} from "./TypeScriptHelpFunctions.tsx";
 
 export interface CreatureItemStrike extends CreatureItem {
     system: StrikeSystem
@@ -97,7 +98,7 @@ export function PrintStrike(creature: StatBlockProp,item: CreatureItemStrike) {
     }
     
     return (<>
-        <b>{item.system.weaponType.value}</b> <span className="font-[Pathfinder2eActions]">A</span> {item.name} {printNumberWithSignalElement(item.system.bonus.value)} [{printNumberWithSignalElement(item.system.bonus.value - atkPenalty)}/{printNumberWithSignalElement(item.system.bonus.value - (atkPenalty * 2))}]
+        <b>{capitalize(item.system.weaponType.value)}</b> <span className="pathfinder-action">A</span>{item.name} {printNumberWithSignalElement(item.system.bonus.value)} [{printNumberWithSignalElement(item.system.bonus.value - atkPenalty)}/{printNumberWithSignalElement(item.system.bonus.value - (atkPenalty * 2))}]
         {traits.value.length > 0 && <>({printTraitsSeparator(traits, ", ")})</>} {GetDamagesInfo(item.system).map(dmg => (<> {dmg.damage} {dmg.damageType}</>))} {attackEffectsString !== "" && <> {attackEffectsString}</>}
     </>)
 }

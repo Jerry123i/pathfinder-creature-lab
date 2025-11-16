@@ -32,7 +32,7 @@ function App(){
     return (
         <div className="flex bg-gray-50">
             {/* Sidebar */}
-            <div className="border-amber-100 border-r-4 p-3">
+            <div className=" bg-amber-100 border-amber-200 border-r-4 p-3">
                 {DropDown(monsters, setCreature)}
             </div>
 

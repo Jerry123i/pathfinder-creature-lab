@@ -67,10 +67,10 @@ export function PrintSpells(creature: StatBlockProp) { //TODO Separate different
     let lastLevel = -1;
 
     return (
-        <table>
+        <table className="table-auto rounded-xl border-1 border-black p-2">
             <thead>
             <tr>
-                <th>{spellcasting.name} : DC{spellcasting.system.spelldc.dc}</th>
+                <th className="bg-violet-300 px-2 py-0.5">{spellcasting.name} : DC{spellcasting.system.spelldc.dc}</th>
             </tr>
             </thead>
             <tbody>
@@ -79,7 +79,7 @@ export function PrintSpells(creature: StatBlockProp) { //TODO Separate different
                 const levelHeader =
                     level > lastLevel ? (
                         <tr key={`header-${level}`}>
-                            <th>Level {level}</th>
+                            <th className="px-2 py-0.5 bg-violet-400">Level {level}</th>
                         </tr>
                     ) : null;
 
@@ -88,8 +88,8 @@ export function PrintSpells(creature: StatBlockProp) { //TODO Separate different
                 return (
                     <Fragment key={spell._id}>
                         {levelHeader}
-                        <tr>
-                            <td>{spell.name}</td>
+                        <tr className="odd:bg-violet-100 not-odd:bg-gray-100">
+                            <td className="px-2 py-1  ">{spell.name}</td>
                         </tr>
                     </Fragment>
                 );

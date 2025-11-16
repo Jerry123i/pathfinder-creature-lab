@@ -11,5 +11,9 @@
 
     h3 {
         font-size: var(--text-lg);
-    }    
+    }
+    
+    .pathfinder-action{
+        @apply font-[Pathfinder2eActions] text-[1.75rem] pr-1;
+    }
 }

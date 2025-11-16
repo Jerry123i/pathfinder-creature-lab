@@ -59,7 +59,7 @@ export function GetGenericAbilities(value: StatBlockProp): CreatureItem[] {
 
     const allItems = value.items;
 
-    return allItems.filter(item => {
+    let selectedItems = allItems.filter(item => {
         return (
             !spells.includes(item as CreatureItemSpell)
             && !strikes.includes(item as CreatureItemStrike)
@@ -70,8 +70,43 @@ export function GetGenericAbilities(value: StatBlockProp): CreatureItem[] {
             && item.type != "equipment"
             && item.system.slug != "telepathy"
             && item.system.slug != "constant-spells"
+            && item.system.slug != "1-status-to-all-saves-vs-magic"
         )
     })
+
+    selectedItems = selectedItems.sort((a, b) => {
+
+        // 1) Map actionType → rank order
+        const typeRank = {
+            action: 0,
+            reaction: 1,
+            passive: 2
+        };
+
+        const aType = a.system.actionType?.value.toLowerCase() ?? "";
+        const bType = b.system.actionType?.value.toLowerCase() ?? "";
+
+        // Compare type first
+        if (typeRank[aType] !== typeRank[bType]) {
+            return typeRank[aType] - typeRank[bType];
+        }
+
+        // 2) If both are action: order by action number
+        if (aType === "action") {
+            const aActions = a.system.actions?.value ?? 0;  // treat null as 0
+            const bActions = b.system.actions?.value ?? 0;
+
+            if (aActions !== bActions) {
+                return aActions - bActions; // fewer actions first
+            }
+        }
+
+        // 3) Alphabetical fallback
+        return a.name.localeCompare(b.name);
+    });
+    
+    return selectedItems;
+    
 }
 
 export function GetLoreItems(value : StatBlockProp) {
@@ -177,10 +212,10 @@ function GetActionIcon(value: CreatureItem)
         return null;
     
     if (value.system.actionType.value === "reaction")
-        return (<span className="font-[Pathfinder2eActions]">R</span>);
+        return (<span className="pathfinder-action">R</span>);
 
     if (value.system.actionType.value === "free")
-        return (<span className="font-[Pathfinder2eActions]">F</span>);
+        return (<span className="pathfinder-action">F</span>);
     
     if (value.system.actionType.value === "passive")
         return null;
@@ -195,11 +230,11 @@ function GetActionIcon(value: CreatureItem)
     
     switch (value.system.actions.value){
         case 1:
-            return (<span className="font-[Pathfinder2eActions]">A</span>);
+            return (<span className="pathfinder-action">A</span>);
         case 2:
-            return (<span className="font-[Pathfinder2eActions]">D</span>);
+            return (<span className="pathfinder-action">D</span>);
         default:
-            return (<span className="font-[Pathfinder2eActions]">T</span>);
+            return (<span className="pathfinder-action">T</span>);
     }
 }
 
@@ -228,7 +263,7 @@ function statBlock(value: StatBlockProp) {
         {printValueWithSignal(value.system.saves.fortitude, "Fort")}{";"}
         {printValueWithSignal(value.system.saves.reflex, "Ref")}{";"}
         {printValueWithSignal(value.system.saves.will, "Will")}
-
+        {value.items.find((value) => value.system?.slug === "1-status-to-all-saves-vs-magic") !== undefined && <span className="font-semibold">; +1 status to all saves vs. magic</span>}
         <br/>
         {printValue(value.system.attributes.hp, "HP")}
         {value.system.attributes.resistances === undefined ? null : (
@@ -268,10 +303,10 @@ function statBlock(value: StatBlockProp) {
             {GetStrikes(value).map(i => <li>{PrintStrike(value,i)}</li>)}
         </ul>
         <ul>
-            {GetGenericAbilities(value).map(abilityItem => (<li>
-                <h3>{GetActionIcon(abilityItem)}{abilityItem.name}</h3>
-                {abilityItem.system.traits.value?.length > 0 ?
-                    <p>({printTraitsSeparator(abilityItem.system.traits, " ,")})</p> : null}
+            {GetGenericAbilities(value).map(abilityItem => (
+            <li className="py-1 border-t-2 border-amber-300">
+                <span className="text-lg pr-2">{GetActionIcon(abilityItem)}{abilityItem.name}</span>{abilityItem.system.traits.value?.length > 0 ? 
+                <span className="text-stone-500">({printTraitsSeparator(abilityItem.system.traits, ", ")})</span> : null}
                 <p dangerouslySetInnerHTML={{__html: parseAbilityDescription(abilityItem.system.description.value)}}></p>
             </li>))}
         </ul>

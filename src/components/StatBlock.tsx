@@ -4,6 +4,7 @@ import type {Abilities} from "./Abilities.tsx";
 import {type CreatureItemSpell, GetSpells, HasSpells, PrintSpells} from "./Spells.tsx";
 import {capitalize} from "./TypeScriptHelpFunctions.tsx";
 import {Fragment} from "react";
+import {GetTraitColor, printTraitsSeparator, printTraitsTransformElement, type Traits} from "./Traits.tsx";
 
 export interface StatBlockProp {
     _id: string;
@@ -23,30 +24,10 @@ export interface CreatureSystems {
     traits: Traits;
 }
 
-export interface Traits {
-    rarity: string;
-    size: { value: string };
-    value: string[];
-}
-
 export function modifyAllSaves(creature: CreatureSystems, value: number) {
     creature.saves.reflex.value += value;
     creature.saves.fortitude.value += value;
     creature.saves.will.value += value;
-}
-
-export function AddTrait(creature: StatBlockProp, value: string) {
-    if (creature.system.traits.value.includes(value))
-        return;
-
-    creature.system.traits.value.push(value)
-}
-
-export function RemoveTrait(creature: StatBlockProp, value: string) {
-    if (!creature.system.traits.value.includes(value))
-        return;
-
-    creature.system.traits.value = creature.system.traits.value.filter(x => x != value); 
 }
 
 export interface Attributes {
@@ -215,12 +196,13 @@ function GetActionIcon(value: CreatureItem)
 function statBlock(value: StatBlockProp) {
 
     return (<>
-        <h1 style={{display: "flex", justifyContent: "space-between", alignItems: "center"}}>
+        <h1 className="space-x-6 font-semibold">
             <span>{value.name}</span>
+            <span>-</span>
             <span>{value.system.details.level.value}</span>
         </h1>
         {printTraitsTransformElement(value.system.traits, (s, i) => {
-            return (<p className="inline-block bg-[#531004] text-white border-double border-2 border-[#d5c489] font-semibold text-[1.0em] not-italic px-[5px] text-left indent-0 my-[0.1em]">{s.toString()}</p>)
+            return (<p className={`inline-block ${GetTraitColor(s)} text-white border-double border-2 border-[#d5c489] font-semibold text-[1.0em] not-italic px-[5px] text-left indent-0 my-[0.1em]`}>{s.toString()}</p>)
         })}
         <p dangerouslySetInnerHTML={{__html: value.system.details.publicNotes}}></p>
         {value.system.details.languages.value.length > 0 && (<><b>Languages: </b> {value.system.details.languages.value.map((l, index) =>
@@ -299,55 +281,6 @@ export function cloneStatBlock(statBlock: StatBlockProp): StatBlockProp {
             ...JSON.parse(JSON.stringify(item))
         }))
     };
-}
-
-export function printTraitsTransform (value: Traits, stringTransform: (s: string, i: number) => string) {
-    const parts: string[] = [];
-
-    if (value?.rarity && value.rarity.toLowerCase() !== "common") {
-        parts.push(capitalize(value.rarity));
-    }
-
-    if (value?.size?.value) {
-        parts.push(capitalize(value.size.value));
-    }
-
-    const traits = value?.value ?? [];
-    const startIndex = parts.length;
-    const transformedParts = [
-        ...parts.map((part, i) => stringTransform(part, i)),
-        ...traits.map((trait, index) => stringTransform(capitalize(trait), startIndex + index)),
-    ];
-
-    return <>{transformedParts}</>;
-}
-
-export function printTraitsTransformElement (value: Traits, stringTransform: (s: string, i: number) => Element) {
-    const parts: string[] = [];
-
-    if (value?.rarity && value.rarity.toLowerCase() !== "common") {
-        parts.push(capitalize(value.rarity));
-    }
-
-    if (value?.size?.value) {
-        parts.push(capitalize(value.size.value));
-    }
-
-    const traits = value?.value ?? [];
-    const startIndex = parts.length;
-    const transformedParts = [
-        ...parts.map((part, i) => stringTransform(part, i)),
-        ...traits.map((trait, index) => stringTransform(capitalize(trait), startIndex + index)),
-    ];
-
-    return <>{transformedParts}</>;
-}
-
-export function printTraitsSeparator (value: Traits, separator: string) {
-    
-    return printTraitsTransform(value,  (s,i)=>{
-        return i===0? s : (separator) + s;
-    })
 }
 
 export function parseAbilityDescription(input: string): string {

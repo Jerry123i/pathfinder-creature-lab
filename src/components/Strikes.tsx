@@ -6,8 +6,9 @@
     type StatBlockProp,
     type StringHolder,
     type ValueHolder,
-    printNumberWithSignalElement, type CreatureItem, printTraitsTransform, printTraitsSeparator, GetAbilityNameFromSlug
+    printNumberWithSignalElement, type CreatureItem, GetAbilityNameFromSlug
 } from "./StatBlock.tsx";
+import {printTraitsSeparator, printTraitsTransform} from "./Traits.tsx";
 
 export interface CreatureItemStrike extends CreatureItem {
     system: StrikeSystem

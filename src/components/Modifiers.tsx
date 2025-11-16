@@ -1,10 +1,11 @@
-﻿import {AddTrait, RemoveTrait, type StatBlockProp} from "./StatBlock.tsx";
+﻿import {type StatBlockProp} from "./StatBlock.tsx";
 import {modifyAllSaves} from "./StatBlock.tsx";
 import {cloneStatBlock} from "./StatBlock.tsx";
 import {modifyAllStrikes} from "./Strikes.tsx";
 import {modifyAllSkills} from "./Skills.tsx";
 import {ModifyAbilitiesAndRelatedStats} from "./Abilities.tsx";
 import {ModifySpellDc} from "./Spells.tsx";
+import {AddTrait, RemoveTrait, ReplaceTrait} from "./Traits.tsx";
 
 type ModifierType = "Level" | "Ancestry" | "Elemental" | "Undead" | "CreatureType";
 
@@ -111,8 +112,7 @@ export const Dwarf : CreatureAdjustment = {
         ModifyAbilitiesAndRelatedStats(sb,  "wis", 1);
         ModifyAbilitiesAndRelatedStats(sb,  "cha", -1);
 
-        RemoveTrait(sb, "human");
-        AddTrait(sb,  "dwarf");
+        ReplaceTrait(sb,  "human", "dwarf");
 
         sb.name = "Dwarf " + sb.name;
         
@@ -134,8 +134,7 @@ export const Elf : CreatureAdjustment = {
         ModifyAbilitiesAndRelatedStats(sb,  "int", 1);
         ModifyAbilitiesAndRelatedStats(sb,  "con", -1);
 
-        RemoveTrait(sb, "human");
-        AddTrait(sb,  "elf");
+        ReplaceTrait(sb,  "human", "elf");
 
         sb.name = "Elf " + sb.name;
         
@@ -157,8 +156,7 @@ export const Gnome : CreatureAdjustment = {
         ModifyAbilitiesAndRelatedStats(sb,  "cha", 1);
         ModifyAbilitiesAndRelatedStats(sb,  "str", -1);
 
-        RemoveTrait(sb, "human");
-        AddTrait(sb,  "gnome");
+        ReplaceTrait(sb,  "human", "gnome");
 
         sb.name = "Gnome " + sb.name;
         
@@ -179,9 +177,8 @@ export const Goblin : CreatureAdjustment = {
         ModifyAbilitiesAndRelatedStats(sb,  "dex", 1);
         ModifyAbilitiesAndRelatedStats(sb,  "cha", 1);
         ModifyAbilitiesAndRelatedStats(sb,  "wis", -1);
-        
-        RemoveTrait(sb, "human");
-        AddTrait(sb,  "goblin");
+
+        ReplaceTrait(sb,  "human", "goblin");
 
         sb.name = "Goblin " + sb.name;
         
@@ -203,8 +200,7 @@ export const Halfling : CreatureAdjustment = {
         ModifyAbilitiesAndRelatedStats(sb,  "wis", 1);
         ModifyAbilitiesAndRelatedStats(sb,  "str", -1);
 
-        RemoveTrait(sb, "human");
-        AddTrait(sb,  "halfling");
+        ReplaceTrait(sb,  "human", "halfling");
 
         sb.name = "Halfling " + sb.name;
         
@@ -226,9 +222,8 @@ export const Leshy : CreatureAdjustment = {
         ModifyAbilitiesAndRelatedStats(sb,  "wis", 1);
         ModifyAbilitiesAndRelatedStats(sb,  "int", -1);
 
-        RemoveTrait(sb, "human");
+        ReplaceTrait(sb,  "human", "leshy");
         RemoveTrait(sb, "humanoid");
-        AddTrait(sb,  "leshy");
         AddTrait(sb,  "plant");
 
         sb.name = "Leshy " + sb.name;
@@ -249,8 +244,7 @@ export const Orc : CreatureAdjustment = {
 
         ModifyAbilitiesAndRelatedStats(sb,  "str", 1);
 
-        RemoveTrait(sb, "human");
-        AddTrait(sb,  "orc");
+        ReplaceTrait(sb,  "human", "orc");
 
         sb.name = "Orc " + sb.name;
         
@@ -272,8 +266,7 @@ export const Minotaur : CreatureAdjustment = {
         ModifyAbilitiesAndRelatedStats(sb,  "con", 1);
         ModifyAbilitiesAndRelatedStats(sb,  "cha", -1);
 
-        RemoveTrait(sb, "human");
-        AddTrait(sb,  "minotaur");
+        ReplaceTrait(sb,  "human", "minotaur");
 
         sb.name = "Minotaur " + sb.name;
         
@@ -295,8 +288,7 @@ export const Merfolk : CreatureAdjustment = {
         ModifyAbilitiesAndRelatedStats(sb,  "cha", 1);
         ModifyAbilitiesAndRelatedStats(sb,  "con", -1);
 
-        RemoveTrait(sb, "human");
-        AddTrait(sb,  "merfolk");
+        ReplaceTrait(sb,  "human", "merfolk");
 
         sb.name = "Merfolk " + sb.name;
         

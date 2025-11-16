@@ -110,7 +110,7 @@ function CreatureAdjustmentButtons(selectedAdjustments :number[], selectedArrayS
             workingGroup.push(header);
         }
 
-        const button =(<button className={("px-2 py-0.5 border-white border-1 rounded-md") + (selectedAdjustments.includes(i)? pressedButton : "")} key={item._id}
+        const button =(<button className={`px-2 py-0.5 border-white border-1 rounded-md ${selectedAdjustments.includes(i)?"bg-green-100 text-green-950 outline-green-100 outline-1" : ""}`} key={item._id}
                                onClick={()=>{
                                    //On Click
                                    selectedArraySetter(handleCreatureAdjustmentClick(selectedAdjustments, i))

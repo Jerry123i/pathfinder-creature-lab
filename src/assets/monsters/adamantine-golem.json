@@ -184,7 +184,7 @@
                     "title": ""
                 },
                 "rules": [],
-                "slug": null,
+                "slug": "destructive-strike",
                 "traits": {
                     "rarity": "common",
                     "value": []
@@ -217,7 +217,7 @@
                     "title": ""
                 },
                 "rules": [],
-                "slug": "destructive-strike",
+                "slug": null,
                 "traits": {
                     "rarity": "common",
                     "value": []

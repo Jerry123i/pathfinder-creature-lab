@@ -96,7 +96,7 @@ export function PrintAllSpells(creature: StatBlockProp) { //TODO Separate differ
         spellListsCombination.push(PrintSpellcastingEntry(spellList));
     }
     
-    return (<span className="space-y-4">{spellListsCombination}</span>);
+    return (<span className="space-y-4 flex space-x-2">{spellListsCombination}</span>);
 }
 
 function PrintSpellcastingEntry(list: SpellcastingList)
@@ -108,7 +108,7 @@ function PrintSpellcastingEntry(list: SpellcastingList)
     let lastLevel = -1;
 
     return (
-        <table className="w-80 table-auto rounded-xl border-1 border-black p-2">
+        <table className="h-0 w-80 table-auto border-1 border-black p-2">
             <thead>
             <tr>
                 <th className="bg-violet-300 px-2 py-0.5">{list.name} : DC{list.dc}</th>

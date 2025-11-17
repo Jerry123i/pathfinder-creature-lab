@@ -343,17 +343,17 @@ export function parseAbilityDescription(input: string): string {
     );
 
     output = output.replace(
-        /@Damage\[\(?(\d+d\d+(?:\+\d+)?)\)?\[(\w+)(?:,(\w+))?\](?:\|\w+\:[\w+\-]+)?\]/g,
+        /@Damage\[\(?((?:\d+|(?:\d+d\d+(?:\+\d+)?)))\)?\[(\w+)(?:,(\w+))?\](?:\|\w+\:[\w+\-]+)?\]/g,
         (_match, dice, type, type2) => `<b>${dice}${type ? " " + type : ""}${type2 ? " " + type2 : ""}</b>`
     );
 
     output = output.replace(
-        /@Check\[(fortitude|reflex|will)\|dc:(\d+)[^\]]*\]/gi,
+        /@Check\[(\w+)\|dc:(\d+)[^\]]*\]/gi,
         (_match, save, dc) => `<b>DC ${dc} ${capitalize(save)}</b>`
     );
 
     output = output.replace(
-        /@Template\[(emanation|cone|burst|aura|line)\|distance:(\d+)\]/gi,
+        /@Template\[(?:type\:)?(emanation|cone|burst|aura|line)\|distance:(\d+)\]/gi,
         (_match, shape, distance) => `<b>${distance}ft ${shape}</b>`
     );
 
@@ -363,8 +363,32 @@ export function parseAbilityDescription(input: string): string {
     );
 
     output = output.replace(
+        /\[\[\/(?:b|s|p|)r ([\w\+\-]+) #[\w ]+\]\](?:{([\w ]+)})?/g,
+        (_match, match1, match2) =>
+        {
+            if (match2 === undefined)
+                return (`<b>${match1}</b>`)
+
+            return (`<b>${match2}</b>`)
+        }   
+    );
+    
+    output = output.replace(
+        /\[\[\/act (\w+) dc=(\d+)\]\]/g,
+        (_match, text, dc) =>
+        {
+            return `${capitalize(text)} DC ${dc}`
+        }
+    )
+    
+    output = output.replace(
         /@Localize\[PF2E\.NPC\.Abilities\.Glossary\..+]/g,
         (_match) => ""
+    );
+
+    output = output.replace(
+        /@UUID\[.+\.Actor\.(\w+)\]/g,
+        (_match, content) => `<b>${content}</b>`
     );
 
     return output;

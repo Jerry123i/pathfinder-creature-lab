@@ -16,4 +16,8 @@
     .pathfinder-action{
         @apply font-[Pathfinder2eActions] text-[1.75rem] pr-1;
     }
+    
+    .input-field{
+        @apply bg-gray-50 p-1 placeholder:text-gray-300 rounded-md;
+    }
 }

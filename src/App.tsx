@@ -5,6 +5,7 @@ import {applyAllAdjustments} from "./components/Modifiers.tsx";
 import type {CreatureAdjustment} from "./components/Modifiers.tsx";
 import statBlock from "./components/StatBlock.tsx";
 import {useState} from "react";
+import {DropDown, SideBar} from "./Sidebar.tsx";
 
 
 // eslint-disable-next-line react-refresh/only-export-components
@@ -32,8 +33,8 @@ function App(){
     return (
         <div className="flex bg-gray-50">
             {/* Sidebar */}
-            <div className=" bg-amber-100 border-amber-200 border-r-4 p-3">
-                {DropDown(monsters, setCreature)}
+            <div className="flex bg-amber-100 border-amber-200 border-r-4 p-3">
+                {SideBar(monsters)}
             </div>
 
             {/* Main Content */}
@@ -43,14 +44,6 @@ function App(){
             </div>
         </div>
     );
-}
-
-function DropDown(list: StatBlockProp[], onValueChange: (i: number) => void) {
-    return (<select className="bg-amber-50 p-1 pb-2 justify-center rounded-md" onChange={(e) => onValueChange(Number(e.target.value))}>
-        {list.map((item: StatBlockProp, index) =>
-            (<option value={index} key={item._id}>{item.name}</option>))
-        })
-    </select>)
 }
 
 function CreatureAdjustmentButtons(selectedAdjustments :number[], selectedArraySetter : ((i : number[]) => void))
@@ -92,7 +85,6 @@ function CreatureAdjustmentButtons(selectedAdjustments :number[], selectedArrayS
     let workingGroup = [];
     const finalValue  = [];
 
-    const pressedButton = " bg-green-100 text-green-950 outline-green-100 outline-1"
     for (let i = 0; i < CreatureAdjustmentList.length; i++)
     {
         const item = CreatureAdjustmentList[i];

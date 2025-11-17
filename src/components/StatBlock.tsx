@@ -68,6 +68,10 @@ export function GetGenericAbilities(value: StatBlockProp): CreatureItem[] {
             && item.type != "spellcastingEntry"
             && item.type != "lore"
             && item.type != "equipment"
+            && item.type != "ammo"
+            && item.system.slug != "push"
+            && item.system.slug != "grab"
+            && item.system.slug != "knockdown"
             && item.system.slug != "telepathy"
             && item.system.slug != "constant-spells"
             && item.system.slug != "1-status-to-all-saves-vs-magic"
@@ -374,10 +378,16 @@ export function parseAbilityDescription(input: string): string {
     );
     
     output = output.replace(
-        /\[\[\/act (\w+) dc=(\d+)\]\]/g,
-        (_match, text, dc) =>
+        /\[\[\/act (\w+)(?: dc=(\d+))?\]\](?:{([\w ]+)})?/g,
+        (_match, text, dc, text2) =>
         {
-            return `${capitalize(text)} DC ${dc}`
+            if (dc !== undefined)
+                return `${capitalize(text)} DC ${dc}`
+            
+            if (text2 !== undefined)
+                return `${capitalize(text2)}`
+            
+            return `${capitalize(text)}`
         }
     )
     

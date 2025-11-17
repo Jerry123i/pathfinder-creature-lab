@@ -33,14 +33,14 @@ function App(){
     return (
         <div className="flex bg-gray-50">
             {/* Sidebar */}
-            <div className="flex bg-amber-100 border-amber-200 border-r-4 p-3">
+            <div className="flex flex-1 bg-amber-100 border-amber-200 border-r-4 p-3">
                 {SideBar(monsters)}
             </div>
 
             {/* Main Content */}
-            <div className="p-3">
-                {CreatureAdjustmentButtons(selectedAdjustmentIndexes, setSelectedAdjustments)}
-                {statBlock(adjustedCreature)}
+            <div className="flex flex-4 flex-col p-3">
+                <div>{CreatureAdjustmentButtons(selectedAdjustmentIndexes, setSelectedAdjustments)}</div>                
+                <div>{statBlock(adjustedCreature)}</div>
             </div>
         </div>
     );

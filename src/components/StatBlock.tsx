@@ -70,8 +70,11 @@ export function GetGenericAbilities(value: StatBlockProp): CreatureItem[] {
             && item.type != "equipment"
             && item.type != "ammo"
             && item.system.slug != "push"
+            && item.system.slug != "improved-push"
             && item.system.slug != "grab"
+            && item.system.slug != "improved-grab"
             && item.system.slug != "knockdown"
+            && item.system.slug != "improved-knockdown"
             && item.system.slug != "telepathy"
             && item.system.slug != "constant-spells"
             && item.system.slug != "1-status-to-all-saves-vs-magic"
@@ -247,7 +250,6 @@ function statBlock(value: StatBlockProp) {
     return (<>
         <h1 className="space-x-6 font-semibold">
             <span>{value.name}</span>
-            <span>-</span>
             <span>{value.system.details.level.value}</span>
         </h1>
         {printTraitsTransformElement(value.system.traits, (s, i) => {

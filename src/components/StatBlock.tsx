@@ -205,7 +205,7 @@ export function DiceString(value: DiceAndModifier): string {
 }
 
 export interface Details {
-    level: ValueHolder;
+    level: {value: number};
     publicNotes: string;
     languages: {details : string, value : string[]}
 }

@@ -16,9 +16,9 @@ export function loadMonsters()
     return monsters;
 }
 
-function App(){
+function App()
+{
 
-    // const [creatureSelectIndex, setCreature] = useState(0);
     const [currentBaseCreature, setCreature] = useState<StatBlockProp>();
     const [selectedAdjustmentIndexes, setSelectedAdjustments] = useState<number[]>([]);
 

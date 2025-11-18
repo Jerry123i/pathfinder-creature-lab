@@ -24,27 +24,29 @@ export function SideBar(allCreatures: StatBlockProp[], onSelectCreature: (creatu
     
     return(
     <div className="grow sticky top-3 flex-col flex max-h-[97vh] bg-pink-500 space-y-2 p-2">
-        <div className="  bg-[#00ffff] flex-1 space-y-1 space-x-2">
-            <div>Name</div>
-            <input className="grow input-field" placeholder="Name" onChange={(e)=>{setFilters({...filters, nameFilter:e.target.value})}}></input>
-        </div>
-        <div className="flex bg-[#00ff00] flex-1 space-x-2">
-            <div className="grow">
-                <div className="text-xs">Min lvl.</div>
-                <input className="grow input-field" placeholder="-1" onChange={e => {setFilters({...filters,min:Number.parseInt(e.target.value)})}}></input>
-            </div>
-            <div className="grow">
-                <div className="text-xs">Min lvl.</div>
-                <input className="grow input-field" placeholder="25" onChange={e => {setFilters({...filters,max:Number.parseInt(e.target.value)})}}></input>
+        <div className="bg-[#00ffff]">
+            <div className="flex">
+                <div>Name</div>
+                <input className="grow input-field" placeholder="Name" onChange={(e)=>{setFilters({...filters, nameFilter:e.target.value})}}></input>
             </div>
         </div>
-        <div className="bg-[#6666ff] flex-1">
+        <div className="flex bg-[#00ff00] gap-2">
+            <div className="flex">
+                <div className="text-xs">Min lvl.</div>
+                <input className="input-field" placeholder="-1" onChange={e => {setFilters({...filters,min:Number.parseInt(e.target.value)})}}></input>
+            </div>
+            <div className="flex">
+                <div className="text-xs">Max lvl.</div>
+                <input className="input-field" placeholder="25" onChange={e => {setFilters({...filters,max:Number.parseInt(e.target.value)})}}></input>
+            </div>
+        </div>
+        <div className="bg-[#6666ff] flex">
             {TraitsArea(filters, setFilters)}
         </div>
-        <div className="bg-[#229933] flex flex-1 space-x-2 justify-around">
+        <div className="bg-[#229933] flex gap-2 justify-around">
             {SortArea(filters, setFilters)}
         </div>
-        <div className="bg-[#00ffff] flex-8 overflow-y-scroll">{CreaturesArea(FilterAndSortCreatures(allCreatures, filters), onSelectCreature)}</div>
+        <div className="bg-[#00ffff] flex-[8] overflow-y-scroll">{CreaturesArea(FilterAndSortCreatures(allCreatures, filters), onSelectCreature)}</div>
     </div>);
 }
 

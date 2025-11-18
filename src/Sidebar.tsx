@@ -10,7 +10,7 @@ export function DropDown(list: StatBlockProp[], onValueChange: (i: number) => vo
 }
 
 
-export function SideBar(allCreatures: StatBlockProp[])
+export function SideBar(allCreatures: StatBlockProp[], onSelectCreature: (creature: StatBlockProp) => void)
 {
     return(
     <div className="grow sticky top-3 flex-col flex max-h-[97vh] bg-pink-500 space-y-2 p-2">
@@ -29,12 +29,14 @@ export function SideBar(allCreatures: StatBlockProp[])
             </div>
         </div>
         <div className="bg-[#6666ff] flex-1">{TraitsArea()}</div>
-        <div className="bg-[#229933] flex flex-1 space-x-2">
-            <span>Sort:</span>
-            <span className="bg-gray-300 rounded-md p-1">Level</span>
-            <span className="bg-gray-300 rounded-md p-1">Name</span>
+        <div className="bg-[#229933] flex flex-1 space-x-2 justify-around">
+            <div className="p-4 flex space-x-2 w-4/5">
+                <div>Sort:</div>
+                <div className="bg-gray-300 rounded-3xl p-1 w-1/3 text-center select-none">Level</div>
+                <div className="bg-gray-300 rounded-3xl p-1 w-1/3 text-center select-none">Name</div>
+            </div>
         </div>
-        <div className="bg-[#00ffff] flex-8 overflow-y-scroll">{CreaturesArea(allCreatures)}</div>
+        <div className="bg-[#00ffff] flex-8 overflow-y-scroll">{CreaturesArea(allCreatures, onSelectCreature)}</div>
     </div>);
 }
 
@@ -53,11 +55,12 @@ function TraitsArea(){
     </div>);
 } 
 
-function CreaturesArea(creatures : StatBlockProp[])
+function CreaturesArea(creatures : StatBlockProp[], onSelectCreature : (creature: StatBlockProp) => void)
 {
     return(<div className="">
             {creatures.map(value => {
-                return(<div className="border-1 border-gray-400 p-2 rounded-2xl bg-gray-200 m-2 select-none hover:bg-gray-600 hover:text-white ">
+                return(<div className="border-1 border-gray-400 p-2 rounded-2xl bg-gray-200 m-2 select-none hover:bg-gray-600 hover:text-white " key={value._id}
+                            onClick={()=> { onSelectCreature(value) }}>
                     <p>{value.name}     {value.system.details.level.value}</p>
                 </div>)
             })}            

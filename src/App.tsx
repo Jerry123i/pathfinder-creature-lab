@@ -5,23 +5,24 @@ import {applyAllAdjustments} from "./components/Modifiers.tsx";
 import type {CreatureAdjustment} from "./components/Modifiers.tsx";
 import statBlock from "./components/StatBlock.tsx";
 import {useState} from "react";
-import {DropDown, SideBar} from "./Sidebar.tsx";
+import {SideBar} from "./Sidebar.tsx";
 
 
 // eslint-disable-next-line react-refresh/only-export-components
-export function loadMonsters(){
+export function loadMonsters()
+{
     const modules = import.meta.glob("./assets/monsters/*.json", {eager:true});
-    return Object.values(modules) as StatBlockProp[];
+    const monsters = Object.values(modules) as StatBlockProp[];
+    return monsters;
 }
 
 function App(){
 
-    const [creatureSelectIndex, setCreature] = useState(0);
+    // const [creatureSelectIndex, setCreature] = useState(0);
+    const [currentBaseCreature, setCreature] = useState<StatBlockProp>();
     const [selectedAdjustmentIndexes, setSelectedAdjustments] = useState<number[]>([]);
 
     const monsters = loadMonsters();
-
-    const currentBaseCreature = monsters[creatureSelectIndex];
 
     const selectedAdjustments : CreatureAdjustment[] = [];
     for (let i = 0; i < selectedAdjustmentIndexes.length; i++) {
@@ -34,7 +35,7 @@ function App(){
         <div className="flex bg-gray-50">
             {/* Sidebar */}
             <div className="flex flex-1 bg-amber-100 border-amber-200 border-r-4 p-3">
-                {SideBar(monsters)}
+                {SideBar(monsters, setCreature)}
             </div>
 
             {/* Main Content */}

@@ -245,8 +245,11 @@ function GetActionIcon(value: CreatureItem)
     }
 }
 
-function statBlock(value: StatBlockProp) {
+function statBlock(value: StatBlockProp | undefined) {
 
+    if(value === undefined)
+        return (<p className="italic text-gray-400">Select a creature</p>)
+    
     return (<>
         <h1 className="space-x-6 font-semibold">
             <span>{value.name}</span>

@@ -328,8 +328,11 @@ export const Vampire : CreatureAdjustment = {
     }
 }
 
-export function applyAllAdjustments(baseCreature : StatBlockProp, adjustments : CreatureAdjustment[]) : StatBlockProp
+export function applyAllAdjustments(baseCreature : StatBlockProp | undefined, adjustments : CreatureAdjustment[]) : StatBlockProp | undefined
 {
+    if(baseCreature === undefined)
+        return undefined;
+    
     if (adjustments.length === 0)
         return  baseCreature;
     

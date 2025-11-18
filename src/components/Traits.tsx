@@ -47,6 +47,9 @@ export function traitsCleanup(value: string[]) {
         
         if(value[i] === "sm")
             value[i] = "small";
+        
+        if (value[i]=== "grg")
+            value[i] = "gargantuan";
 
         value[i] = capitalize(value[i]);
     }

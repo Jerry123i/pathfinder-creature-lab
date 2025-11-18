@@ -343,32 +343,32 @@ export function parseAbilityDescription(input: string): string {
 
     output = output.replace(
         /@UUID\[[^\]]*\.Item\.[^\]]*]\{([^}]*)\}/g,
-        (_match, label) => `<b>${label}</b>`
+        (_match, label) => `<nobr><b>${label}</b></nobr>`
     );
 
     output = output.replace(
         /@UUID\[[^\]]*\.Item\.([^\]]*)\]/g,
-        (_match, name) => `<b>${name}</b>`
+        (_match, name) => `<nobr><b>${name}</b></nobr>`
     );
 
     output = output.replace(
         /@Damage\[\(?((?:\d+|(?:\d+d\d+(?:\+\d+)?)))\)?\[(\w+)(?:,(\w+))?\](?:\|\w+\:[\w+\-]+)?\]/g,
-        (_match, dice, type, type2) => `<b>${dice}${type ? " " + type : ""}${type2 ? " " + type2 : ""}</b>`
+        (_match, dice, type, type2) => `<nobr><b>${dice}${type ? " " + type : ""}${type2 ? " " + type2 : ""}</b></nobr>`
     );
 
     output = output.replace(
         /@Check\[(\w+)\|dc:(\d+)[^\]]*\]/gi,
-        (_match, save, dc) => `<b>DC ${dc} ${capitalize(save)}</b>`
+        (_match, save, dc) => `<nobr><b>DC ${dc} ${capitalize(save)}</b></nobr>`
     );
 
     output = output.replace(
         /@Template\[(?:type\:)?(emanation|cone|burst|aura|line)\|distance:(\d+)\]/gi,
-        (_match, shape, distance) => `<b>${distance}ft ${shape}</b>`
+        (_match, shape, distance) => `<nobr><b>${distance}ft ${shape}</b></nobr>`
     );
 
     output = output.replace(
         /\[\[\/gmr [^\]]*]]\{([^}]*)\}/g,
-        (_match, content) => `<b>${content}</b>`
+        (_match, content) => `<nobr><b>${content}</b>`
     );
 
     output = output.replace(
@@ -376,9 +376,9 @@ export function parseAbilityDescription(input: string): string {
         (_match, match1, match2) =>
         {
             if (match2 === undefined)
-                return (`<b>${match1}</b>`)
+                return (`<nobr><b>${match1}</b></nobr>`)
 
-            return (`<b>${match2}</b>`)
+            return (`<nobr><b>${match2}</b></nobr>`)
         }   
     );
     

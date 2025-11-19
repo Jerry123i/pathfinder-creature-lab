@@ -69,6 +69,7 @@ export function GetGenericAbilities(value: StatBlockProp): CreatureItem[] {
             && item.type != "lore"
             && item.type != "equipment"
             && item.type != "ammo"
+            && item.type != "condition"
             && item.system.slug != "push"
             && item.system.slug != "improved-push"
             && item.system.slug != "grab"
@@ -352,7 +353,7 @@ export function parseAbilityDescription(input: string): string {
     );
 
     output = output.replace(
-        /@Damage\[\(?((?:\d+|(?:\d+d\d+(?:\+\d+)?)))\)?\[(\w+)(?:,(\w+))?\](?:\|\w+\:[\w+\-]+)?\]/g,
+        /@Damage\[\(?((?:\d+(?:(?:\+|-?)\d+)?|(?:\d+d\d+(?:(?:\+|\-?)\d+)?)))\)?\[(\w+)(?:,(\w+))?\](?:\|\w+\:[\w+\-]+)?\]/g,
         (_match, dice, type, type2) => `<nobr><b>${dice}${type ? " " + type : ""}${type2 ? " " + type2 : ""}</b></nobr>`
     );
 

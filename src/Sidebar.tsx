@@ -1,5 +1,6 @@
 ﻿import {cloneStatBlock, type StatBlockProp} from "./components/StatBlock.tsx";
 import {useState} from "react";
+import {capitalize} from "./components/TypeScriptHelpFunctions.tsx";
 
 
 export function DropDown(list: StatBlockProp[], onValueChange: (i: number) => void) {
@@ -177,6 +178,7 @@ function CreaturesArea(creatures : StatBlockProp[], onSelectCreature : (creature
                 return(<div className="border-1 border-gray-400 p-2 rounded-2xl bg-gray-200 m-2 select-none hover:bg-gray-600 hover:text-white " key={value._id}
                             onClick={()=> { onSelectCreature(value) }}>
                     <p>{value.name}     {value.system.details.level.value}</p>
+                    {value.system.traits.value.map((value, i) =>{return(<span className="text-gray-500 text-xs">{capitalize(value)} | </span>);} )}
                 </div>)
             })}            
         </div>

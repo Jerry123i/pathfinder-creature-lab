@@ -24,14 +24,14 @@ export function SideBar(allCreatures: StatBlockProp[], onSelectCreature: (creatu
     const [filters, setFilters] = useState<FilterValues>({min: -1, max: 30, sort: "LevelUp", nameFilter: "", traitsArray: []});
     
     return(
-    <div className="grow sticky top-3 flex-col flex max-h-[97vh] bg-pink-500 space-y-2 p-2">
-        <div className="bg-[#00ffff]">
+    <div className="grow sticky top-3 flex-col flex max-h-[97vh] bg-amber-200 rounded-xl space-y-2 p-2">
+        <div className="">
             <div className="flex">
                 <div>Name</div>
                 <input className="grow input-field" placeholder="Name" onChange={(e)=>{setFilters({...filters, nameFilter:e.target.value})}}></input>
             </div>
         </div>
-        <div className="flex bg-[#00ff00] gap-2">
+        <div className="flex  gap-2">
             <div className="flex">
                 <div className="text-xs">Min lvl.</div>
                 <input className="input-field" placeholder="-1" onChange={e => {setFilters({...filters,min:Number.parseInt(e.target.value)})}}></input>
@@ -41,20 +41,20 @@ export function SideBar(allCreatures: StatBlockProp[], onSelectCreature: (creatu
                 <input className="input-field" placeholder="25" onChange={e => {setFilters({...filters,max:Number.parseInt(e.target.value)})}}></input>
             </div>
         </div>
-        <div className="bg-[#6666ff] flex">
+        <div className=" flex">
             {TraitsArea(filters, setFilters)}
         </div>
-        <div className="bg-[#229933] flex gap-2 justify-around">
+        <div className=" flex gap-2 justify-around">
             {SortArea(filters, setFilters)}
         </div>
-        <div className="bg-[#00ffff] flex-[8] overflow-y-scroll">{CreaturesArea(FilterAndSortCreatures(allCreatures, filters), onSelectCreature)}</div>
+        <div className=" flex-[8] overflow-y-scroll border-1 border-gray-300">{CreaturesArea(FilterAndSortCreatures(allCreatures, filters), onSelectCreature)}</div>
     </div>);
 }
 
 function SortArea(filter : FilterValues, filterSetter : (value : FilterValues) => void)
 {
     return(
-        <div className="p-4 flex space-x-2 w-4/5">
+        <div className="p-2 flex space-x-2 w-full">
             <div>Sort:</div>
             <div className="bg-gray-300 rounded-3xl p-1 w-1/3 text-center select-none"
              onClick={()=>

@@ -26,20 +26,15 @@ export function SideBar(allCreatures: StatBlockProp[], onSelectCreature: (creatu
     return(
     <div className="grow sticky top-3 flex-col flex max-h-[97vh] bg-amber-200 rounded-xl space-y-2 p-2">
         <div className="">
-            <div className="flex">
+            <div className="flex gap-4">
                 <div>Name</div>
-                <input className="grow input-field" placeholder="Name" onChange={(e)=>{setFilters({...filters, nameFilter:e.target.value})}}></input>
+                <input className="grow input-field" placeholder="Name" onChange={(e) => {
+                    setFilters({...filters, nameFilter: e.target.value})
+                }}></input>
             </div>
         </div>
-        <div className="flex  gap-2">
-            <div className="flex">
-                <div className="text-xs">Min lvl.</div>
-                <input className="input-field" placeholder="-1" onChange={e => {setFilters({...filters,min:Number.parseInt(e.target.value)})}}></input>
-            </div>
-            <div className="flex">
-                <div className="text-xs">Max lvl.</div>
-                <input className="input-field" placeholder="25" onChange={e => {setFilters({...filters,max:Number.parseInt(e.target.value)})}}></input>
-            </div>
+        <div className="flex  gap-4">
+            {LevelMinMaxArea(setFilters, filters)}
         </div>
         <div className=" flex">
             {TraitsArea(filters, setFilters)}
@@ -47,7 +42,8 @@ export function SideBar(allCreatures: StatBlockProp[], onSelectCreature: (creatu
         <div className=" flex gap-2 justify-around">
             {SortArea(filters, setFilters)}
         </div>
-        <div className=" flex-[8] overflow-y-scroll border-1 border-gray-300">{CreaturesArea(FilterAndSortCreatures(allCreatures, filters), onSelectCreature)}</div>
+        <div
+            className=" flex-[8] overflow-y-scroll border-1 border-gray-300">{CreaturesArea(FilterAndSortCreatures(allCreatures, filters), onSelectCreature)}</div>
     </div>);
 }
 
@@ -101,10 +97,36 @@ function SortArea(filter : FilterValues, filterSetter : (value : FilterValues) =
     )
 }
 
+function LevelMinMaxArea(setFilters: (value: (((prevState: FilterValues) => FilterValues) | FilterValues)) => void, filters: FilterValues) {
+    return <>
+        <div className="flex gap-4">
+            <div className="text-xs">Min lvl.</div>
+            <input className="input-field" placeholder="-1" onChange={e =>
+            {
+                let val = -1;
+                if (e.target.value !== "")
+                    val = Number.parseInt(e.target.value);
+                setFilters({...filters, min: val})
+            }}></input>
+        </div>
+        <div className="flex gap-4">
+            <div className="text-xs">Max lvl.</div>
+            <input className="input-field" placeholder="25" onChange={e =>
+            {
+                let val = 25;
+                if (e.target.value !== "")
+                    val = Number.parseInt(e.target.value);
+                setFilters({...filters, max: Number.parseInt(val)})
+            }}></input>
+        </div>
+    </>;
+}
+
 const TraitsPlaceholder = ["Fire", "Dragon", "Water", "Earth", "Air", "Undead", "Shadow", "Human", "Goblin",  "Aiuvarin"]
 
 function TraitsArea(filter : FilterValues,filterSetter : (f : FilterValues) => void){
-    return(<div className="">
+    return(<div className="gap-2">
+        <p>Traits:</p>
         {TraitsPlaceholder.map(value => {
             return (<span className="mx-1 whitespace-nowrap ">
                     <label>

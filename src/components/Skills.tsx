@@ -133,11 +133,11 @@ export function printSkills(creature:StatBlockProp,list: SkillList) {
                 let skillName = skillInterfaceKey;
                 skillName = skillName[0].toUpperCase() + skillName.slice(1);
                 return (
-                    <Fragment key={skillInterfaceKey}>{skillName} {skill.base >= 0 ? "+" : ""}{skill.base}{skill.special !== undefined && GetSpecialSkills(skill)};</Fragment>
+                    <Fragment key={skillInterfaceKey}>{skillName} {skill.base >= 0 ? "+" : ""}{skill.base}{skill.special !== undefined && GetSpecialSkills(skill)}; </Fragment>
                 );
             })}
             {lores.length > 0 && lores.map((loreInterfaceKey) => {
-                return <Fragment key={loreInterfaceKey.name}>{loreInterfaceKey.name} {loreInterfaceKey.system.mod?.value >= 0 ? "+" : ""}{loreInterfaceKey.system.mod.value}</Fragment>
+                return <Fragment key={loreInterfaceKey.name}>{loreInterfaceKey.name} {loreInterfaceKey.system.mod?.value >= 0 ? "+" : ""}{loreInterfaceKey.system.mod.value}; </Fragment>
             })}
         </>
     );

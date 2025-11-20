@@ -353,8 +353,56 @@ export function parseAbilityDescription(input: string): string {
     );
 
     output = output.replace(
-        /@Damage\[\(?((?:\d+(?:(?:\+|-?)\d+)?|(?:\d+d\d+(?:(?:\+|\-?)\d+)?)))\)?\[(\w+)(?:,(\w+))?\](?:\|\w+\:[\w+\-]+)?\]/g,
-        (_match, dice, type, type2) => `<nobr><b>${dice}${type ? " " + type : ""}${type2 ? " " + type2 : ""}</b></nobr>`
+        /@UUID\[[^\]]*\.Actor\.([^\]]*)\]/g,
+        (_match, name) => `<nobr><b>${name}</b></nobr>`
+    );
+
+    // output = output.replace(
+    //     /@Damage\[\(?((?:\d+(?:(?:\+|-?)\d+)?|(?:\d+d\d+(?:(?:\+|\-?)\d+)?)))\)?\[(\w+)(?:,(\w+))?\](?:\|\w+\:[\w+\-]+)?\]/g,
+    //     (_match, dice, type, type2) => `<nobr><b>${dice}${type ? " " + type : ""}${type2 ? " " + type2 : ""}</b></nobr>`
+    // );
+
+    output = output.replace(
+        /@Damage\[((?:,?\(?(?:\d+(?:(?:\+|-?)\d+)?|\d+d\d+(?:(?:\+|-?)\d+)?|\d+\[\w+\])\)?\[(?:,?\w+)+\])+)(?:\|\w+:[\w+-]+)?\](?:\{[\w +-]+\})?/g,
+        (_match, damageInfoMatch) =>
+        {
+            const split = damageInfoMatch.toString().split(/(?<=\]),/);
+            const rolls:{dice:string, dmgType1:string, dmgType2:string}[] = [];
+
+            for (const s of split)
+            {
+                const results = s.match(/^,?\(?(\d+(?:(?:\+|-?)\d+)?|\d+d\d+(?:(?:\+|-?)\d+)?|\d+\[\w+\])\)?\[(?:,?(\w+))?(?:,?(\w+))?\]$/);
+                rolls.push({dice:results[1], dmgType1:results[2], dmgType2:results[3]});
+                //rolls.push(`${results[1]} ${results[2]} ${results[3]===undefined?"":results[3]}`);
+            }
+
+            let fullString = "";
+
+            for (let i = 0; i < rolls.length; i++)
+            {
+                const roll = rolls[i];
+                
+                if (roll.dmgType1 === "healing"){
+                    fullString += `${roll.dice} Healing`;
+                }
+                else{
+                    fullString += `${roll.dice} ${roll.dmgType1}${roll.dmgType2===undefined?"":` and ${roll.dmgType2}"`}`;
+                }
+                
+                if (rolls.length > 1)
+                {
+                    if(i === rolls.length - 2)
+                        fullString += " plus";
+                    else if (i !== rolls.length - 1)
+                        fullString += ",";
+                }
+                
+                fullString += " ";
+            }
+            
+            return `<b>${fullString}</b>`;
+            
+        }
     );
 
     output = output.replace(
@@ -363,8 +411,11 @@ export function parseAbilityDescription(input: string): string {
     );
 
     output = output.replace(
-        /@Template\[(?:type\:)?(emanation|cone|burst|aura|line)\|distance:(\d+)\]/gi,
-        (_match, shape, distance) => `<nobr><b>${distance}ft ${shape}</b></nobr>`
+        /@Template\[(?:type:)?(emanation|cone|burst|aura|line)\|distance:(\d+)\](?:\{([\w+\- ]+)\})?/gi,
+        (_match, shape, distance, match3) =>
+        {
+            return `<nobr><b>${distance}ft ${shape}</b></nobr>`  
+        } 
     );
 
     output = output.replace(
@@ -373,7 +424,7 @@ export function parseAbilityDescription(input: string): string {
     );
 
     output = output.replace(
-        /\[\[\/(?:b|s|p|)r ([\w\+\-]+) #[\w ]+\]\](?:{([\w ]+)})?/g,
+        /\[\[\/(?:b|s|p|)r \{?([\w+-]+)\}?(?: #[\w ]+)?\]\](?:\{([\w +-]+)\})?/g, //TODO Modify this if tracks a d20
         (_match, match1, match2) =>
         {
             if (match2 === undefined)

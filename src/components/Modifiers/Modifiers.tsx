@@ -1,11 +1,11 @@
-﻿import {type StatBlockProp} from "./StatBlock.tsx";
-import {modifyAllSaves} from "./StatBlock.tsx";
-import {cloneStatBlock} from "./StatBlock.tsx";
-import {modifyAllStrikes} from "./Strikes.tsx";
-import {modifyAllSkills} from "./Skills.tsx";
-import {ModifyAbilitiesAndRelatedStats} from "./Abilities.tsx";
-import {ModifySpellDc} from "./Spells.tsx";
-import {AddTrait, RemoveTrait, ReplaceTrait} from "./Traits.tsx";
+﻿import {type StatBlockProp} from "../StatBlock.tsx";
+import {modifyAllSaves} from "../StatBlock.tsx";
+import {cloneStatBlock} from "../StatBlock.tsx";
+import {modifyAllStrikes} from "../Strikes.tsx";
+import {modifyAllSkills} from "../Skills.tsx";
+import {type Abilities, ModifyAbilitiesAndRelatedStats} from "../Abilities.tsx";
+import {ModifySpellDc} from "../Spells.tsx";
+import {AddTrait, RemoveTrait, ReplaceTrait} from "../Traits.tsx";
 
 type ModifierType = "Level" | "Ancestry" | "Elemental" | "Undead" | "CreatureType";
 
@@ -17,6 +17,17 @@ export interface CreatureAdjustment {
     type : ModifierType;
 
     apply: (statblock: StatBlockProp) => StatBlockProp;
+}
+
+export interface TraitChanges {
+    add?: string[];
+    remove?: string[];
+    replace?: { from: string; to: string }[];
+}
+
+export interface CustomAncestryCreatureAdjustment extends CreatureAdjustment {
+    abilityModifiers: Abilities;
+    traitChanges?: TraitChanges;
 }
 
 export const Elite : CreatureAdjustment = {
@@ -84,8 +95,6 @@ export const Weak : CreatureAdjustment = {
         else 
             hpDecreaseValue = 30;
 
-        console.log("val " + hpDecreaseValue);
-        
         sb.system.attributes.hp.value -= hpDecreaseValue;
         modifyAllStrikes(sb, -2, -2);
         ModifySpellDc(sb, -2);

@@ -3,7 +3,6 @@ import {printSkills, type SkillList} from "./Skills.tsx";
 import type {Abilities} from "./Abilities.tsx";
 import {type CreatureItemSpell, GetSpells, HasSpells, PrintAllSpells} from "./Spells.tsx";
 import {capitalize} from "./TypeScriptHelpFunctions.tsx";
-import {Fragment} from "react";
 import {GetTraitColor, printTraitsSeparator, printTraitsTransformElement, type Traits} from "./Traits.tsx";
 
 export interface StatBlockProp {
@@ -136,7 +135,20 @@ export interface ItemSystem {
     traits: Traits,
     slug: string,
     actions: ValueHolder | null,
-    actionType : StringHolder
+    actionType : StringHolder,
+    rules : Rule[]
+}
+
+export interface Rule {
+    attackModifier: number;
+    key: string
+    damage?: Damage
+    damageType?: string
+    value?: any
+}
+
+export interface Damage {
+    base: {damageType: string, dice: number, die: string}
 }
 
 export interface LoreItemSystem extends ItemSystem {

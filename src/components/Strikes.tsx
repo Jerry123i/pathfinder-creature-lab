@@ -1,15 +1,18 @@
 ﻿import {
+    type CreatureItem,
     type DamageRollInfo,
     DiceString,
+    GetAbilityNameFromSlug,
     GetDice,
     type ItemSystem,
+    printNumberWithSignalElement,
     type StatBlockProp,
     type StringHolder,
-    type ValueHolder,
-    printNumberWithSignalElement, type CreatureItem, GetAbilityNameFromSlug
+    type ValueHolder
 } from "./StatBlock.tsx";
 import {printTraitsSeparator} from "./Traits.tsx";
 import {capitalize} from "./TypeScriptHelpFunctions.tsx";
+import type {AbilityName} from "./Abilities.tsx";
 
 export interface CreatureItemStrike extends CreatureItem {
     system: StrikeSystem
@@ -24,67 +27,70 @@ export interface StrikeSystem extends ItemSystem {
 }
 
 
+function modifyStrike(strike: CreatureItem, hitValue: number, damageValue: number) 
+{
+    if (strike.type.toLowerCase() === "equipment") {
+
+        for (const rule of strike.system.rules) {
+            if (rule.key.toLowerCase() === "strike") {
+                if (rule.attackModifier !== undefined)
+                    rule.attackModifier += hitValue;
+
+                strike.system.rules.push(
+                    {
+                        damageType: rule.damage.base.damageType,
+                        key: "FlatModifier",
+                        predicate: rule.predicate,
+                        selector: "{item|_id}-damage",
+                        value: damageValue
+                    }
+                );
+
+                break
+            }
+        }
+        return;
+    }
+
+
+    const strikeAtk = strike as CreatureItemStrike;
+
+    strikeAtk.system.bonus.value += hitValue;
+    const rawDamage = GetDamagesInfo(strikeAtk.system);
+
+    for (let j = 0, lenj = rawDamage.length; j < lenj; ++j) {
+        if (j > 0)
+            break;
+        const damage = GetDice(rawDamage[j]);
+        damage.modifier += damageValue;
+
+        rawDamage[j].damage = DiceString(damage);
+    }
+}
 
 export function modifyAllStrikes(creature: StatBlockProp, hitValue: number, damageValue: number) {
 
     const strikes = GetStrikes(creature);
     
-    let strike;
-    
-    for (let i = 0, len = strikes.length; i < len; ++i)
-    {
-        if (strikes[i].type.toLowerCase() === "equipment")
-        {
-            strike = strikes[i];
+    for (let i = 0, len = strikes.baseStrikes.length; i < len; ++i)
+        modifyStrike(strikes.baseStrikes[i], hitValue, damageValue);
 
-
-            for (const rule of strike.system.rules)
-            {
-                if (rule.key.toLowerCase() === "strike")
-                {
-                    if (rule.attackModifier!==undefined)
-                        rule.attackModifier += hitValue;
-                    
-                    strike.system.rules.push(
-                        {
-                            damageType: rule.damage.base.damageType,
-                            key: "FlatModifier",
-                            predicate: rule.predicate,
-                            selector: "{item|_id}-damage",
-                            value: damageValue
-                        }
-                    );
-                    
-                    break
-                }
-            }
-            continue;
-        }
-            
-        
-        strike = strikes[i] as CreatureItemStrike;
-        
-        strike.system.bonus.value += hitValue;
-        const rawDamage = GetDamagesInfo(strike.system);
-
-        for (let j = 0, lenj = rawDamage.length; j < lenj; ++j) {
-            if (j > 0)
-                break;
-            const damage = GetDice(rawDamage[j]);
-            damage.modifier += damageValue;
-
-            rawDamage[j].damage = DiceString(damage);
-        }
-    }
+    for (let i = 0, len = strikes.equipmentStrikes.length; i < len; ++i)
+        modifyStrike(strikes.equipmentStrikes[i], hitValue, damageValue);
 }
 
-export function GetStrikes(value: StatBlockProp): CreatureItem[] {
+export function GetStrikes(value: StatBlockProp): {baseStrikes : CreatureItemStrike[], equipmentStrikes: CreatureItem[]}
+{
 
-    const meleeTag = value.items.filter(item => item.type === "melee");
+    const meleeTag = value.items.filter(item => item.type === "melee") as CreatureItemStrike[];
     const equipment = GetStrikesFromEquipment(value);
     
-    return [...meleeTag, ...equipment];
+    return {baseStrikes: meleeTag, equipmentStrikes: equipment};
     
+}
+
+export function GetCombinedStrikes(value: {baseStrikes : CreatureItemStrike[], equipmentStrikes: CreatureItem[]}) : CreatureItem[]{
+    return [...value.baseStrikes, ...value.equipmentStrikes];
 }
 
 export function GetStrikesFromEquipment(value: StatBlockProp) : CreatureItem[]
@@ -170,7 +176,7 @@ export function PrintStrike_StrikeType(creature: StatBlockProp,item: CreatureIte
     }
     
     return (<>
-        <b>{capitalize(item.system.weaponType.value)}</b> <span className="pathfinder-action">A</span>{item.name} {printNumberWithSignalElement(item.system.bonus.value)}[{printNumberWithSignalElement(item.system.bonus.value - atkPenalty)}/{printNumberWithSignalElement(item.system.bonus.value - (atkPenalty * 2))}]
+        <b>{isThrow(item)?"Ranged":capitalize(item.system.weaponType.value)}</b> <span className="pathfinder-action">A</span>{item.name} {printNumberWithSignalElement(item.system.bonus.value)}[{printNumberWithSignalElement(item.system.bonus.value - atkPenalty)}/{printNumberWithSignalElement(item.system.bonus.value - (atkPenalty * 2))}]
         {" "}{traits.value.length > 0 && <>({printTraitsSeparator(traits, ", ")})</>} {GetDamagesInfo(item.system).map(dmg => (<> {dmg.damage} {dmg.damageType}</>))} {attackEffectsString !== "" && <span className="text-green-800 italic"> {attackEffectsString}</span>}
     </>)
 }
@@ -212,4 +218,82 @@ export function PrintStrike_EquipmentType(creature: StatBlockProp,item: Creature
         {/*{GetDamagesInfo(item.system).map(dmg => (<> {dmg.damage} {dmg.damageType}</>))} {attackEffectsString !== "" && <span className="text-green-800 italic"> {attackEffectsString}</span>}*/}
     </>)
     
+}
+
+export function ModifyStrikesByAbility(creature: StatBlockProp, ability: AbilityName, value: number)
+{
+    if (ability !== "str" && ability !== "dex")
+        return;
+    
+    const strikes = GetStrikes(creature);
+
+    for (const strike of strikes.baseStrikes) {
+        const weaponType = strike.system.weaponType?.value.toLowerCase();
+        const traits = strike.system.traits.value;
+        const isRanged = weaponType === "ranged";
+        const isMelee = weaponType === "melee";
+        const hasFinesse = traits.includes("finesse");
+        const hasBrutal = traits.includes("brutal");
+        const isPropulsive = traits.includes("propulsive");
+        const thrown = isThrow(strike);
+        
+        
+        if (ability === "dex") {
+            const dexEligible =
+                (isRanged && !hasBrutal) ||
+                (isMelee && hasFinesse) ||
+                thrown;
+
+            if (dexEligible) {
+                modifyStrike(strike, value, 0);
+            }
+            continue;
+        }
+
+        if (ability === "str")
+        {
+            if (isPropulsive) //TODO negative values
+            {
+                let propulsiveValue = Math.floor(value/2);
+                if (creature.system.abilities.str.mod % 2 === 0 && value % 2 !== 0)
+                    propulsiveValue += 1;
+                
+                modifyStrike(strike, 0, propulsiveValue);
+                continue;
+            }
+            
+            if (thrown) {
+                const hit = hasBrutal ? value : 0;
+                modifyStrike(strike, hit, value);
+                continue;
+            }
+
+            const strEligible =
+                (isRanged && hasBrutal) ||
+                isMelee;
+
+            if (strEligible) {
+                const hit = hasFinesse ? 0 : value;
+                modifyStrike(strike, hit, value);
+            }
+        }
+    }
+
+    for (const strike of strikes.equipmentStrikes)
+    {
+        if (ability === "str")
+            modifyStrike(strike, value,value);
+    }
+    
+}
+
+function isThrow(value: CreatureItemStrike) : boolean
+{
+    for (const trait of value.system.traits.value)
+    {
+        if (trait.toLowerCase().includes("thrown"))
+            return true;
+    }    
+    
+    return false;
 }

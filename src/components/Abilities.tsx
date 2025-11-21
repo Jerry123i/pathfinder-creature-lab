@@ -1,6 +1,8 @@
 ﻿import type {Mod, StatBlockProp} from "./StatBlock.tsx";
 import {ModifyAssociatedSkills} from "./Skills.tsx";
 
+import {ModifyStrikesByAbility} from "./Strikes.tsx";
+
 export interface Abilities {
     cha: Mod;
     con: Mod;
@@ -14,8 +16,6 @@ export type AbilityName = keyof Abilities;
 
 export function ModifyAbilitiesAndRelatedStats(creature : StatBlockProp ,ability : AbilityName, value : number)
 {
-    ModifyAssociatedSkills(creature, ability, value);
-    
     const allAbilities = creature.system.abilities;
     
     switch (ability){
@@ -42,4 +42,7 @@ export function ModifyAbilitiesAndRelatedStats(creature : StatBlockProp ,ability
     
     if (ability === "wis")
         creature.system.perception.mod += value;
+
+    ModifyAssociatedSkills(creature, ability, value);
+    ModifyStrikesByAbility(creature,  ability, value);
 }

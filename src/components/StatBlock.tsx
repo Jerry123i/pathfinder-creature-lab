@@ -1,4 +1,4 @@
-﻿import {type CreatureItemStrike, GetStrikes, PrintStrike} from "./Strikes.tsx";
+﻿import {type CreatureItemStrike, GetCombinedStrikes, GetStrikes, PrintStrike} from "./Strikes.tsx";
 import {printSkills, type SkillList} from "./Skills.tsx";
 import type {Abilities} from "./Abilities.tsx";
 import {type CreatureItemSpell, GetSpells, HasSpells, PrintAllSpells} from "./Spells.tsx";
@@ -61,7 +61,7 @@ export function GetGenericAbilities(value: StatBlockProp): CreatureItem[] {
     let selectedItems = allItems.filter(item => {
         return (
             !spells.includes(item as CreatureItemSpell)
-            && !strikes.includes(item as CreatureItemStrike)
+            && !strikes.baseStrikes.includes(item as CreatureItemStrike)
             && item.type != "weapon"
             && item.type != "armor"
             && item.type != "spellcastingEntry"
@@ -324,7 +324,7 @@ function statBlock(value: StatBlockProp | undefined) {
         <hr/>
         <h2>Strikes</h2>
         <ul>
-            {GetStrikes(value).map(i => <li>{PrintStrike(value,i)}</li>)}
+            {GetCombinedStrikes(GetStrikes(value)).map(i => <li>{PrintStrike(value,i)}</li>)}
         </ul>
         <ul>
             {GetGenericAbilities(value).map(abilityItem => (

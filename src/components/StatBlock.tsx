@@ -140,11 +140,13 @@ export interface ItemSystem {
 }
 
 export interface Rule {
-    attackModifier: number;
-    key: string
-    damage?: Damage
-    damageType?: string
-    value?: any
+    predicate: string[];
+    attackModifier?: number;
+    key: string;
+    damage?: Damage;
+    damageType?: string;
+    value?: any;
+    selector: string;
 }
 
 export interface Damage {

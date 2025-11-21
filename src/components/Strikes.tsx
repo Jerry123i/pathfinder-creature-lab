@@ -29,12 +29,40 @@ export function modifyAllStrikes(creature: StatBlockProp, hitValue: number, dama
 
     const strikes = GetStrikes(creature);
     
+    let strike;
+    
     for (let i = 0, len = strikes.length; i < len; ++i)
     {
-        if (strikes[i].type.toLowerCase() !== "melee") //TODO
+        if (strikes[i].type.toLowerCase() === "equipment")
+        {
+            strike = strikes[i];
+
+
+            for (const rule of strike.system.rules)
+            {
+                if (rule.key.toLowerCase() === "strike")
+                {
+                    if (rule.attackModifier!==undefined)
+                        rule.attackModifier += hitValue;
+                    
+                    strike.system.rules.push(
+                        {
+                            damageType: rule.damage.base.damageType,
+                            key: "FlatModifier",
+                            predicate: rule.predicate,
+                            selector: "{item|_id}-damage",
+                            value: damageValue
+                        }
+                    );
+                    
+                    break
+                }
+            }
             continue;
+        }
+            
         
-        const strike = strikes[i] as CreatureItemStrike;
+        strike = strikes[i] as CreatureItemStrike;
         
         strike.system.bonus.value += hitValue;
         const rawDamage = GetDamagesInfo(strike.system);

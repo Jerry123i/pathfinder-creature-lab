@@ -18,11 +18,11 @@ export function loadMonsters()
 
 function App()
 {
-
     const [currentBaseCreature, setCreature] = useState<StatBlockProp>();
     const [selectedAdjustmentIndexes, setSelectedAdjustments] = useState<number[]>([]);
     const [isDescriptionOpen, setIsDescriptionOpen] = useState(false);
-
+    const [indexOfOpenCategories, setIndexOfOpenCategories] = useState<boolean[]>([]);
+    
     const monsters = loadMonsters();
 
     const selectedAdjustments : CreatureAdjustment[] = [];
@@ -41,14 +41,14 @@ function App()
 
             {/* Main Content */}
             <div className="flex flex-4 flex-col p-3">
-                <div>{CreatureAdjustmentButtons(selectedAdjustmentIndexes, setSelectedAdjustments)}</div>                
+                <div>{CreatureAdjustmentButtons(selectedAdjustmentIndexes, setSelectedAdjustments, indexOfOpenCategories, setIndexOfOpenCategories)}</div>       
                 <div>{statBlock(adjustedCreature, isDescriptionOpen, setIsDescriptionOpen)}</div>
             </div>
         </div>
     );
 }
 
-function CreatureAdjustmentButtons(selectedAdjustments :number[], selectedArraySetter : ((i : number[]) => void))
+function CreatureAdjustmentButtons(selectedAdjustments: number[], selectedArraySetter: ((i: number[]) => void), categoriesOpen: boolean[],setCategoriesOpen : (val: boolean[]) => void)
 {
     CreatureAdjustmentList.sort((a,b)=>{
         if(a.type === b.type)
@@ -85,38 +85,60 @@ function CreatureAdjustmentButtons(selectedAdjustments :number[], selectedArrayS
     let lastType = "";
     
     let workingGroup = [];
+    let buttonsGroup = [];
     const finalValue  = [];
 
+    let groupsCount = 0;
+    
     for (let i = 0; i < CreatureAdjustmentList.length; i++)
     {
         const item = CreatureAdjustmentList[i];
         
         if (lastType !== item.type)
-        {   
+        {
+            const groupIndex = groupsCount;
+            groupsCount += 1;
+            
             lastType = item.type;
 
             if (i !== 0){
-                finalValue.push(<div className="p-1 space-x-2 space-y-1">{workingGroup}</div>);
+                finalValue.push(<div className={`p-1 space-x-2 space-y-1`}>{workingGroup}<div className={`${categoriesOpen[groupIndex-1]?"":"hidden"}`}>{buttonsGroup}</div></div>);
                 workingGroup = [];
+                buttonsGroup = [];
             }
             
-            const header = <h3 className="font-bold">{">"} {item.type}</h3>;
+            const header = <h3 className="font-bold cursor-pointer select-none" onClick={()=>
+            {
+                const x = structuredClone(categoriesOpen);
+                x[groupIndex] = !x[groupIndex];
+                setCategoriesOpen(x);
+            }}>{categoriesOpen[groupIndex]?"🔽":"->"} {item.type}</h3>;
             workingGroup.push(header);
         }
 
-        const button =(<button className={`px-2 py-0.5 border-white border-1 rounded-md ${selectedAdjustments.includes(i)?"bg-green-100 text-green-950 outline-green-100 outline-1" : ""}`} key={item._id}
+        const button =(<button className={`px-2 py-0.5 border-white border-1 hover:border-green-500 rounded-md ${selectedAdjustments.includes(i)?"bg-green-100 text-green-950 outline-green-100 outline-1" : ""}`} key={item._id}
                                onClick={()=>{
-                                   //On Click
                                    selectedArraySetter(handleCreatureAdjustmentClick(selectedAdjustments, i))
                                }}>{item.name}</button>)
         
-        workingGroup.push(button);
+        //workingGroup.push(button);
+        buttonsGroup.push(button);
         
         if (i === CreatureAdjustmentList.length - 1)
         {
-            finalValue.push(<div className="p-1 space-x-2 space-y-1">{workingGroup}</div>);
+            finalValue.push(<div className={`p-1 space-x-2 space-y-1`}>{workingGroup}<div className={`${categoriesOpen[groupsCount-1]?"":"hidden"}`}>{buttonsGroup}</div></div>);
             workingGroup = [];
+            buttonsGroup = [];
         }
+    }
+    
+    if (categoriesOpen.length === 0)
+    {
+        const array : boolean[] = [];
+        for (let i = 0; i < groupsCount; i++)
+            array.push(false);
+        array[0] = true;
+        setCategoriesOpen(array);
     }
     
     return <div className="bg-green-900 text-green-50">{finalValue}</div>;

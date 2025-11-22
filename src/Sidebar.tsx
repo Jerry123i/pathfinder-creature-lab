@@ -1,6 +1,7 @@
-﻿import {cloneStatBlock, type StatBlockProp} from "./components/StatBlock.tsx";
+﻿import {type StatBlockProp} from "./components/StatBlock.tsx";
 import {useState} from "react";
 import {capitalize} from "./components/TypeScriptHelpFunctions.tsx";
+import {ArrowFatDownIcon, ArrowFatUpIcon} from "@phosphor-icons/react";
 
 
 export function DropDown(list: StatBlockProp[], onValueChange: (i: number) => void) {
@@ -49,52 +50,61 @@ export function SideBar(allCreatures: StatBlockProp[], onSelectCreature: (creatu
 
 function SortArea(filter : FilterValues, filterSetter : (value : FilterValues) => void)
 {
-    return(
+    return (
         <div className="p-2 flex space-x-2 w-full">
             <div>Sort:</div>
-            <div className="bg-gray-300 rounded-3xl p-1 w-1/3 text-center select-none"
-             onClick={()=>
-            {
-                switch(filter.sort){
-                    case "LevelUp":
-                        filterSetter({...filter, sort:"LevelDown"})
-                        break;
-                    case "LevelDown":
-                        filterSetter({...filter, sort:"LevelUp"})
-                        break;
-                    case "NameUp":
-                        filterSetter({...filter, sort:"LevelUp"})
-                        break;
-                    case "NameDown":
-                        filterSetter({...filter, sort:"LevelUp"})
-                        break;
-                }
-                return;
-            
-            }}>{filter.sort == "LevelUp" ? "⬇️ " : ""}{filter.sort == "LevelDown" ? "⬆️ " : ""}Level</div>
-            <div className="bg-gray-300 rounded-3xl p-1 w-1/3 text-center select-none"
-                 onClick={()=>
-                 {
-                     switch(filter.sort){
-                         case "LevelUp":
-                             filterSetter({...filter, sort:"NameUp"})
-                             break;
-                         case "LevelDown":
-                             filterSetter({...filter, sort:"NameUp"})
-                             break;
-                         case "NameUp":
-                             filterSetter({...filter, sort:"NameDown"})
-                             break;
-                         case "NameDown":
-                             filterSetter({...filter, sort:"NameUp"})
-                             break;
-                     }
-                     return;
 
-                 }}
-            >{filter.sort == "NameUp" ? "⬇️ " : ""}{filter.sort == "NameDown" ? "⬆️ " : ""}Name</div>
+            {/* LEVEL BUTTON */}
+            <div
+                className="bg-gray-300 hover:bg-gray-600 hover:text-white rounded-3xl p-1 w-1/3 select-none flex items-center justify-center space-x-0"
+                onClick={() => {
+                    switch (filter.sort) {
+                        case "LevelUp":
+                            filterSetter({ ...filter, sort: "LevelDown" });
+                            break;
+                        case "LevelDown":
+                            filterSetter({ ...filter, sort: "LevelUp" });
+                            break;
+                        default:
+                            filterSetter({ ...filter, sort: "LevelUp" });
+                            break;
+                    }
+                }}
+            >
+                {/* fixed-width icon placeholder */}
+                <div className="w-5 flex justify-center">
+                    {filter.sort === "LevelUp" && <ArrowFatDownIcon weight="fill" />}
+                    {filter.sort === "LevelDown" && <ArrowFatUpIcon weight="fill" />}
+                </div>
+                <span>Level</span>
+            </div>
+
+            {/* NAME BUTTON */}
+            <div
+                className="bg-gray-300 hover:bg-gray-600 hover:text-white rounded-3xl p-1 w-1/3 select-none flex items-center justify-center space-x-0"
+                onClick={() => {
+                    switch (filter.sort) {
+                        case "NameUp":
+                            filterSetter({ ...filter, sort: "NameDown" });
+                            break;
+                        case "NameDown":
+                            filterSetter({ ...filter, sort: "NameUp" });
+                            break;
+                        default:
+                            filterSetter({ ...filter, sort: "NameUp" });
+                            break;
+                    }
+                }}
+            >
+                <div className="w-5 flex justify-center">
+                    {filter.sort === "NameUp" && <ArrowFatDownIcon weight="fill" />}
+                    {filter.sort === "NameDown" && <ArrowFatUpIcon weight="fill" />}
+                </div>
+                <span>Name</span>
+            </div>
         </div>
-    )
+    );
+
 }
 
 function LevelMinMaxArea(setFilters: (value: (((prevState: FilterValues) => FilterValues) | FilterValues)) => void, filters: FilterValues) {

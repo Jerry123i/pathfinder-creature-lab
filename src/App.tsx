@@ -6,7 +6,14 @@ import type {CreatureAdjustment} from "./components/Modifiers/Modifiers.tsx";
 import statBlock from "./components/StatBlock.tsx";
 import {useState} from "react";
 import {SideBar} from "./Sidebar.tsx";
-
+import {
+    CaretCircleDown,
+    CaretCircleDownIcon,
+    CaretCircleRight,
+    CaretCircleRightIcon,
+    CaretDown,
+    CaretRight
+} from "@phosphor-icons/react";
 
 // eslint-disable-next-line react-refresh/only-export-components
 export function loadMonsters()
@@ -40,7 +47,7 @@ function App()
             </div>
 
             {/* Main Content */}
-            <div className="flex flex-4 flex-col p-3">
+            <div className="flex flex-4 flex-col">
                 <div>{CreatureAdjustmentButtons(selectedAdjustmentIndexes, setSelectedAdjustments, indexOfOpenCategories, setIndexOfOpenCategories)}</div>       
                 <div>{statBlock(adjustedCreature, isDescriptionOpen, setIsDescriptionOpen)}</div>
             </div>
@@ -102,17 +109,17 @@ function CreatureAdjustmentButtons(selectedAdjustments: number[], selectedArrayS
             lastType = item.type;
 
             if (i !== 0){
-                finalValue.push(<div className={`p-1 space-x-2 space-y-1`}>{workingGroup}<div className={`${categoriesOpen[groupIndex-1]?"":"hidden"}`}>{buttonsGroup}</div></div>);
+                finalValue.push(<div className={`p-1`}>{workingGroup}<div className={`flex gap-1 ${categoriesOpen[groupIndex-1]?"":"hidden"}`}>{buttonsGroup}</div></div>);
                 workingGroup = [];
                 buttonsGroup = [];
             }
             
-            const header = <h3 className="font-bold cursor-pointer select-none" onClick={()=>
+            const header = <span className="flex font-bold cursor-pointer select-none items-center gap-1" onClick={()=>
             {
                 const x = structuredClone(categoriesOpen);
                 x[groupIndex] = !x[groupIndex];
                 setCategoriesOpen(x);
-            }}>{categoriesOpen[groupIndex]?"🔽":"->"} {item.type}</h3>;
+            }}>{categoriesOpen[groupIndex]?<CaretCircleDownIcon size={18} weight="fill" />:<CaretCircleRightIcon size={18} weight="bold" />} <h3>{item.type}</h3></span>;
             workingGroup.push(header);
         }
 
@@ -126,7 +133,7 @@ function CreatureAdjustmentButtons(selectedAdjustments: number[], selectedArrayS
         
         if (i === CreatureAdjustmentList.length - 1)
         {
-            finalValue.push(<div className={`p-1 space-x-2 space-y-1`}>{workingGroup}<div className={`${categoriesOpen[groupsCount-1]?"":"hidden"}`}>{buttonsGroup}</div></div>);
+            finalValue.push(<div className={`p-1`}>{workingGroup}<div className={`flex gap-1 ${categoriesOpen[groupsCount-1]?"":"hidden"}`}>{buttonsGroup}</div></div>);
             workingGroup = [];
             buttonsGroup = [];
         }
@@ -141,7 +148,7 @@ function CreatureAdjustmentButtons(selectedAdjustments: number[], selectedArrayS
         setCategoriesOpen(array);
     }
     
-    return <div className="bg-green-900 text-green-50">{finalValue}</div>;
+    return <div className="bg-green-900 text-green-50 px-3 py-1">{finalValue}</div>;
 }
 
 function handleCreatureAdjustmentClick(existingArray : number[] ,value : number) : number[]

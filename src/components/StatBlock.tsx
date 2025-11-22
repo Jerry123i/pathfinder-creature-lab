@@ -263,9 +263,9 @@ function GetActionIcon(value: CreatureItem)
 function statBlock(value: StatBlockProp | undefined, isDescriptionOpen: boolean, setIsDescriptionOpen: ((a:boolean)=>void) ) {
 
     if(value === undefined)
-        return (<p className="italic text-gray-400">Select a creature</p>)
+        return (<p className="italic text-gray-400 px-3 py-1">Select a creature</p>)
     
-    return (<>
+    return (<div className="px-3 py-1">
         <h1 className="space-x-6 font-semibold">
             <span>{value.name}</span>
             <span>{value.system.details.level.value}</span>
@@ -338,7 +338,7 @@ function statBlock(value: StatBlockProp | undefined, isDescriptionOpen: boolean,
             <h2>Spells</h2>
             {PrintAllSpells(value)}
         </>) : <></>}
-    </>)
+    </div>)
 }
 
 function DescriptionArea(isDescriptionOpen: boolean, setIsDescriptionOpen: (a: boolean) => void, value: StatBlockProp) 

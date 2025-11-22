@@ -1,8 +1,8 @@
 
 import type {StatBlockProp} from "./components/StatBlock.tsx";
-import {CreatureAdjustmentList} from "./components/Modifiers.tsx";
-import {applyAllAdjustments} from "./components/Modifiers.tsx";
-import type {CreatureAdjustment} from "./components/Modifiers.tsx";
+import {CreatureAdjustmentList} from "./components/Modifiers/Modifiers.tsx";
+import {applyAllAdjustments} from "./components/Modifiers/Modifiers.tsx";
+import type {CreatureAdjustment} from "./components/Modifiers/Modifiers.tsx";
 import statBlock from "./components/StatBlock.tsx";
 import {useState} from "react";
 import {SideBar} from "./Sidebar.tsx";
@@ -21,6 +21,7 @@ function App()
 
     const [currentBaseCreature, setCreature] = useState<StatBlockProp>();
     const [selectedAdjustmentIndexes, setSelectedAdjustments] = useState<number[]>([]);
+    const [isDescriptionOpen, setIsDescriptionOpen] = useState(false);
 
     const monsters = loadMonsters();
 
@@ -41,7 +42,7 @@ function App()
             {/* Main Content */}
             <div className="flex flex-4 flex-col p-3">
                 <div>{CreatureAdjustmentButtons(selectedAdjustmentIndexes, setSelectedAdjustments)}</div>                
-                <div>{statBlock(adjustedCreature)}</div>
+                <div>{statBlock(adjustedCreature, isDescriptionOpen, setIsDescriptionOpen)}</div>
             </div>
         </div>
     );

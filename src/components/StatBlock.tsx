@@ -260,7 +260,7 @@ function GetActionIcon(value: CreatureItem)
     }
 }
 
-function statBlock(value: StatBlockProp | undefined) {
+function statBlock(value: StatBlockProp | undefined, isDescriptionOpen: boolean, setIsDescriptionOpen: ((a:boolean)=>void) ) {
 
     if(value === undefined)
         return (<p className="italic text-gray-400">Select a creature</p>)
@@ -273,8 +273,8 @@ function statBlock(value: StatBlockProp | undefined) {
         {printTraitsTransformElement(value.system.traits, (s, i) => {
             return (<p className={`inline-block ${GetTraitColor(s)} text-white border-double border-2 border-[#d5c489] font-semibold text-[1.0em] not-italic px-[5px] text-left indent-0 my-[0.1em]`}>{s.toString()}</p>)
         })}
-        <p dangerouslySetInnerHTML={{__html: value.system.details.publicNotes}}></p>
-        {value.system.details.languages.value.length > 0 && (<><b>Languages: </b> {value.system.details.languages.value.map((l, index) =>
+        {DescriptionArea(isDescriptionOpen, setIsDescriptionOpen, value)}
+        {value.system.details.languages.value.length > 0 &&(<><hr/><b>Languages: </b> {value.system.details.languages.value.map((l, index) =>
         {
             return ((index===0?"":", ") + capitalize(l))
         }
@@ -341,7 +341,22 @@ function statBlock(value: StatBlockProp | undefined) {
     </>)
 }
 
-export function cloneStatBlock(statBlock: StatBlockProp): StatBlockProp {
+function DescriptionArea(isDescriptionOpen: boolean, setIsDescriptionOpen: (a: boolean) => void, value: StatBlockProp) 
+{
+    
+    return (isDescriptionOpen ?
+        (<>
+            <p className="" dangerouslySetInnerHTML={{__html: value.system.details.publicNotes}}></p>
+            <span className="text-sm italic pl-2 text-gray-400 select-none cursor-pointer" onClick={() => {setIsDescriptionOpen(false)}}>Hide</span>
+        </>)
+        : <><span className="flex items-center gap-0">
+            <span className="line-clamp-1 truncate max-w-xs" dangerouslySetInnerHTML={{__html: value.system.details.publicNotes}}></span> <span className="text-sm italic pl-2 text-gray-400 select-none cursor-pointer" onClick={() => {setIsDescriptionOpen(true)}}>Read More</span>
+            </span>
+        </>);
+}
+
+export function cloneStatBlock(statBlock: StatBlockProp): StatBlockProp 
+{
     return {
         _id: crypto.randomUUID(), // give the clone a new id
         name: statBlock.name,

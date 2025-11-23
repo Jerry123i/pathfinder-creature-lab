@@ -190,4 +190,4 @@ export function changeSize(baseCreature : StatBlockProp, value: ("tiny"|"small"|
     return sb;
 }
 
-export const CreatureAdjustmentList = [Elite, Weak, Catfolk, Dwarf, Elf, Gnome, Goblin, Halfling, Leshy, Minotaur, Merfolk, Orc, Zombie, Vampire];
+export const CreatureAdjustmentList = [Elite, Weak, Catfolk, Dwarf, Elf, Gnome, Goblin, Halfling, Leshy, Minotaur, Merfolk, Orc];

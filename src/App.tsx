@@ -7,12 +7,8 @@ import statBlock from "./components/StatBlock.tsx";
 import {useState} from "react";
 import {SideBar} from "./Sidebar.tsx";
 import {
-    CaretCircleDown,
     CaretCircleDownIcon,
-    CaretCircleRight,
     CaretCircleRightIcon,
-    CaretDown,
-    CaretRight
 } from "@phosphor-icons/react";
 
 // eslint-disable-next-line react-refresh/only-export-components
@@ -42,12 +38,12 @@ function App()
     return (
         <div className="flex bg-gray-50">
             {/* Sidebar */}
-            <div className="flex flex-1 bg-amber-100 border-amber-200 border-r-4 p-3">
+            <div className="flex flex-1/5 bg-amber-100 border-amber-200 border-r-4 p-3">
                 {SideBar(monsters, setCreature)}
             </div>
 
             {/* Main Content */}
-            <div className="flex flex-4 flex-col">
+            <div className="flex flex-4/5 flex-col">
                 <div>{CreatureAdjustmentButtons(selectedAdjustmentIndexes, setSelectedAdjustments, indexOfOpenCategories, setIndexOfOpenCategories)}</div>       
                 <div>{statBlock(adjustedCreature, isDescriptionOpen, setIsDescriptionOpen)}</div>
             </div>

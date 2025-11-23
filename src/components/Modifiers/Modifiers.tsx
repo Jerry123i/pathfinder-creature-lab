@@ -185,6 +185,9 @@ export function addSpeed(baseCreature : StatBlockProp, value: TypedValue)
 
 export function changeSize(baseCreature : StatBlockProp, value: ("tiny"|"small"|"medium"|"large"|"huge"|"gargantuan")) : StatBlockProp
 {
+    if (baseCreature.system.traits.value.includes("troop"))
+        return baseCreature;
+    
     const sb = cloneStatBlock(baseCreature);
     sb.system.traits.size.value = value;
     return sb;

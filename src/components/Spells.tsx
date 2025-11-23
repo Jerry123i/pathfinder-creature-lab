@@ -1,4 +1,4 @@
-﻿import type {CreatureItem, ItemSystem, StatBlockProp, ValueHolder} from "./StatBlock.tsx";
+﻿import type {CreatureItem, ItemSystem, StatBlockProp, NullableValueHolder} from "./StatBlock.tsx";
 import {Fragment} from "react";
 
 export type SpellTraditions = "arcane" | "divine" | "primal" | "occult";
@@ -66,7 +66,7 @@ export function ModifySpellDc(creature : StatBlockProp, value : number)
 }
 
 export interface SpellSystem extends ItemSystem {
-    level: ValueHolder;
+    level: NullableValueHolder;
     location: {heightenedLevel: number, value:string}; //TODO this declaration might be dangerous
 }
 

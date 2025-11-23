@@ -23,9 +23,11 @@ export function ModifyAbilitiesAndRelatedStats(creature : StatBlockProp ,ability
             allAbilities.cha.mod += value;
             break;
         case "con":
+            creature.system.saves.fortitude.value += value;
             allAbilities.con.mod += value;
             break;
         case "dex":
+            creature.system.saves.reflex.value += value;
             allAbilities.dex.mod += value;
             break;
         case "int":
@@ -35,6 +37,7 @@ export function ModifyAbilitiesAndRelatedStats(creature : StatBlockProp ,ability
             allAbilities.str.mod += value;
             break;
         case "wis":
+            creature.system.saves.will.value += value;
             allAbilities.wis.mod += value;
             break;
 

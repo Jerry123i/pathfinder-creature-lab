@@ -22,7 +22,7 @@ export function RemoveTrait(creature: StatBlockProp, value: string) {
     creature.system.traits.value = creature.system.traits.value.filter(x => x != value);
 }
 
-export function ReplaceTrait(creature : StatBlockProp, valueToRemove : string, valueToPlace)
+export function ReplaceTrait(creature : StatBlockProp, valueToRemove : string, valueToPlace : string)
 {
     if (!creature.system.traits.value.includes(valueToRemove))
     {

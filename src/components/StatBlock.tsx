@@ -191,7 +191,7 @@ export interface ItemSystem {
     description: StringHolder,
     traits: Traits,
     slug: string,
-    actions: ValueHolder | null,
+    actions: NullableValueHolder | null,
     actionType : StringHolder,
     rules : Rule[]
 }
@@ -211,7 +211,7 @@ export interface Damage {
 }
 
 export interface LoreItemSystem extends ItemSystem {
-    mod: ValueHolder;
+    mod: NullableValueHolder;
 }
 
 export interface Stats {
@@ -222,10 +222,13 @@ export interface Mod {
     mod: number;
 }
 
-export interface ValueHolder {
+export interface NullableValueHolder {
     type?: string;
-    saveDetail?: number;
     value: number | null;
+}
+
+export interface ValueHolder{
+    value: number;
 }
 
 export interface TypedValue {
@@ -557,6 +560,8 @@ export function parseAbilityDescription(input: string): string {
         (_match, content) => `<b>${content}</b>`
     );
 
+    output = output.replace(/(<hr \/>(?:(?:<br>)*|(?:<p><\/p>)*)*)$/g, (_match) => "")
+    
     return output;
 }
 
@@ -568,12 +573,12 @@ function printMod(mod: Mod, name: string) {
     return <> <b>{name}</b> +{val}</>;
 }
 
-function printValue(value: ValueHolder, name: string) {
+function printValue(value: NullableValueHolder, name: string) {
     const val = value.value;
     return <> <b>{name}</b> {val}</>;
 }
 
-function printValueWithSignal(value: ValueHolder, name: string) {
+function printValueWithSignal(value: NullableValueHolder, name: string) {
     const val = value.value;
     return <> <b>{name}</b> {val < 0 ? "" : "+"}{val}</>;
 }

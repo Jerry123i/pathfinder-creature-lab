@@ -8,7 +8,7 @@
     printNumberWithSignalElement,
     type StatBlockProp,
     type StringHolder,
-    type ValueHolder
+    type NullableValueHolder
 } from "./StatBlock.tsx";
 import {printTraitsSeparator} from "./Traits.tsx";
 import {capitalize} from "./TypeScriptHelpFunctions.tsx";
@@ -19,7 +19,7 @@ export interface CreatureItemStrike extends CreatureItem {
 }
 
 export interface StrikeSystem extends ItemSystem {
-    bonus: ValueHolder,
+    bonus: NullableValueHolder,
     weaponType?: StringHolder,
     range: { increment: number, max: number },
     damageRolls: Record<string, DamageRollInfo>

@@ -343,7 +343,6 @@ function statBlock(value: StatBlockProp | undefined, isDescriptionOpen: boolean,
 
 function DescriptionArea(isDescriptionOpen: boolean, setIsDescriptionOpen: (a: boolean) => void, value: StatBlockProp) 
 {
-    
     return (isDescriptionOpen ?
         (<>
             <p className="" dangerouslySetInnerHTML={{__html: value.system.details.publicNotes}}></p>

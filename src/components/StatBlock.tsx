@@ -10,7 +10,7 @@ export interface StatBlockProp {
     name: string;
     system: CreatureSystems;
     items: CreatureItem[];
-    spellsAnnotation: string;
+    //spellsAnnotation: string;
 }
 
 export interface CreatureSystems {
@@ -147,12 +147,12 @@ export function GetGenericAbilities(value: StatBlockProp): CreatureItem[] {
             passive: 2
         };
 
-        const aType = a.system.actionType?.value.toLowerCase() ?? "";
-        const bType = b.system.actionType?.value.toLowerCase() ?? "";
+        const aType : string = a.system.actionType?.value.toLowerCase() ?? "";
+        const bType : string = b.system.actionType?.value.toLowerCase() ?? "";
 
         // Compare type first
-        if (typeRank[aType] !== typeRank[bType]) {
-            return typeRank[aType] - typeRank[bType];
+        if (typeRank[aType as keyof typeof typeRank] !== typeRank[bType as keyof typeof typeRank]) {
+            return typeRank[aType as keyof typeof typeRank] - typeRank[bType as keyof typeof typeRank];
         }
 
         // 2) If both are action: order by action number
@@ -225,6 +225,19 @@ export interface Mod {
 export interface NullableValueHolder {
     type?: string;
     value: number | null;
+}
+
+export function NullableValueChange(x : NullableValueHolder, value : number)
+{
+    if (x.value === null)
+        return;
+    x.value += value;
+}
+
+export function GetValue(x: NullableValueHolder): number {
+    if (x.value === null)
+        return 0;
+    return x.value;
 }
 
 export interface ValueHolder{
@@ -330,7 +343,7 @@ function statBlock(value: StatBlockProp | undefined, isDescriptionOpen: boolean,
             <span>{value.name}</span>
             <span>{value.system.details.level.value}</span>
         </h1>
-        {printTraitsTransformElement(value.system.traits, (s, i) => {
+        {printTraitsTransformElement(value.system.traits, (s) => {
             return (
                 <p className={`inline-block ${GetTraitColor(s)} text-white border-double border-2 border-[#d5c489] font-semibold text-[1.0em] not-italic px-[5px] text-left indent-0 my-[0.1em]`}>{s.toString()}</p>)
         })}
@@ -514,8 +527,9 @@ export function parseAbilityDescription(input: string): string {
 
     output = output.replace(
         /@Template\[(?:type:)?(emanation|cone|burst|aura|line)\|distance:(\d+)\](?:\{([\w+\- ]+)\})?/gi,
-        (_match, shape, distance, match3) =>
+        (_match, shape, distance) =>
         {
+            //match3 exists not used
             return `<nobr><b>${distance}ft ${shape}</b></nobr>`  
         } 
     );
@@ -579,7 +593,7 @@ function printValue(value: NullableValueHolder, name: string) {
 }
 
 function printValueWithSignal(value: NullableValueHolder, name: string) {
-    const val = value.value;
+    const val = GetValue(value);
     return <> <b>{name}</b> {val < 0 ? "" : "+"}{val}</>;
 }
 

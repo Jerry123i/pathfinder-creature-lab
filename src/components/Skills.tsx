@@ -1,5 +1,5 @@
 ﻿import {Fragment} from "react";
-import {type CreatureSystems, GetLoreItems, type StatBlockProp} from "./StatBlock.tsx";
+import {type CreatureSystems, GetLoreItems, GetValue, NullableValueChange, type StatBlockProp} from "./StatBlock.tsx";
 import type {AbilityName} from "./Abilities.tsx";
 
 export interface Skill {
@@ -41,8 +41,9 @@ export function modifyAllSkills(creatureStats : StatBlockProp ,creatureSystems: 
     
     const lores = GetLoreItems(creatureStats);
 
-    for (let i = 0; i < lores.length; i++) {
-        lores[i].system.mod.value += value;
+    for (let i = 0; i < lores.length; i++)
+    {
+        NullableValueChange(lores[i].system.mod, value);
     }
     
 }
@@ -100,7 +101,7 @@ export function TryModifyLore(creature: StatBlockProp, value: number) {
     const lores  = GetLoreItems(creature);
 
     for (let i = 0; i < lores.length; i++) {
-        lores[i].system.mod.value += value;
+        NullableValueChange(lores[i].system.mod, value);
     }
     
 }
@@ -109,6 +110,9 @@ function GetSpecialSkills(skill: Skill) {
     
     let stringValue = "";
 
+    if (skill.special === undefined)
+        return (<></>);
+    
     for (let i = 0; i < skill.special?.length; i++)
     {
         const special = skill.special[i];
@@ -137,7 +141,7 @@ export function printSkills(creature:StatBlockProp,list: SkillList) {
                 );
             })}
             {lores.length > 0 && lores.map((loreInterfaceKey) => {
-                return <Fragment key={loreInterfaceKey.name}>{loreInterfaceKey.name} {loreInterfaceKey.system.mod?.value >= 0 ? "+" : ""}{loreInterfaceKey.system.mod.value}; </Fragment>
+                return <Fragment key={loreInterfaceKey.name}>{loreInterfaceKey.name} {GetValue(loreInterfaceKey.system.mod) >= 0 ? "+" : ""}{loreInterfaceKey.system.mod.value}; </Fragment>
             })}
         </>
     );

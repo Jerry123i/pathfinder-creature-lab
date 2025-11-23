@@ -1,5 +1,5 @@
 ﻿
-type AttributeTiers = "extreme" | "high" | "moderate" | "low" | "terrible";
+//type AttributeTiers = "extreme" | "high" | "moderate" | "low" | "terrible";
 
 interface Range {
     min: number;
@@ -9,5 +9,5 @@ interface Range {
 
 export interface LookupTable {
     ranges: Range[];
-    lookup(level: number): string | undefined;
+    lookup(level: number): string;
 }

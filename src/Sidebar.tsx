@@ -126,7 +126,7 @@ function LevelMinMaxArea(setFilters: (value: (((prevState: FilterValues) => Filt
                 let val = 25;
                 if (e.target.value !== "")
                     val = Number.parseInt(e.target.value);
-                setFilters({...filters, max: Number.parseInt(val)})
+                setFilters({...filters, max: val})
             }}></input>
         </div>
     </>;
@@ -210,7 +210,7 @@ function CreaturesArea(creatures : StatBlockProp[], onSelectCreature : (creature
                 return(<div className="border-1 border-gray-400 p-2 rounded-2xl bg-gray-200 m-2 select-none hover:bg-gray-600 hover:text-white " key={value._id}
                             onClick={()=> { onSelectCreature(value) }}>
                     <p>{value.name}     {value.system.details.level.value}</p>
-                    {value.system.traits.value.map((value, i) =>{return(<span className="text-gray-500 text-xs">{capitalize(value)} | </span>);} )}
+                    {value.system.traits.value.map((value, i) =>{return(<span className="text-gray-500 text-xs" key={i}>{capitalize(value)} | </span>);} )}
                 </div>)
             })}            
         </div>

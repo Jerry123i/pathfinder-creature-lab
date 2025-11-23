@@ -8,7 +8,7 @@
     printNumberWithSignalElement,
     type StatBlockProp,
     type StringHolder,
-    type NullableValueHolder
+    type NullableValueHolder, NullableValueChange
 } from "./StatBlock.tsx";
 import {printTraitsSeparator} from "./Traits.tsx";
 import {capitalize} from "./TypeScriptHelpFunctions.tsx";
@@ -36,9 +36,15 @@ function modifyStrike(strike: CreatureItem, hitValue: number, damageValue: numbe
                 if (rule.attackModifier !== undefined)
                     rule.attackModifier += hitValue;
 
+                let dmgType = "";
+                if (rule.damage === undefined)
+                    dmgType = "";
+                else 
+                    dmgType = rule.damage.base.damageType;
+                
                 strike.system.rules.push(
                     {
-                        damageType: rule.damage.base.damageType,
+                        damageType: dmgType,
                         key: "FlatModifier",
                         predicate: rule.predicate,
                         selector: "{item|_id}-damage",
@@ -55,7 +61,8 @@ function modifyStrike(strike: CreatureItem, hitValue: number, damageValue: numbe
 
     const strikeAtk = strike as CreatureItemStrike;
 
-    strikeAtk.system.bonus.value += hitValue;
+    NullableValueChange(strikeAtk.system.bonus, hitValue);
+    
     const rawDamage = GetDamagesInfo(strikeAtk.system);
 
     for (let j = 0, lenj = rawDamage.length; j < lenj; ++j) {
@@ -129,13 +136,13 @@ function GetDamagesInfo(value: StrikeSystem): DamageRollInfo[] {
     return damages;
 }
 
-export function PrintStrike(creature: StatBlockProp,item: CreatureItemStrike){
+export function PrintStrike(creature: StatBlockProp,item: CreatureItem){
     
     if (item.type === "melee")
-        return PrintStrike_StrikeType(creature, item);
+        return PrintStrike_StrikeType(creature, item as CreatureItemStrike);
     
     if (item.type === "equipment")
-        return PrintStrike_EquipmentType(creature,item);
+        return PrintStrike_EquipmentType(item);
     
     return <></>;
 }
@@ -176,12 +183,12 @@ export function PrintStrike_StrikeType(creature: StatBlockProp,item: CreatureIte
     }
     
     return (<>
-        <b>{isThrow(item)?"Ranged":capitalize(item.system.weaponType.value)}</b> <span className="pathfinder-action">A</span>{item.name} {printNumberWithSignalElement(item.system.bonus.value)}[{printNumberWithSignalElement(item.system.bonus.value - atkPenalty)}/{printNumberWithSignalElement(item.system.bonus.value - (atkPenalty * 2))}]
+        <b>{isThrow(item)?"Ranged":capitalize(item.system.weaponType.value)}</b> <span className="pathfinder-action">A</span>{item.name} {printNumberWithSignalElement(item.system.bonus.value)}[{printNumberWithSignalElement((item.system.bonus.value ?? 0) - atkPenalty)}/{printNumberWithSignalElement((item.system.bonus.value??0) - (atkPenalty * 2))}]
         {" "}{traits.value.length > 0 && <>({printTraitsSeparator(traits, ", ")})</>} {GetDamagesInfo(item.system).map(dmg => (<> {dmg.damage} {dmg.damageType}</>))} {attackEffectsString !== "" && <span className="text-green-800 italic"> {attackEffectsString}</span>}
     </>)
 }
 
-export function PrintStrike_EquipmentType(creature: StatBlockProp,item: CreatureItemStrike){
+export function PrintStrike_EquipmentType(item: CreatureItem){
 
     let atkPenalty = 5;
 
@@ -196,9 +203,11 @@ export function PrintStrike_EquipmentType(creature: StatBlockProp,item: Creature
     
     for (const rule of item.system.rules)
     {
-        if (rule.key.toLowerCase() === "strike" && !baseDamageStablished){
-            bonus = rule.attackModifier;
-            damages.push(rule.damage?.base.dice.toString()+rule.damage?.base.die+` ${rule.damage?.base.damageType} damage`);
+        if (rule.key.toLowerCase() === "strike" && !baseDamageStablished)
+        {
+            bonus = (rule.attackModifier ?? 0);
+            const numberDice = (rule.damage?.base.dice.toString() ?? "null"); 
+            damages.push(numberDice+rule.damage?.base.die+` ${rule.damage?.base.damageType} damage`);
             baseDamageStablished = true;
         }
         if (rule.key.toLowerCase() === "flatmodifier"){

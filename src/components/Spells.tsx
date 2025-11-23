@@ -44,7 +44,7 @@ export interface SpellcastingList{
     spells: CreatureItemSpell[];
 }
 
-export function GetSpellcastingEntry(value: StatBlockProp) : SpellcastingItem
+export function GetSpellcastingEntry(value: StatBlockProp) : SpellcastingItem | null
 {
     for (let i = 0; i < value.items.length; i++)
     {
@@ -52,8 +52,7 @@ export function GetSpellcastingEntry(value: StatBlockProp) : SpellcastingItem
         if (item.type === "spellcastingEntry")
             return item as SpellcastingItem;
     }
-    let notFound : SpellcastingItem;
-    return notFound;
+    return null;
 }
 
 export function ModifySpellDc(creature : StatBlockProp, value : number)
@@ -61,8 +60,13 @@ export function ModifySpellDc(creature : StatBlockProp, value : number)
     if (!HasSpells(creature))
         return;
     
-    GetSpellcastingEntry(creature).system.spelldc.dc += value;
-    GetSpellcastingEntry(creature).system.spelldc.value += value;
+    const spellCasting = GetSpellcastingEntry(creature);
+    
+    if (spellCasting === null)
+        return;
+    
+    spellCasting.system.spelldc.dc += value;
+    spellCasting.system.spelldc.value += value;
 }
 
 export interface SpellSystem extends ItemSystem {
@@ -115,7 +119,7 @@ function PrintSpellcastingEntry(list: SpellcastingList)
             </tr>
             </thead>
             <tbody>
-            {spells.map((spell, index) => {
+            {spells.map((spell) => {
                 const level = GetActiveLevel(spell.system);
                 const levelHeader =
                     level > lastLevel ? (

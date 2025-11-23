@@ -1,4 +1,4 @@
-﻿import {cloneStatBlock, modifyAllSaves, type StatBlockProp} from "../StatBlock.tsx";
+﻿import {cloneStatBlock, modifyAllSaves, type StatBlockProp, type TypedValue} from "../StatBlock.tsx";
 import {modifyAllStrikes} from "../Strikes.tsx";
 import {modifyAllSkills} from "../Skills.tsx";
 import {ModifySpellDc} from "../Spells.tsx";
@@ -160,9 +160,34 @@ export function addLanguages(baseCreature : StatBlockProp, language: string, add
 
     const sb = cloneStatBlock(baseCreature);
     
-    sb.system.details.languages.value.push(language)
+    if (sb.system.details.languages.value.includes(language))
+        return sb;
     
+    sb.system.details.languages.value.push(language)    
     return sb;
-} 
+}
+
+export function addSpeed(baseCreature : StatBlockProp, value: TypedValue)
+{
+    for (const speed of baseCreature.system.attributes.speed.otherSpeeds)
+    {
+        if (speed.type == value.type)
+        {
+            if (speed.value < value.value)
+                speed.value = value.value;
+            
+            return;
+        }
+    }
+    
+    baseCreature.system.attributes.speed.otherSpeeds.push(value);
+}
+
+export function changeSize(baseCreature : StatBlockProp, value: ("tiny"|"small"|"medium"|"large"|"huge"|"gargantuan")) : StatBlockProp
+{
+    const sb = cloneStatBlock(baseCreature);
+    sb.system.traits.size.value = value;
+    return sb;
+}
 
 export const CreatureAdjustmentList = [Elite, Weak, Catfolk, Dwarf, Elf, Gnome, Goblin, Halfling, Leshy, Minotaur, Merfolk, Orc, Zombie, Vampire];

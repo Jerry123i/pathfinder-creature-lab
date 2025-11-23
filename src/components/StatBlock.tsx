@@ -29,6 +29,29 @@ export interface Perception{
     senses : Sense[];
 }
 
+export interface Sense {
+    type: string;
+    range?: number;
+    acuity?: SensePrecision;
+}
+
+export function AddDarkVision(sb: StatBlockProp, value : ("darkvision" | "low-light-vision"))
+{
+    const perception = sb.system.perception;
+    
+    const currentVision = GetDarknessVision(perception);
+    if (currentVision?.type === value)
+        return;
+    
+    if (currentVision?.type === "darkvision")
+        return;
+    
+    if (currentVision === undefined)
+        perception.senses.push({type:value})    
+    else if (currentVision.type ===  "low-light-vision" && value === "darkvision")
+        currentVision.type = value;
+}
+
 export function GetDarknessVision(value: Perception): Sense | undefined
 {
     for (const sense of value.senses) {
@@ -53,11 +76,7 @@ export function GetSpecialSenses(value: Perception): Sense[]
 }
 
 
-export interface Sense {
-    type: string;
-    range?: number;
-    acuity: SensePrecision;
-}
+
 
 export type SensePrecision = "precise"|"imprecise"|"vague";
 
@@ -211,7 +230,7 @@ export interface ValueHolder {
 
 export interface TypedValue {
     type: string;
-    value: string;
+    value: number;
 }
 
 export interface SpeedValue {

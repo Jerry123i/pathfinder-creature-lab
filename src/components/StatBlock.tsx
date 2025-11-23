@@ -17,11 +17,49 @@ export interface CreatureSystems {
     abilities: Abilities;
     details: Details;
     attributes: Attributes;
-    perception: Mod;
+    perception: Perception;
     skills: SkillList;
     saves: { fortitude: ValueHolder, reflex: ValueHolder, will: ValueHolder };
     traits: Traits;
 }
+
+export interface Perception{
+    details : string;
+    mod : number;
+    senses : Sense[];
+}
+
+export function GetDarknessVision(value: Perception): Sense | undefined
+{
+    for (const sense of value.senses) {
+        
+        if (sense.type === "darkvision" || sense.type === "low-light-vision")
+            return sense;
+    }
+    return undefined;
+}
+
+export function GetSpecialSenses(value: Perception): Sense[]
+{
+    const specialSenses: Sense[] = [];
+    for (const sense of value.senses)
+    {
+        if (sense.type === "darkvision" || sense.type === "low-light-vision")
+            continue;
+        
+        specialSenses.push(sense);
+    }
+    return specialSenses;
+}
+
+
+export interface Sense {
+    type: string;
+    range?: number;
+    acuity: SensePrecision;
+}
+
+export type SensePrecision = "precise"|"imprecise"|"vague";
 
 export function modifyAllSaves(creature: CreatureSystems, value: number) {
     creature.saves.reflex.value += value;
@@ -271,23 +309,27 @@ function statBlock(value: StatBlockProp | undefined, isDescriptionOpen: boolean,
             <span>{value.system.details.level.value}</span>
         </h1>
         {printTraitsTransformElement(value.system.traits, (s, i) => {
-            return (<p className={`inline-block ${GetTraitColor(s)} text-white border-double border-2 border-[#d5c489] font-semibold text-[1.0em] not-italic px-[5px] text-left indent-0 my-[0.1em]`}>{s.toString()}</p>)
+            return (
+                <p className={`inline-block ${GetTraitColor(s)} text-white border-double border-2 border-[#d5c489] font-semibold text-[1.0em] not-italic px-[5px] text-left indent-0 my-[0.1em]`}>{s.toString()}</p>)
         })}
         {DescriptionArea(isDescriptionOpen, setIsDescriptionOpen, value)}
-        {value.system.details.languages.value.length > 0 &&(<><hr/><b>Languages: </b> {value.system.details.languages.value.map((l, index) =>
-        {
-            return ((index===0?"":", ") + capitalize(l))
-        }
+        {value.system.details.languages.value.length > 0 && (<>
+            <hr/>
+            <b>Languages: </b> {value.system.details.languages.value.map((l, index) => {
+                return ((index === 0 ? "" : ", ") + capitalize(l))
+            }
         )}</>)}{value.system.details.languages?.details && (<>, ({value.system.details.languages?.details})</>)}
         <hr/>
-        {printMod(value.system.perception, "Perception")}<br/>
-        <b>Skills</b> {printSkills(value,  value.system.skills)}<br/>
+        {PrintPerceptionLine(value)}
+        <br/>
+        <b>Skills</b> {printSkills(value, value.system.skills)}<br/>
         <hr/>
         {printValue(value.system.attributes.ac, "AC")}{";"}
         {printValueWithSignal(value.system.saves.fortitude, "Fort")}{";"}
         {printValueWithSignal(value.system.saves.reflex, "Ref")}{";"}
         {printValueWithSignal(value.system.saves.will, "Will")}
-        {value.items.find((value) => value.system?.slug === "1-status-to-all-saves-vs-magic") !== undefined && <span className="font-semibold">; +1 status to all saves vs. magic</span>}
+        {value.items.find((value) => value.system?.slug === "1-status-to-all-saves-vs-magic") !== undefined &&
+            <span className="font-semibold">; +1 status to all saves vs. magic</span>}
         <br/>
         {printValue(value.system.attributes.hp, "HP")}
         {value.system.attributes.resistances === undefined ? null : (
@@ -302,7 +344,7 @@ function statBlock(value: StatBlockProp | undefined, isDescriptionOpen: boolean,
             <>
                 <b> Immunities:</b>{" "}
                 {value.system.attributes.immunities.map((imu, index) => (
-                    <>{index===0?null:", "}{capitalize(imu.type)}</>
+                    <>{index === 0 ? null : ", "}{capitalize(imu.type)}</>
                 ))}
             </>
         )}
@@ -324,15 +366,17 @@ function statBlock(value: StatBlockProp | undefined, isDescriptionOpen: boolean,
         <hr/>
         <h2>Strikes</h2>
         <ul>
-            {GetCombinedStrikes(GetStrikes(value)).map(i => <li>{PrintStrike(value,i)}</li>)}
+            {GetCombinedStrikes(GetStrikes(value)).map(i => <li>{PrintStrike(value, i)}</li>)}
         </ul>
         <ul>
             {GetGenericAbilities(value).map(abilityItem => (
-            <li className="py-1 border-t-2 border-amber-300">
-                <span className="text-lg pr-2">{GetActionIcon(abilityItem)}{abilityItem.name}</span>{abilityItem.system.traits.value?.length > 0 ? 
-                <span className="text-stone-500">({printTraitsSeparator(abilityItem.system.traits, ", ")})</span> : null}
-                <p dangerouslySetInnerHTML={{__html: parseAbilityDescription(abilityItem.system.description.value)}}></p>
-            </li>))}
+                <li className="py-1 border-t-2 border-amber-300">
+                    <span
+                        className="text-lg pr-2">{GetActionIcon(abilityItem)}{abilityItem.name}</span>{abilityItem.system.traits.value?.length > 0 ?
+                    <span
+                        className="text-stone-500">({printTraitsSeparator(abilityItem.system.traits, ", ")})</span> : null}
+                    <p dangerouslySetInnerHTML={{__html: parseAbilityDescription(abilityItem.system.description.value)}}></p>
+                </li>))}
         </ul>
         {HasSpells(value) ? (<>
             <h2>Spells</h2>
@@ -352,6 +396,14 @@ function DescriptionArea(isDescriptionOpen: boolean, setIsDescriptionOpen: (a: b
             <span className="line-clamp-1 truncate max-w-xs" dangerouslySetInnerHTML={{__html: value.system.details.publicNotes}}></span> <span className="text-sm italic pl-2 text-gray-400 select-none cursor-pointer" onClick={() => {setIsDescriptionOpen(true)}}>Read More</span>
             </span>
         </>);
+}
+
+function PrintPerceptionLine(value: StatBlockProp)
+{
+    return (<><b>Perception</b> {printNumberWithSignalString(value.system.perception.mod)}
+        {GetDarknessVision(value.system.perception)&&` ;${GetDarknessVision(value.system.perception)?.type}`}
+        {GetSpecialSenses(value.system.perception).map(sense => {return ` (${sense.acuity} ${sense.type} ${sense.range&&`${sense.range} feet`})`})}
+    </>);
 }
 
 export function cloneStatBlock(statBlock: StatBlockProp): StatBlockProp 

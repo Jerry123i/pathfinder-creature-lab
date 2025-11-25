@@ -1,3 +1,7 @@
+@font-face {
+    font-family: PF2A;
+    src: url("../src/assets/fonts/Pathfinder2eActions.ttf") format("truetype");
+}
 @import "tailwindcss";
 
 @layer base {
@@ -14,7 +18,7 @@
     }
     
     .pathfinder-action{
-        @apply font-[Pathfinder2eActions] text-[1.75rem] pr-1;
+        @apply font-[PF2A] text-[1.75rem] pr-1;
     }
     
     .input-field{

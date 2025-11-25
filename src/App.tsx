@@ -14,8 +14,8 @@ import {
 // eslint-disable-next-line react-refresh/only-export-components
 export function loadMonsters()
 {
-    //const modules = import.meta.glob("./assets/monsters/**/*.json", {eager:true});
-    const modules = import.meta.glob("./assets/monsters/*.json", {eager:true});
+    const modules = import.meta.glob("./assets/monsters/**/*.json", {eager:true});
+    //const modules = import.meta.glob("./assets/monsters/*.json", {eager:true});
     const monsters = Object.values(modules) as StatBlockProp[];
     return monsters;
 }

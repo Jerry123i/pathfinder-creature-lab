@@ -132,12 +132,30 @@ function LevelMinMaxArea(setFilters: (value: (((prevState: FilterValues) => Filt
     </>;
 }
 
-const TraitsPlaceholder = ["Fire", "Dragon", "Water", "Earth", "Air", "Undead", "Shadow", "Human", "Goblin",  "Aiuvarin"]
+const traits = ["Air", "Fire", "Earth", "Metal", "Water", "Wood", "Human", "Dragon", "Animal", "Beast", "Plant", "Incorporeal", "Ooze", "Undead", "Construct", "Troop"]
+// const traits : (string|string[])[] =
+//     ["Elements",
+//     ["Air", "Fire", "Earth", "Metal", "Water", "Wood"],
+//     "Fiend",
+//     ["Fiend", "Devil", "Daemon", "Demon"],
+//     "Celestial",
+//     ["Celestial", "Azata", "Angel", "Archon"],
+//     "Monitor",
+//     ["Monitor", "Protean", "Psychopomp", "Aeon"],
+//     "Other Planes",
+//     ["Fey", "Shadow", "Dream"],
+//     "Ancestries",
+//     ["Human", "Goblin", "Elf", "Dwarf", "Orc", "Halfling", "Gnome"],
+//     "Type",
+//     ["Dragon", "Animal", "Beast", "Plant", "Undead", "Construct"],
+//     "Other",
+//     ["Troop"]
+//     ]
 
 function TraitsArea(filter : FilterValues,filterSetter : (f : FilterValues) => void){
     return(<div className="gap-2">
         <p>Traits:</p>
-        {TraitsPlaceholder.map(value => {
+        {traits.map(value => {
             return (<span className="mx-1 whitespace-nowrap ">
                     <label>
                         <input type="checkbox" onChange = {

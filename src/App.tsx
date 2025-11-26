@@ -47,6 +47,7 @@ function App()
             <div className="flex flex-4/5 flex-col">
                 <div>{CreatureAdjustmentButtons(selectedAdjustmentIndexes, setSelectedAdjustments, indexOfOpenCategories, setIndexOfOpenCategories)}</div>       
                 <div>{statBlock(adjustedCreature, isDescriptionOpen, setIsDescriptionOpen)}</div>
+                <p className="text-xs mt-auto align text-right text-gray-500 pr-1 pb-1">Version 0.1</p>
             </div>
         </div>
     );

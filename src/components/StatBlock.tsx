@@ -400,10 +400,10 @@ function statBlock(value: StatBlockProp | undefined, isDescriptionOpen: boolean,
         </p>
         <hr/>
         <h2>Strikes</h2>
-        <ul>
+        <ul className="undottedList">
             {GetCombinedStrikes(GetStrikes(value)).map(i => <li>{PrintStrike(value, i)}</li>)}
         </ul>
-        <ul>
+        <ul className="undottedList">
             {GetGenericAbilities(value).map(abilityItem => (
                 <li className="py-1 border-t-2 border-amber-300">
                     <span
@@ -456,7 +456,26 @@ export function cloneStatBlock(statBlock: StatBlockProp): StatBlockProp
 export function parseAbilityDescription(input: string): string {
     let output = input;
 
+    output = output.replace(
+        /@actor\.flags\.pf2e\.energyGland\.type/g,
+        () => `energy`
+    );
+    
+    output = output.replace(
+        /@actor\.flags\.pf2e\.powerSource/g,
+        () => `energy`
+    )
 
+    output = output.replace(
+        /@item\.flags\.pf2e\.rulesSelections\.breathWeapon/g,
+        () => `energy`
+    )
+
+    output = output.replace(
+        /@item\.flags\.pf2e\.rulesSelections\.bombingBarrage/g,
+        () => `energy`
+    )
+    
     output = output.replace(
         /@UUID\[[^\]]*\.Item\.[^\]]*]\{([^}]*)\}/g,
         (_match, label) => `<nobr><b>${label}</b></nobr>`
@@ -472,13 +491,8 @@ export function parseAbilityDescription(input: string): string {
         (_match, name) => `<nobr><b>${name}</b></nobr>`
     );
 
-    // output = output.replace(
-    //     /@Damage\[\(?((?:\d+(?:(?:\+|-?)\d+)?|(?:\d+d\d+(?:(?:\+|\-?)\d+)?)))\)?\[(\w+)(?:,(\w+))?\](?:\|\w+\:[\w+\-]+)?\]/g,
-    //     (_match, dice, type, type2) => `<nobr><b>${dice}${type ? " " + type : ""}${type2 ? " " + type2 : ""}</b></nobr>`
-    // );
-
     output = output.replace(
-        /@Damage\[((?:,?\(?(?:\d+(?:(?:\+|-?)\d+)?|\d+d\d+(?:(?:\+|-?)\d+)?|\d+\[\w+\])\)?\[(?:,?\w+)+\])+)(?:\|\w+:[\w+-]+)?\](?:\{[\w +-]+\})?/g,
+        /@Damage\[((?:,?\(?(?:\d+(?:(?:\+|-?)\d+)?|\d+d\d+(?:(?:\+|-?)\d+)?|\d+\[\w+\])\)?\[(?:,?\w+)+\])+)(?:\|[\w+-:]+)?\](?:\{[\w +-]+\})?/g,
         (_match, damageInfoMatch) =>
         {
             const split = damageInfoMatch.toString().split(/(?<=\]),/);
@@ -521,8 +535,17 @@ export function parseAbilityDescription(input: string): string {
     );
 
     output = output.replace(
-        /@Check\[(\w+)\|dc:(\d+)[^\]]*\]/gi,
-        (_match, save, dc) => `<nobr><b>DC ${dc} ${capitalize(save)}</b></nobr>`
+        /@Check\[(\w+)(?:\|(?!dc:)[\w:-]+)*(?:\|dc:(\d+))?(?:\|(?!dc:)[\w:-]+)*\](?:\{([\w ]+)?\})?/gi,
+        (_match, save, dc, text3) => 
+        {
+            if (text3 !== undefined)
+                return `<nobr><b>${text3}</b></nobr>`;
+            
+            if (dc !== undefined)
+                return `<nobr><b>DC ${dc} ${capitalize(save)}</b></nobr>`;
+            
+            return `<nobr><b>${capitalize(save)}</b></nobr>`
+        }
     );
 
     output = output.replace(
@@ -551,16 +574,16 @@ export function parseAbilityDescription(input: string): string {
     );
     
     output = output.replace(
-        /\[\[\/act (\w+)(?: dc=(\d+))?\]\](?:{([\w ]+)})?/g,
-        (_match, text, dc, text2) =>
+        /\[\[\/act ([\w-]+)(?: dc=(\d+))?(?: skill=(\w+))?\]\](?:{([\w ]+)})?/g,
+        (_match, text, dc, skill, text2) =>
         {
             if (dc !== undefined)
-                return `${capitalize(text)} DC ${dc}`
+                return `<nobr><b>[${capitalize(text)} DC ${dc}]</nobr></b>`
             
             if (text2 !== undefined)
-                return `${capitalize(text2)}`
+                return `<nobr><b>${capitalize(text2)}</nobr></b>`
             
-            return `${capitalize(text)}`
+            return `<nobr><b>${capitalize(text)}</nobr></b>`
         }
     )
     

@@ -123,6 +123,10 @@ function GetSpecialSkills(skill: Skill) {
 }
 
 export function printSkills(creature:StatBlockProp,list: SkillList) {
+    
+    if (list === undefined)
+        return <></>;
+    
     const keys = Object.keys(list) as (keyof SkillList)[];
     const definedSkills = keys.filter(k => list[k]);
 

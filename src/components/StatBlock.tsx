@@ -467,6 +467,20 @@ export function cloneStatBlock(statBlock: StatBlockProp): StatBlockProp
 export function parseAbilityDescription(input: string): string {
     let output = input;
 
+    //Pathfinder icons replacement
+    output = output.replace(/<span class="action-glyph">1<\/span>/g,
+        ()=>`<span class="pathfinder-action">A</span>`)
+    output = output.replace(/<span class="action-glyph">a<\/span>/gi,
+        ()=>`<span class="pathfinder-action">A</span>`)
+    output = output.replace(/<span class="action-glyph">2<\/span>/g,
+        ()=>`<span class="pathfinder-action">D</span>`)
+    output = output.replace(/<span class="action-glyph">3<\/span>/g,
+        ()=>`<span class="pathfinder-action">T</span>`)
+    output = output.replace(/<span class="action-glyph">R<\/span>/g,
+        ()=>`<span class="pathfinder-action">R</span>`)
+    output = output.replace(/<span class="action-glyph">F<\/span>/g,
+        ()=>`<span class="pathfinder-action">F</span>`)
+    
     output = output.replace(
         /@actor\.flags\.pf2e\.energyGland\.type/g,
         () => `energy`

@@ -1,4 +1,6 @@
 
+Shambler Troop print skills
+
 Primeiro Elite
 Depois o Resto
 
@@ -6,15 +8,8 @@ werebear
 
 Regeneration & Fast Healing (Kektar e Troll)
 
-Quetz Coatl
-Juggernaut
-Levaloch tem spells
+Levaloch tem spells // Ritual
 Elder Wyrmwraith / Tarn Linnorm / Tor Linnorm
-Ironwarden Stell Shield
 
-Traits:
-Elementais
-Human
-Troop
-Undead
-Construct
+1 to 3 actions Mercenary Band
+Troop defenses HP

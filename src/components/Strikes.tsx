@@ -308,3 +308,34 @@ function isThrow(value: CreatureItemStrike) : boolean
     
     return false;
 }
+
+export function PrintReactiveStrikeLabel(value: StatBlockProp)
+{
+    const reactiveStrike = getReactiveStrike(value);
+    
+    if (reactiveStrike === undefined)
+        return <></>;
+    
+    if (reactiveStrike.name === "Reactive Strike" || reactiveStrike.name === "Attack of Opportunity")
+        return <>
+            (<span className="text-s flex items-center gap-1">
+                {(<span className="text-s "><span className="pathfinder-action text-[1.25rem] leading-none">R</span><span className="font-semibold">Reactive Strike</span></span>)}
+            </span>)
+            </>
+    
+    else
+        return <>
+            (<span className="text-s flex items-center gap-1">
+                {(<span className="text-s "><span className="pathfinder-action text-[1.25rem] leading-none">R</span><span className="font-semibold">{reactiveStrike.name}</span></span>)}
+            </span>)
+            </>
+}
+
+function getReactiveStrike(value: StatBlockProp): CreatureItem | undefined
+{
+    const reactiveStrike = value.items.filter(v => {return v.system.slug === "reactive-strike" || v.system.slug === "attack-of-opportunity"});
+    if (reactiveStrike.length === 0)
+        return undefined;
+    
+    return reactiveStrike[0];
+}

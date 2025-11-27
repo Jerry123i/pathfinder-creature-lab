@@ -1,9 +1,16 @@
-﻿import {type CreatureItemStrike, GetCombinedStrikes, GetStrikes, PrintStrike} from "./Strikes.tsx";
+﻿import {
+    type CreatureItemStrike,
+    GetCombinedStrikes,
+    GetStrikes,
+    PrintReactiveStrikeLabel,
+    PrintStrike
+} from "./Strikes.tsx";
 import {printSkills, type SkillList} from "./Skills.tsx";
 import type {Abilities} from "./Abilities.tsx";
 import {type CreatureItemSpell, GetSpells, HasSpells, PrintAllSpells} from "./Spells.tsx";
 import {capitalize} from "./TypeScriptHelpFunctions.tsx";
 import {GetTraitColor, printTraitsSeparator, printTraitsTransformElement, type Traits} from "./Traits.tsx";
+import {PrintShield} from "./Shield.tsx";
 
 export interface StatBlockProp {
     _id: string;
@@ -126,6 +133,7 @@ export function GetGenericAbilities(value: StatBlockProp): CreatureItem[] {
             && item.type != "equipment"
             && item.type != "ammo"
             && item.type != "condition"
+            && item.type != "shield"
             && item.system.slug != "push"
             && item.system.slug != "improved-push"
             && item.system.slug != "grab"
@@ -135,6 +143,9 @@ export function GetGenericAbilities(value: StatBlockProp): CreatureItem[] {
             && item.system.slug != "telepathy"
             && item.system.slug != "constant-spells"
             && item.system.slug != "1-status-to-all-saves-vs-magic"
+            && item.system.slug != "shield-block"
+            && !(item.system.slug === "reactive-strike" && (item.name === "Reactive Strike" || item.name === "Attack of Opportunity"))
+            && !(item.system.slug === "attack-of-opportunity" && (item.name === "Reactive Strike" || item.name === "Attack of Opportunity"))
         )
     })
 
@@ -359,7 +370,7 @@ function statBlock(value: StatBlockProp | undefined, isDescriptionOpen: boolean,
         <br/>
         <b>Skills</b> {printSkills(value, value.system.skills)}<br/>
         <hr/>
-        {printValue(value.system.attributes.ac, "AC")}{";"}
+        <span className="flex gap-1 items-center">{printValue(value.system.attributes.ac, "AC")}{";"}{PrintShield(value)}</span>
         {printValueWithSignal(value.system.saves.fortitude, "Fort")}{";"}
         {printValueWithSignal(value.system.saves.reflex, "Ref")}{";"}
         {printValueWithSignal(value.system.saves.will, "Will")}
@@ -399,7 +410,7 @@ function statBlock(value: StatBlockProp | undefined, isDescriptionOpen: boolean,
             {printMod(value.system.abilities.cha, "CHA")}
         </p>
         <hr/>
-        <h2>Strikes</h2>
+        <span className="flex align-middle"><h2>Strikes</h2><span className="ml-2 flex">{PrintReactiveStrikeLabel(value)}</span></span>
         <ul className="undottedList">
             {GetCombinedStrikes(GetStrikes(value)).map(i => <li>{PrintStrike(value, i)}</li>)}
         </ul>

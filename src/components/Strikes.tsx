@@ -176,6 +176,8 @@ export function PrintStrike_StrikeType(creature: StatBlockProp,item: CreatureIte
             attackEffectsString = "plus ";
             
             for (let i = 0; i < item.system.attackEffects.value.length; i++) {
+                if (i>0)
+                    attackEffectsString += " and ";
                 attackEffectsString += GetAbilityNameFromSlug(creature, item.system.attackEffects.value[i]);
             }
         }

@@ -1,0 +1,37 @@
+@Damage\[(?:(?:,)?\(?((?:\d+(?:(?:\+|-?)\d+)?|(?:\d+d\d+(?:(?:\+|-?)\d+)?)))\)?\[(\w+)(?:,(\w+))?\])+(?:\|\w+:[\w+-]+)?\]
+
+-
+
+Full match
+@Damage\[((?:,?\(?(?:\d+(?:(?:\+|-?)\d+)?|\d+d\d+(?:(?:\+|-?)\d+)?|\d+\[\w+\])\)?\[(?:,?\w+)+\])+)(?:\|\w+:[\w+-]+)?\](?:\{[\w +-]+\})?
+
+Individual match
+^,?\(?(\d+(?:(?:\+|-?)\d+)?|\d+d\d+(?:(?:\+|-?)\d+)?|\d+\[\w+\])\)?\[(?:,?(\w+))?(?:,?(\w+))?\]$
+
+
+@Damage[3d10[acid],(3[splash])[acid]]
+@Damage[13d6+3[bludgeoning]|options:area-damage]
+@Damage[13d6-14[bludgeoning,fire]|options:area-damage]
+@Damage[5d6[bludgeoning],5d6[poison]|options:area-damage]
+@Damage[5d6[bludgeoning],5d6[poison],20[fire]|options:area-damage]
+@Damage[5d6+3[bludgeoning],5d6[poison]|options:area-damage]
+@Damage[5d6+3[bludgeoning],30[slashing]|options:area-damage]
+@Damage[5d6+3[bludgeoning],30[fire,cold]|options:area-damage]
+@Damage[13d6[bludgeoning]|options:area-damage]
+@Damage[13d6-3[bludgeoning]|options:area-damage]
+@Damage[30[healing]|options:area-damage]
+@Damage[30+8[acid]|options:area-damage]
+@Damage[30-108[healing]|options:area-damage]
+@Damage[5d12[electricity]|options:area-damage]
+@Damage[(1d4+2)[bludgeoning]]
+@Damage[1d4[persistent,poison]]
+@Damage[17[piercing],5[poison]]{17 piercing damage and 5 poison damage}
+@Damage[2d8[bludgeoning],2d8[piercing]]{2d8 bludgeoning damage plus 2d8 piercing damage}
+@Damage[2d6[cold]|options:area-damage]{cold}
+@Damage[2d6[cold]|options:area-damage]{fire}
+@Damage[1d4[healing,vitality]|shortLabel]
+
+
+
+(?<=\[|,)
+(?=,|\])

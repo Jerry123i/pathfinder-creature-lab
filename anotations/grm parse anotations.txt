@@ -1,0 +1,6 @@
+\[\[\/gmr (\w+) #(?:\w| )+\]\](?:\{([^}]*)\})?
+
+[[/gmr 1d4 #Recharge Breath Poison]]{1d4 rounds}
+[[/gmr 1d4 #Recharge Wail]]
+[[/gmr 1d4 #Weeks]]{1d4 weeks}
+[[/gmr 1d6 #Alchemical Chambers]]

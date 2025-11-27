@@ -27,6 +27,28 @@
         padding-left: 0;
     }
     
+    table{
+        border: 1px solid black;
+        margin: 2px;
+    }
+    tr{
+        border: 1px solid black;
+    }
+    td{
+        padding: 5px;
+        border: 1px solid black;
+        text-align: center;
+    }
+    td:not(:first-child){
+        text-align: left;
+    }
+    th{
+        padding: 3px 10px 3px 10px;
+        border: 1px solid black;
+        text-align: center;
+    }
+
+
     .pathfinder-action{
         @apply font-[PF2A] text-[1.75rem] pr-1;
     }

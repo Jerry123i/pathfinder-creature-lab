@@ -1,0 +1,12 @@
+@Check\[(\w+)(?:\|(?!dc:)[ \,\w:-]+)*(?:\|dc:(\d+))?(?:\|(?!dc:)[ \,\w:-]+)*\](?:\{([\w ]+)?\})?
+
+@Check[reflex|basic|dc:31|options:area-effect|traits:cold]
+@Check[fortitude|dc:40|options:area-effect,damaging-effect,inflicts:stunned]
+@Check[reflex|dc:15]
+@Check[reflex|dc:17|basic|options:area-effect]
+@Check[deception|against:will]
+@Check[occultism|against:will|options:inflicts:stupefied]
+@Check[thievery|traits:action:disable-a-device|dc:14]
+@Check[fortitude|against:class-spell|traits:air]{Fortitude saving throw}
+@Check[perception|defense:games-lore|traits:secret]
+@Check[perception]

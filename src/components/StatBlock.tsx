@@ -535,7 +535,7 @@ export function parseAbilityDescription(input: string): string {
     );
 
     output = output.replace(
-        /@Check\[(\w+)(?:\|(?!dc:)[\w:-]+)*(?:\|dc:(\d+))?(?:\|(?!dc:)[\w:-]+)*\](?:\{([\w ]+)?\})?/gi,
+        /@Check\[(\w+)(?:\|(?!dc:)[ \,\w:-]+)*(?:\|dc:(\d+))?(?:\|(?!dc:)[ \,\w:-]+)*\](?:\{([\w ]+)?\})?/gi,
         (_match, save, dc, text3) => 
         {
             if (text3 !== undefined)
@@ -558,8 +558,14 @@ export function parseAbilityDescription(input: string): string {
     );
 
     output = output.replace(
-        /\[\[\/gmr [^\]]*]]\{([^}]*)\}/g,
-        (_match, content) => `<nobr><b>${content}</b>`
+        /\[\[\/gmr (\w+) #(?:\w| )+\]\](?:\{([^}]*)\})?/g,
+        (_match, dice, text) => 
+        {
+            if(text === undefined)
+                return `<nobr><b>${dice}</b></nobr>`
+            
+            return `<nobr><b>${text}</b></nobr>`
+        }
     );
 
     output = output.replace(
@@ -582,6 +588,9 @@ export function parseAbilityDescription(input: string): string {
             
             if (text2 !== undefined)
                 return `<nobr><b>${capitalize(text2)}</nobr></b>`
+            
+            if (text === undefined)
+                return `<nobr><b>${capitalize(skill)}</nobr></b>` 
             
             return `<nobr><b>${capitalize(text)}</nobr></b>`
         }

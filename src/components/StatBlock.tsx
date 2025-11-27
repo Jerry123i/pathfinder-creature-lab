@@ -11,6 +11,15 @@ import {type CreatureItemSpell, GetSpells, HasSpells, PrintAllSpells} from "./Sp
 import {capitalize} from "./TypeScriptHelpFunctions.tsx";
 import {GetTraitColor, printTraitsSeparator, printTraitsTransformElement, type Traits} from "./Traits.tsx";
 import {PrintShield} from "./Shield.tsx";
+import {
+    GetFastHealing,
+    GetRegeneration,
+    isVoidHealing,
+    PrintHP,
+    PrintImmunity,
+    PrintResistances,
+    PrintWeakness
+} from "./HPItems.tsx";
 
 export interface StatBlockProp {
     _id: string;
@@ -99,6 +108,7 @@ export interface Attributes {
     hp: ValueHolder;
     speed: SpeedValue;
     resistances: TypedValue[];
+    weaknesses: TypedValue[];
     immunities : {type: string}[];
 }
 
@@ -144,6 +154,10 @@ export function GetGenericAbilities(value: StatBlockProp): CreatureItem[] {
             && item.system.slug != "constant-spells"
             && item.system.slug != "1-status-to-all-saves-vs-magic"
             && item.system.slug != "shield-block"
+            && item.system.slug != "negative-healing"
+            && item.system.slug != "void-healing"
+            && item.system.slug != "regeneration"
+            && item.system.slug != "fast-healing"
             && !(item.system.slug === "reactive-strike" && (item.name === "Reactive Strike" || item.name === "Attack of Opportunity"))
             && !(item.system.slug === "attack-of-opportunity" && (item.name === "Reactive Strike" || item.name === "Attack of Opportunity"))
         )
@@ -370,30 +384,21 @@ function statBlock(value: StatBlockProp | undefined, isDescriptionOpen: boolean,
         <br/>
         <b>Skills</b> {printSkills(value, value.system.skills)}<br/>
         <hr/>
-        <span className="flex gap-1 items-center">{printValue(value.system.attributes.ac, "AC")}{";"}{PrintShield(value)}</span>
+        <span
+            className="flex gap-1 items-center">{printValue(value.system.attributes.ac, "AC")}{";"}{PrintShield(value)}</span>
         {printValueWithSignal(value.system.saves.fortitude, "Fort")}{";"}
         {printValueWithSignal(value.system.saves.reflex, "Ref")}{";"}
         {printValueWithSignal(value.system.saves.will, "Will")}
         {value.items.find((value) => value.system?.slug === "1-status-to-all-saves-vs-magic") !== undefined &&
             <span className="font-semibold">; +1 status to all saves vs. magic</span>}
-        <br/>
-        {printValue(value.system.attributes.hp, "HP")}
-        {value.system.attributes.resistances === undefined ? null : (
-            <>
-                <b> Resistances:</b>{" "}
-                {value.system.attributes.resistances.map(res => (
-                    <>{capitalize(res.type)} {res.value} </>
-                ))}
-            </>
-        )}
-        {value.system.attributes.immunities === undefined ? null : (
-            <>
-                <b> Immunities:</b>{" "}
-                {value.system.attributes.immunities.map((imu, index) => (
-                    <>{index === 0 ? null : ", "}{capitalize(imu.type)}</>
-                ))}
-            </>
-        )}
+        <br></br>
+        {PrintHP(value)}
+        {isVoidHealing(value) ? ` (void healing)` : null}
+        {GetFastHealing(value) !== undefined ? ` (${GetFastHealing(value)?.name})` : null}
+        {GetRegeneration(value) !== undefined ? ` (${GetRegeneration(value)?.name})` : null}
+        {PrintResistances(value)}
+        {PrintWeakness(value)}
+        {PrintImmunity(value)}
         <br/>
         {printValue(value.system.attributes.speed, "Speed")}ft
         {value.system.attributes.speed.otherSpeeds.length > 0 ?
@@ -410,7 +415,8 @@ function statBlock(value: StatBlockProp | undefined, isDescriptionOpen: boolean,
             {printMod(value.system.abilities.cha, "CHA")}
         </p>
         <hr/>
-        <span className="flex align-middle"><h2>Strikes</h2><span className="ml-2 flex">{PrintReactiveStrikeLabel(value)}</span></span>
+        <span className="flex align-middle"><h2>Strikes</h2><span
+            className="ml-2 flex">{PrintReactiveStrikeLabel(value)}</span></span>
         <ul className="undottedList">
             {GetCombinedStrikes(GetStrikes(value)).map(i => <li>{PrintStrike(value, i)}</li>)}
         </ul>
@@ -644,7 +650,7 @@ function printMod(mod: Mod, name: string) {
     return <> <b>{name}</b> +{val}</>;
 }
 
-function printValue(value: NullableValueHolder, name: string) {
+export function printValue(value: NullableValueHolder, name: string) {
     const val = value.value;
     return <> <b>{name}</b> {val}</>;
 }

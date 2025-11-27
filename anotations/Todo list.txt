@@ -3,10 +3,9 @@ Depois o Resto
 
 werebear
 
-Regeneration & Fast Healing (Kektar e Troll)
-Void Healing
+Troop defenses HP
 
 Levaloch tem spells // Ritual
 Elder Wyrmwraith / Tarn Linnorm / Tor Linnorm
 
-Troop defenses HP
+Remove senses

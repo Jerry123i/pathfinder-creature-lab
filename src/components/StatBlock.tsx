@@ -410,8 +410,14 @@ function statBlock(value: StatBlockProp | undefined, isDescriptionOpen: boolean,
         {printValueWithSignal(value.system.saves.fortitude, "Fort")}{";"}
         {printValueWithSignal(value.system.saves.reflex, "Ref")}{";"}
         {printValueWithSignal(value.system.saves.will, "Will")}
-        {value.items.find((value) => value.system?.slug === "1-status-to-all-saves-vs-magic") !== undefined &&
-            <span className="font-semibold">; +1 status to all saves vs. magic</span>}
+        {value.items.some(i => i.system?.slug === "1-status-to-all-saves-vs-magic") && 
+            (
+            <span className="text-gray-500 italic"> {" "}
+                {
+                    (value.items.find((i) => i.system?.slug === "1-status-to-all-saves-vs-magic"))?.name
+                }
+            </span>
+        )}
         <br></br>
         {PrintHP(value)}
         {isVoidHealing(value) ? ` (void healing)` : null}

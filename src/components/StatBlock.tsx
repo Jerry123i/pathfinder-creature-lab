@@ -286,35 +286,56 @@ export interface StringHolder {
 export interface DamageRollInfo {
     damage: string;
     damageType: string;
+    category?: string;
 }
 
 export interface DiceAndModifier {
-    diceType: number;
-    diceNumber: number;
+    diceType: number | null;
+    diceNumber: number | null;
     modifier: number;
 }
 
-export function GetDice(value: DamageRollInfo): DiceAndModifier {
-    const pattern = /(\d+)d(\d+)([+-]\d+)?/i; // matches e.g. 2d6, 3d10+5, 12d4-3
-    const match = value.damage.toString().match(pattern);
+export function GetDice(value: DamageRollInfo): DiceAndModifier
+{
+    const dicePattern = /(\d+)d(\d+)([+-]\d+)?/i; // matches e.g. 2d6, 3d10+5, 12d4-3
+    const staticDamagePattern = /(\d+)/;
+    
+    const matchDice = value.damage.toString().match(dicePattern);
 
-    if (!match) {
-        throw new Error(`Invalid dice format: ${value.damage}`);
+    if (matchDice)
+    {
+        const diceNumber = parseInt(matchDice[1], 10);
+        const diceType = parseInt(matchDice[2], 10);
+        const modifier = matchDice[3] ? parseInt(matchDice[3], 10) : 0;
+
+        return {
+            diceType,
+            diceNumber,
+            modifier
+        };
+    }
+    
+    const matchStatic = value.damage.toString().match(staticDamagePattern);
+    
+    if(matchStatic)
+    {
+        return {
+            diceType: null,
+            diceNumber: null,
+            modifier: parseInt(matchStatic[1])
+        };
     }
 
-    const diceNumber = parseInt(match[1], 10);
-    const diceType = parseInt(match[2], 10);
-    const modifier = match[3] ? parseInt(match[3], 10) : 0;
-
-    return {
-        diceType,
-        diceNumber,
-        modifier
-    };
+    throw new Error(`Invalid dice format: ${value.damage}`);
 }
 
-export function DiceString(value: DiceAndModifier): string {
-    return (value.diceNumber.toString() + "d" + value.diceType.toString() + (value.modifier === 0 ? "" : printNumberWithSignalString(value.modifier)))
+export function DiceString(value: DiceAndModifier): string 
+{
+    console.log(value);
+    if (value.diceNumber !== null && value.diceType !== null)
+        return (value.diceNumber.toString() + "d" + value.diceType.toString() + (value.modifier === 0 ? "" : printNumberWithSignalString(value.modifier)));
+    else 
+        return (value.modifier === 0 ? "" : printNumberWithSignalString(value.modifier));
 }
 
 export interface Details {

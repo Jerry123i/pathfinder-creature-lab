@@ -8,7 +8,7 @@
     printNumberWithSignalElement,
     type StatBlockProp,
     type StringHolder,
-    type NullableValueHolder, NullableValueChange
+    type NullableValueHolder, NullableValueChange, parseAbilityDescription
 } from "./StatBlock.tsx";
 import {printTraitsSeparator} from "./Traits.tsx";
 import {capitalize} from "./TypeScriptHelpFunctions.tsx";
@@ -24,6 +24,7 @@ export interface StrikeSystem extends ItemSystem {
     range: { increment: number, max: number },
     damageRolls: Record<string, DamageRollInfo>
     attackEffects?: {custom: string, value: string[]}
+    description: {value: string};
 }
 
 
@@ -132,7 +133,9 @@ function GetDamagesInfo(value: StrikeSystem): DamageRollInfo[] {
         const damageRoll = roll[key] as DamageRollInfo;
         damages.push(damageRoll);
     }
-
+    
+    damages.sort((a) => {if (a.damage.includes("d")) return -1; else return 1;});
+    
     return damages;
 }
 
@@ -155,7 +158,6 @@ export function PrintStrike_StrikeType(creature: StatBlockProp,item: CreatureIte
             if (item.system.range?.increment > 0)
                 item.system.weaponType = {value: "ranged"};
         }
-
     }
 
     let atkPenalty: number;
@@ -186,7 +188,7 @@ export function PrintStrike_StrikeType(creature: StatBlockProp,item: CreatureIte
     
     return (<>
         <b>{isThrow(item)?"Ranged":capitalize(item.system.weaponType.value)}</b> <span className="pathfinder-action">A</span>{item.name} {printNumberWithSignalElement(item.system.bonus.value)}[{printNumberWithSignalElement((item.system.bonus.value ?? 0) - atkPenalty)}/{printNumberWithSignalElement((item.system.bonus.value??0) - (atkPenalty * 2))}]
-        {" "}{traits.value.length > 0 && <>({printTraitsSeparator(traits, ", ")})</>} {GetDamagesInfo(item.system).map(dmg => (<> {dmg.damage} {dmg.damageType}</>))} {attackEffectsString !== "" && <span className="text-green-800 italic"> {attackEffectsString}</span>}
+        {" "}{traits.value.length > 0 && <>({printTraitsSeparator(traits, ", ")})</>} {GetDamagesInfo(item.system).map(dmg => (<> {dmg.damage} {dmg.category && dmg.category+" "}{dmg.damageType}</>))} {attackEffectsString !== "" && <span className="text-green-800 italic"> {attackEffectsString}</span>} <span className="text-gray-500 italic" dangerouslySetInnerHTML={{__html: parseAbilityDescription(item.system.description.value.replace("<p>", "").replace("</p>",""))}}></span>
     </>)
 }
 

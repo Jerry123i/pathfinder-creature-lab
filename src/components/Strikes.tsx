@@ -8,11 +8,12 @@
     printNumberWithSignalElement,
     type StatBlockProp,
     type StringHolder,
-    type NullableValueHolder, NullableValueChange, parseAbilityDescription
+    type NullableValueHolder, NullableValueChange
 } from "./StatBlock.tsx";
 import {printTraitsSeparator} from "./Traits.tsx";
 import {capitalize} from "./TypeScriptHelpFunctions.tsx";
 import type {AbilityName} from "./Abilities.tsx";
+import {parseAbilityDescription} from "./Parsing.tsx";
 
 export interface CreatureItemStrike extends CreatureItem {
     system: StrikeSystem

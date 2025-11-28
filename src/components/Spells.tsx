@@ -1,5 +1,13 @@
-﻿import type {CreatureItem, ItemSystem, StatBlockProp, NullableValueHolder} from "./StatBlock.tsx";
+﻿import {
+    type CreatureItem,
+    type ItemSystem,
+    type StatBlockProp,
+    type NullableValueHolder,
+    GetGenericAbilities
+} from "./StatBlock.tsx";
 import {Fragment} from "react";
+import {capitalize} from "./TypeScriptHelpFunctions.tsx";
+import {checkRegex} from "./Parsing.tsx";
 
 export type SpellTraditions = "arcane" | "divine" | "primal" | "occult";
 
@@ -55,7 +63,7 @@ export function GetSpellcastingEntry(value: StatBlockProp) : SpellcastingItem | 
     return null;
 }
 
-export function ModifySpellDc(creature : StatBlockProp, value : number)
+export function modifySpellDc(creature : StatBlockProp, value : number)
 {
     if (!HasSpells(creature))
         return;

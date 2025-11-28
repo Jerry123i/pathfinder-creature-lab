@@ -1,7 +1,13 @@
-﻿import {cloneStatBlock, modifyAllSaves, type StatBlockProp, type TypedValue} from "../StatBlock.tsx";
+﻿import {
+    cloneStatBlock,
+    GetGenericAbilities,
+    modifyAllSaves,
+    type StatBlockProp,
+    type TypedValue
+} from "../StatBlock.tsx";
 import {modifyAllStrikes} from "../Strikes.tsx";
 import {modifyAllSkills} from "../Skills.tsx";
-import {ModifySpellDc} from "../Spells.tsx";
+import {modifySpellDc} from "../Spells.tsx";
 import {
     Catfolk,
     Dwarf,
@@ -14,6 +20,8 @@ import {
     Minotaur,
     Orc,
 } from "./Ancestry/AncestryModifiers.tsx";
+import {actionTooltipRegex, checkRegex, damageRegex, splitDamageDiceRegex} from "../Parsing.tsx";
+import {capitalize} from "../TypeScriptHelpFunctions.tsx";
 
 type ModifierType = "Level" | "Ancestry" | "Elemental" | "Undead" | "CreatureType";
 
@@ -56,7 +64,9 @@ export const Elite : CreatureAdjustment = {
         
         sb.system.attributes.hp.value += hpIncreaseValue;
         modifyAllStrikes(sb, 2, 2);
-        ModifySpellDc(sb, 2);
+        modifySpellDc(sb, 2);
+        modifyAbilitiesSaves(sb, 2);
+        modifyAbilitiesDamage(sb, 2);
         
         sb.name = "Elite " + sb.name;
         
@@ -94,7 +104,9 @@ export const Weak : CreatureAdjustment = {
 
         sb.system.attributes.hp.value -= hpDecreaseValue;
         modifyAllStrikes(sb, -2, -2);
-        ModifySpellDc(sb, -2);
+        modifySpellDc(sb, -2);
+        modifyAbilitiesSaves(sb, -2);
+        modifyAbilitiesDamage(sb, -2);
 
         sb.name = "Weak " + sb.name;
         
@@ -191,6 +203,84 @@ export function changeSize(baseCreature : StatBlockProp, value: ("tiny"|"small"|
     const sb = cloneStatBlock(baseCreature);
     sb.system.traits.size.value = value;
     return sb;
+}
+
+export function modifyAbilitiesSaves(creature : StatBlockProp, value : number)
+{
+    const abilities = GetGenericAbilities(creature);
+
+    for (const ability of abilities)
+    {
+        let desc = ability.system.description.value;
+
+        desc = desc.replace(checkRegex, (_match, save, dc) => {
+            if (dc === undefined) return _match;
+            return _match.replace(dc, (parseInt(dc) + value).toString());
+        });
+
+        desc = desc.replace(actionTooltipRegex, (_match, text, dc) => {
+            if (dc === undefined) return _match;
+            return _match.replace(dc, (parseInt(dc) + value).toString());
+        });
+
+        ability.system.description.value = desc;
+    }
+}
+
+export function modifyAbilitiesDamage(creature : StatBlockProp, valueToIncrease : number)
+{
+    const abilities = GetGenericAbilities(creature);
+
+    for (const ability of abilities) 
+    {
+        let desc = ability.system.description.value;
+        desc = desc.replace(damageRegex, (_match, damageInfoMatch) => 
+            {
+                const split = damageInfoMatch.toString().split(/(?<=\]),/);
+                let roll: { dice: string, dmgType1: string, dmgType2: string };
+
+                let damageInstance = split[0] as string;
+                damageInstance = damageInstance.replace(splitDamageDiceRegex, (_matchJ, dice) =>
+                    {
+                        const diceRegex = /\d+d\d+((?:\+|-?)\d+)?/;
+                        const flatNumberRegex = /((?:\d+))(?:(?:\+|-?)\d+)?/;
+                        
+                        const diceMatch = dice.match(diceRegex); 
+                        if(diceMatch)
+                        {
+                            //if(diceMatch.match[1] === undefined)
+                            if(diceMatch[1] === undefined)
+                            {
+                                if (valueToIncrease > 0)
+                                    return _matchJ.replace(dice, dice.toString() + "+" + valueToIncrease.toString());
+                                else
+                                    return _matchJ.replace(dice, dice.toString() + valueToIncrease.toString());
+                            }
+                            else
+                            {
+                                const newValue = parseInt(diceMatch[1]) + valueToIncrease;
+                                return _matchJ.replace(dice, newValue.toString());
+                            }
+                        }
+                        else
+                        {
+                            const flatNumberMatch = dice.match(flatNumberRegex);
+                            if(flatNumberMatch)
+                            {
+                                const newValue = parseInt(diceMatch[1]) + valueToIncrease;
+                                return _matchJ.replace(dice, newValue.toString());
+                            }
+                        }
+                        
+                        return _matchJ.replace(dice, dice + "+error");
+                    }
+                );
+
+                return _match.replace(split[0], damageInstance);
+            }
+        )
+        ability.system.description.value = desc;
+    }
 }
 
 export const CreatureAdjustmentList = [Elite, Weak, Catfolk, Dwarf, Elf, Gnome, Goblin, Halfling, Leshy, Minotaur, Merfolk, Orc];

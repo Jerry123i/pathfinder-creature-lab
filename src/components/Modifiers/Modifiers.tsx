@@ -271,7 +271,7 @@ export function modifyAbilitiesDamage(creature : StatBlockProp, valueToIncrease 
                             const flatNumberMatch = dice.match(flatNumberRegex);
                             if(flatNumberMatch)
                             {
-                                const newValue = parseInt(diceMatch[1]) + valueToIncrease;
+                                const newValue = parseInt(flatNumberMatch[1]) + valueToIncrease;
                                 return _matchJ.replace(dice, newValue.toString());
                             }
                         }

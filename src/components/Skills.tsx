@@ -119,6 +119,9 @@ function GetSpecialSkills(skill: Skill) {
         stringValue += (i>0? ", ":"") + (special.base >= 0 ? "+" : "") +special.base + " " + special.label;
     }
     
+    if (stringValue === "")
+        return (<></>);
+    
     return (<>({stringValue})</>);
 }
 

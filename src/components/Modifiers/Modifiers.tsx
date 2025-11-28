@@ -259,7 +259,11 @@ export function modifyAbilitiesDamage(creature : StatBlockProp, valueToIncrease 
                             else
                             {
                                 const newValue = parseInt(diceMatch[1]) + valueToIncrease;
-                                return _matchJ.replace(dice, newValue.toString());
+                                //// const newDice  = diceMatch.replace(diceMatch[1], newValue.toString());
+                                const newDice = dice.replace(diceRegex, (_m) =>{
+                                    return _m.replace(diceMatch[1], (newValue>0?"+":"")+(newValue.toString()));
+                                })
+                                return _matchJ.replace(dice, newDice.toString());
                             }
                         }
                         else

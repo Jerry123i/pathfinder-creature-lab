@@ -89,7 +89,6 @@ export function GetSpecialSenses(value: Perception): Sense[]
         
         specialSenses.push(sense);
     }
-    console.log(specialSenses);
     return specialSenses;
 }
 
@@ -108,7 +107,7 @@ export interface Attributes {
     speed: SpeedValue;
     resistances: TypedValue[];
     weaknesses: TypedValue[];
-    immunities : {type: string}[];
+    immunities : {exceptions:string[], type: string}[];
 }
 
 export interface CreatureItem {

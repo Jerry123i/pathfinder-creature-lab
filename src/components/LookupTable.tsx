@@ -1,13 +1,13 @@
 ﻿
 //type AttributeTiers = "extreme" | "high" | "moderate" | "low" | "terrible";
 
-interface Range {
+interface Range<T> {
     min: number;
     max: number; // use Infinity for open-ended ranges
-    value: string;
+    value: T;
 }
 
-export interface LookupTable {
-    ranges: Range[];
-    lookup(level: number): string;
+export interface LookupTable<T> {
+    ranges: Range<T>[];
+    lookup(level: number): T;
 }

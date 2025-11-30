@@ -171,7 +171,7 @@ export const Leshy: CustomAncestryCreatureAdjustment = {
     },
     apply: (statBlock) => 
     {
-        const healingTable: LookupTable = {
+        const healingTable: LookupTable<string> = {
             ranges: [
                 { min: -1,  max: 0,  value: "1d4" },
                 { min: 1,   max: 1,  value: "1d8" },

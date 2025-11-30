@@ -21,7 +21,7 @@ import {
     Orc,
 } from "./Ancestry/AncestryModifiers.tsx";
 import {actionTooltipRegex, checkRegex, damageRegex, splitDamageDiceRegex} from "../Parsing.tsx";
-import {capitalize} from "../TypeScriptHelpFunctions.tsx";
+import {MindlessUndead, Skeleton, Undead, Zombie} from "./Undead/UndeadModifiers.tsx";
 
 type ModifierType = "Level" | "Ancestry" | "Elemental" | "Undead" | "CreatureType";
 
@@ -114,38 +114,6 @@ export const Weak : CreatureAdjustment = {
     }
 }
 
-export const Zombie : CreatureAdjustment = {
-    _id: "adj_zombie",
-    name: "Zombie",
-    description: "",
-    priority: 1,
-    type: "Undead",
-    apply: (statblock: StatBlockProp) =>
-    {
-        const sb = cloneStatBlock(statblock);
-
-        sb.name = "Zombie " + sb.name;
-
-        return sb;
-    }
-}
-
-export const Vampire : CreatureAdjustment = {
-    _id: "adj_vampire",
-    name: "Vampire",
-    description: "",
-    priority: 1,
-    type: "Undead",
-    apply: (statblock: StatBlockProp) =>
-    {
-        const sb = cloneStatBlock(statblock);
-
-        sb.name = "Vampire " + sb.name;
-
-        return sb;
-    }
-}
-
 export function applyAllAdjustments(baseCreature : StatBlockProp | undefined, adjustments : CreatureAdjustment[]) : StatBlockProp | undefined
 {
     if(baseCreature === undefined)
@@ -193,6 +161,53 @@ export function addSpeed(baseCreature : StatBlockProp, value: TypedValue)
     }
     
     baseCreature.system.attributes.speed.otherSpeeds.push(value);
+}
+
+export function addResistances(sb: StatBlockProp, resistances: string[], value: number) {
+    for (const trait of resistances) {
+        addResistance(sb, {type:trait,  value:value});
+    }
+}
+
+export function addResistance(baseCreature : StatBlockProp, value: TypedValue)
+{
+    if (baseCreature.system.attributes.resistances === undefined)
+        baseCreature.system.attributes.resistances = [];
+    
+    if ((baseCreature.system.attributes.resistances.filter(v => {return v.type === value.type})).length > 0){
+        const resistance = baseCreature.system.attributes.resistances.filter(v => {return v.type === value.type})[0];
+        resistance.value = Math.max(resistance.value, value.value);
+        return;
+    }
+
+    baseCreature.system.attributes.resistances.push(value);
+}
+
+export function addWeakness(baseCreature : StatBlockProp, value: TypedValue)
+{
+    if (baseCreature.system.attributes.weaknesses === undefined)
+        baseCreature.system.attributes.weaknesses = [];
+    
+    if ((baseCreature.system.attributes.weaknesses.filter(v => {return v.type === value.type})).length > 0){
+        const weakness = baseCreature.system.attributes.weaknesses.filter(v => {return v.type === value.type})[0];
+        weakness.value = Math.max(weakness.value, value.value);
+        return;
+    }
+    
+    baseCreature.system.attributes.weaknesses.push(value);
+}
+
+export function addImmunities(baseCreature : StatBlockProp, value: string[]){
+    for (const trait of value) {
+        addImmunity(baseCreature, trait);
+    }
+}
+
+export function addImmunity(baseCreature : StatBlockProp, value: string)
+{
+    if (baseCreature.system.attributes.immunities === undefined)
+        baseCreature.system.attributes.immunities = [];
+    baseCreature.system.attributes.immunities.push({exceptions:[], type:value});
 }
 
 export function changeSize(baseCreature : StatBlockProp, value: ("tiny"|"small"|"medium"|"large"|"huge"|"gargantuan")) : StatBlockProp
@@ -287,4 +302,7 @@ export function modifyAbilitiesDamage(creature : StatBlockProp, valueToIncrease 
     }
 }
 
-export const CreatureAdjustmentList = [Elite, Weak, Catfolk, Dwarf, Elf, Gnome, Goblin, Halfling, Leshy, Minotaur, Merfolk, Orc];
+export const CreatureAdjustmentList = [Elite, Weak, 
+    Catfolk, Dwarf, Elf, Gnome, Goblin, Halfling, Leshy, Minotaur, Merfolk, Orc,
+    Undead,  MindlessUndead, Zombie, Skeleton];
+

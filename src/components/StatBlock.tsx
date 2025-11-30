@@ -137,6 +137,7 @@ export function GetGenericAbilities(value: StatBlockProp): CreatureItem[] {
         return (
             !spells.includes(item as CreatureItemSpell)
             && !strikes.baseStrikes.includes(item as CreatureItemStrike)
+            && item.name != "Troop Movement"
             && item.type != "weapon"
             && item.type != "armor"
             && item.type != "spellcastingEntry"
@@ -159,6 +160,7 @@ export function GetGenericAbilities(value: StatBlockProp): CreatureItem[] {
             && item.system.slug != "void-healing"
             && item.system.slug != "regeneration"
             && item.system.slug != "fast-healing"
+            && item.system.slug != "troop-defenses"
             && !(item.system.slug === "reactive-strike" && (item.name === "Reactive Strike" || item.name === "Attack of Opportunity"))
             && !(item.system.slug === "attack-of-opportunity" && (item.name === "Reactive Strike" || item.name === "Attack of Opportunity"))
         )

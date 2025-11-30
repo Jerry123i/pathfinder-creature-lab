@@ -1,7 +1,7 @@
 ﻿import {capitalize} from "./TypeScriptHelpFunctions.tsx";
 
-export const damageRegex = /@Damage\[((?:,?\(?(?:\d+(?:(?:\+|-?)\d+)?|\d+d\d+(?:(?:\+|-?)\d+)?|\d+\[\w+\])\)?\[(?:,?\w+)+\])+)(?:\|[\w+-:]+)?\](?:\{[\w +-]+\})?/g;
-export const splitDamageDiceRegex = /^,?\(?(\d+(?:(?:\+|-?)\d+)?|\d+d\d+(?:(?:\+|-?)\d+)?|\d+\[\w+\])\)?\[(?:,?(\w+))?(?:,?(\w+))?\]$/;
+export const damageRegex = /@Damage\[((?:,?\(?(?:\d+(?:(?:\+|-?)\d+)?|\d+d\d+(?:(?:\+|-?)\d+)?|\d+\[\w+\])\)?\[(?:,?@*\.*\w+)+\])+)(?:\|[\w+-:]+)?\](?:\{[\w +-]+\})?/g;
+export const splitDamageDiceRegex = /^,?\(?(\d+(?:(?:\+|-?)\d+)?|\d+d\d+(?:(?:\+|-?)\d+)?|\d+\[\w+\])\)?\[(?:,?([@.\w]+))?(?:,?([@.\w]+))?\]$/;
 export const checkRegex = /@Check\[(\w+)(?:\|(?!dc:)[ ,\w:-]+)*(?:\|dc:(\d+))?(?:\|(?!dc:)[ ,\w:-]+)*\](?:\{([\w ]+)?\})?/gi;
 export const actionTooltipRegex = /\[\[\/act ([\w-]+)(?: dc=(\d+))?(?: skill=(\w+))?\]\](?:{([\w ]+)})?/g;
 

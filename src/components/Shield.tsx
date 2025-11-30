@@ -27,16 +27,36 @@ export function GetShield(creatureStatBlock : StatBlockProp) : ShieldSystem | un
 }
 
 export function PrintShield(value: StatBlockProp) {
-    return GetShield(value) &&
-        (<>  [
-            <ShieldIcon weight="bold" className="-ml-1 align-middle"/><span className="text-xs-ml-1 align-middle">AC</span> {value.system.attributes.ac.value + (GetShield(value)?.acBonus ?? 0)};
-            <ShieldPlusIcon weight="bold" className="align-middle"/><span className="text-xs -ml-1 align-middle">HP</span> {GetShield(value)?.hp.value ?? 0};
-            <ShieldCheckeredIcon weight="bold" className="align-middle"/><span className="text-xs -ml-1 align-middle">Hrd</span> {GetShield(value)?.hardness ?? 0}
-        ]
+    const shield = GetShield(value);
+    const shieldBlock = hasShieldBlock(value);
+
+    return (
+        <>
+            {shield && (
+                <>
+                    <ShieldIcon weight="bold" className="-ml-1 align-middle" />
+                    <span className="text-xs -ml-1 align-middle">AC</span>
+                    {value.system.attributes.ac.value + (shield.acBonus ?? 0)}
+
+                    <ShieldPlusIcon weight="bold" className="align-middle" />
+                    <span className="text-xs -ml-1 align-middle">HP</span>
+                    {shield.hp?.value ?? 0}
+
+                    <ShieldCheckeredIcon weight="bold" className="align-middle" />
+                    <span className="text-xs -ml-1 align-middle">Hrd</span>
+                    {shield.hardness ?? 0}
+                </>
+            )}
             <span className="text-xs flex items-center gap-1">
-                {hasShieldBlock(value)?(<span className="text-xs "><span className="pathfinder-action text-[1.25rem] leading-none">R</span><span className="font-semibold">Shield Block</span></span>):""}
+                {shieldBlock && (
+                    <span className="text-xs">
+                        <span className="pathfinder-action text-[1.25rem] leading-none">R</span>
+                        <span className="font-semibold">Shield Block</span>
+                    </span>
+                )}
             </span>
-        </>);
+        </>
+    );
 }
 
 function hasShieldBlock(value :StatBlockProp) : boolean

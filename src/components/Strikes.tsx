@@ -134,8 +134,16 @@ function GetDamagesInfo(value: StrikeSystem): DamageRollInfo[] {
         const damageRoll = roll[key] as DamageRollInfo;
         damages.push(damageRoll);
     }
+
+    const physical = ["slashing", "bludgeoning", "piercing"];
     
-    damages.sort((a) => {if (a.damage.includes("d")) return -1; else return 1;});
+    damages.sort((a,b) => {
+        const score = x =>
+            (physical.includes(x.damageType) ? 2 : 0) +
+            (x.damage.includes("d") ? 1 : 0);
+
+        return score(b) - score(a);
+    });
     
     return damages;
 }

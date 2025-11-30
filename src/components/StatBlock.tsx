@@ -73,7 +73,7 @@ export function GetDarknessVision(value: Perception): Sense | undefined
 {
     for (const sense of value.senses) {
         
-        if (sense.type === "darkvision" || sense.type === "low-light-vision")
+        if (sense.type === "darkvision" || sense.type === "greater-darkvision" || sense.type === "low-light-vision")
             return sense;
     }
     return undefined;
@@ -84,16 +84,14 @@ export function GetSpecialSenses(value: Perception): Sense[]
     const specialSenses: Sense[] = [];
     for (const sense of value.senses)
     {
-        if (sense.type === "darkvision" || sense.type === "low-light-vision")
+        if (sense.type === "darkvision" || sense.type === "greater-darkvision" || sense.type === "low-light-vision")
             continue;
         
         specialSenses.push(sense);
     }
+    console.log(specialSenses);
     return specialSenses;
 }
-
-
-
 
 export type SensePrecision = "precise"|"imprecise"|"vague";
 
@@ -161,6 +159,10 @@ export function GetGenericAbilities(value: StatBlockProp): CreatureItem[] {
             && item.system.slug != "regeneration"
             && item.system.slug != "fast-healing"
             && item.system.slug != "troop-defenses"
+            && item.system.slug != "greater-darkvision"
+            && item.system.slug != "darkvision"
+            && item.system.slug != "tremorsense"
+            && item.system.slug != "wavesense"
             && !(item.system.slug === "reactive-strike" && (item.name === "Reactive Strike" || item.name === "Attack of Opportunity"))
             && !(item.system.slug === "attack-of-opportunity" && (item.name === "Reactive Strike" || item.name === "Attack of Opportunity"))
         )
@@ -482,7 +484,7 @@ function DescriptionArea(isDescriptionOpen: boolean, setIsDescriptionOpen: (a: b
 function PrintPerceptionLine(value: StatBlockProp)
 {
     return (<><b>Perception</b> {printNumberWithSignalString(value.system.perception.mod)}
-        {GetDarknessVision(value.system.perception)&&` ;${GetDarknessVision(value.system.perception)?.type}`}
+        {GetDarknessVision(value.system.perception)&&` ; ${GetDarknessVision(value.system.perception)?.type}`}
         {GetSpecialSenses(value.system.perception).map(sense => {return ` (${sense.acuity} ${sense.type} ${sense.range&&`${sense.range} feet`})`})}
     </>);
 }

@@ -68,3 +68,72 @@ export const moderateStrikeDamageTable: LookupTable<string> = {
         return x?.value ?? "1d4";
     }
 };
+
+export const moderateSpellDcTable: LookupTable<number> = {
+    ranges: [
+        { min: -Infinity, max: 0,  value: 13 },
+        { min: 1,  max: 1,  value: 14 },
+        { min: 2,  max: 2,  value: 15 },
+        { min: 3,  max: 3,  value: 17 },
+        { min: 4,  max: 4,  value: 18 },
+        { min: 5,  max: 5,  value: 19 },
+        { min: 6,  max: 6,  value: 21 },
+        { min: 7,  max: 7,  value: 22 },
+        { min: 8,  max: 8,  value: 23 },
+        { min: 9,  max: 9,  value: 25 },
+        { min: 10, max: 10, value: 26 },
+        { min: 11, max: 11, value: 27 },
+        { min: 12, max: 12, value: 29 },
+        { min: 13, max: 13, value: 30 },
+        { min: 14, max: 14, value: 31 },
+        { min: 15, max: 15, value: 33 },
+        { min: 16, max: 16, value: 34 },
+        { min: 17, max: 17, value: 35 },
+        { min: 18, max: 18, value: 37 },
+        { min: 19, max: 19, value: 38 },
+        { min: 20, max: 20, value: 39 },
+        { min: 21, max: 21, value: 41 },
+        { min: 22, max: 22, value: 42 },
+        { min: 23, max: 23, value: 43 },
+        { min: 24, max: 24, value: 45 },
+    ],
+    lookup(level: number): number {
+        const x = this.ranges.find(r => level >= r.min && level <= r.max);
+        return x?.value ?? 0;
+    }
+};
+
+export const moderateSpellAttackBonusTable: LookupTable<number> = {
+    ranges: [
+        { min: -Infinity, max: 0,  value: 5 },
+        { min: 1,  max: 1,  value: 6 },
+        { min: 2,  max: 2,  value: 7 },
+        { min: 3,  max: 3,  value: 9 },
+        { min: 4,  max: 4,  value: 10 },
+        { min: 5,  max: 5,  value: 11 },
+        { min: 6,  max: 6,  value: 13 },
+        { min: 7,  max: 7,  value: 14 },
+        { min: 8,  max: 8,  value: 15 },
+        { min: 9,  max: 9,  value: 17 },
+        { min: 10, max: 10, value: 18 },
+        { min: 11, max: 11, value: 19 },
+        { min: 12, max: 12, value: 21 },
+        { min: 13, max: 13, value: 22 },
+        { min: 14, max: 14, value: 23 },
+        { min: 15, max: 15, value: 25 },
+        { min: 16, max: 16, value: 26 },
+        { min: 17, max: 17, value: 27 },
+        { min: 18, max: 18, value: 29 },
+        { min: 19, max: 19, value: 30 },
+        { min: 20, max: 20, value: 31 },
+        { min: 21, max: 21, value: 33 },
+        { min: 22, max: 22, value: 34 },
+        { min: 23, max: 23, value: 35 },
+        { min: 24, max: 24, value: 37 },
+    ],
+    lookup(level: number): number {
+        const x = this.ranges.find(r => level >= r.min && level <= r.max);
+        return x?.value ?? 0;
+    }
+};
+

@@ -85,10 +85,10 @@ export function ModifyAssociatedSkills(creature : StatBlockProp,  ability : Abil
     }    
 }
 
-export function TryModifySkill(skills: SkillList, name: SkillName, value: number) {
+export function TryModifySkill(skills: SkillList, name: SkillName, value: number) 
+{
     if (skills === undefined)
         return;
-    
     
     const skill = skills?.[name];
     if (!skill) return;
@@ -104,6 +104,19 @@ export function TryModifyLore(creature: StatBlockProp, value: number) {
         NullableValueChange(lores[i].system.mod, value);
     }
     
+}
+
+export function AddSkill(creature: StatBlockProp, name:SkillName, value: number) 
+{
+    if (creature.system.skills === undefined)
+        creature.system.skills = {};
+
+    const skill = creature.system.skills?.[name];
+    if (!skill)
+        creature.system.skills[name] = {base: value};
+    else if (skill.base < value)
+        skill.base = value;
+
 }
 
 function GetSpecialSkills(skill: Skill) {
@@ -123,6 +136,29 @@ function GetSpecialSkills(skill: Skill) {
         return (<></>);
     
     return (<>({stringValue})</>);
+}
+
+export function getHighestSkill(creature:StatBlockProp) : {name: SkillName, value: number}
+{
+    let higherValue = 0;
+    let higherSkill : SkillName = null ;
+    
+    for (const key of Object.keys(creature.system.skills) as SkillName[])
+    {
+        const skill = creature.system.skills[key];
+        
+        if (skill === undefined)
+            continue;
+        
+        if (skill.base > higherValue)
+        {
+            higherValue = skill.base;
+            higherSkill = key as SkillName;
+        }
+    }
+    
+    return {name:higherSkill, value:higherValue};
+    
 }
 
 export function printSkills(creature:StatBlockProp,list: SkillList) {

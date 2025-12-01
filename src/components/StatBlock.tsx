@@ -18,7 +18,7 @@ import {
     PrintHP,
     PrintImmunity,
     PrintResistances,
-    PrintWeakness
+    PrintWeakness, type Resistance
 } from "./HPItems.tsx";
 import {parseAbilityDescription} from "./Parsing.tsx";
 
@@ -105,7 +105,7 @@ export interface Attributes {
     allSaves: string;
     hp: ValueHolder;
     speed: SpeedValue;
-    resistances: TypedValue[];
+    resistances: Resistance[];
     weaknesses: TypedValue[];
     immunities : {exceptions:string[], type: string}[];
 }

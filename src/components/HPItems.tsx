@@ -2,13 +2,23 @@
 import {printValue, type StatBlockProp} from "./StatBlock.tsx";
 import {printFourSquares} from "./PhosphorIcons.tsx";
 
+export interface Resistance
+{
+    type: string;
+    value: number;
+    exceptions?: string[];
+    doubleVs?: string[];
+}
+
 export function PrintResistances(value: StatBlockProp) {
     return <>
         {value.system.attributes.resistances === undefined ? null : (
             <>
                 <b> Resistances:</b>{" "}
                 {value.system.attributes.resistances.map(res => (
-                    <>{capitalize(res.type)} {res.value}; </>
+                    <>{capitalize(res.type)} {res.value}
+                        {res.exceptions && res.exceptions.length > 0?(` except ` + res.exceptions.map(except => except.toString())):("")}
+                        {res.doubleVs && res.doubleVs.length > 0?(` doubled vs ` + res.doubleVs.map(double => double.toString())):("")}; </>
                 ))}
             </>
         )}

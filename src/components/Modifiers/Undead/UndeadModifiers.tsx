@@ -1,22 +1,36 @@
 ﻿import {
     AddDarkVision,
     cloneStatBlock,
-    type CreatureItem, GetDarknessVision,
+    type CreatureItem, GetDarknessVision, GetDice,
     modifyAllSaves,
     type StatBlockProp
 } from "../../StatBlock.tsx";
 import {
     addImmunities,
     addImmunity,
-    addLanguages,
+    addLanguages, addResistance,
     addResistances,
     addWeakness, addWeaknesses,
     type CreatureAdjustment, modifyAbilitiesDcs
 } from "../Modifiers.tsx";
 import {AddTrait, ReplaceTrait} from "../../Traits.tsx";
 import type {LookupTable} from "../../LookupTable.tsx";
-import {type CreatureItemStrike, GetDamagesInfo, GetStrikes, getStrongerStrike} from "../../Strikes.tsx";
-import {moderateStrikeBonusTable, moderateStrikeDamageTable} from "../../../assets/GMTables.tsx";
+import {
+    type CreatureItemStrike,
+    GetDamagesInfo,
+    GetStrikes,
+    getStrongerStrike,
+    getWeakestStrike
+} from "../../Strikes.tsx";
+import {
+    moderateSpellAttackBonusTable,
+    moderateSpellDcTable,
+    moderateStrikeBonusTable,
+    moderateStrikeDamageTable
+} from "../../../assets/GMTables.tsx";
+import {AddSkill, getHighestSkill} from "../../Skills.tsx";
+import type {CreatureItemSpell, SpellcastingItem} from "../../Spells.tsx";
+import {capitalize} from "../../TypeScriptHelpFunctions.tsx";
 
 const voidHealing = JSON.parse("{\"_id\":\"q1OobVjFqRsc58KI\",\"_stats\":{\"compendiumSource\":\"Compendium.pf2e.bestiary-ability-glossary-srd.Item.TTCw5NusiSSkJU1x\"},\"img\":\"systems/pf2e/icons/actions/Passive.webp\",\"name\":\"Void Healing\",\"sort\":400000,\"system\":{\"actionType\":{\"value\":\"passive\"},\"actions\":{\"value\":null},\"category\":\"defensive\",\"description\":{\"value\":\"<p>@Localize[PF2E.NPC.Abilities.Glossary.NegativeHealing]</p>\"},\"publication\":{\"license\":\"ORC\",\"remaster\":true,\"title\":\"Pathfinder Monster Core\"},\"rules\":[{\"key\":\"ActiveEffectLike\",\"mode\":\"override\",\"path\":\"system.attributes.hp.negativeHealing\",\"value\":true}],\"slug\":\"void-healing\",\"traits\":{\"rarity\":\"common\",\"value\":[]}},\"type\":\"action\"}");
 
@@ -205,7 +219,7 @@ export const Ghost: CreatureAdjustment = {
         sb.system.attributes.speed.otherSpeeds = sb.system.attributes.speed.otherSpeeds.filter((v)=>{return v.type === "fly"});
         sb.system.attributes.speed.value = 0;
         
-        const ghostlyPassage = JSON.parse("{\"_id\":\"\",\"_stats\":{\"compendiumSource\":\"Compendium.pf2e.bestiary-ability-glossary-srd.Item.TTCw5NusiSSkJU1x\"},\"img\":\"\",\"name\":\"Ghostly Passage\",\"sort\":400000,\"system\":{\"actionType\":{\"value\":\"action\"},\"actions\":{\"value\":1},\"category\":\"defensive\",\"description\":{\"value\":\"The creature Flies and, during this movement, can pass through walls, creatures, and other material obstacles as though incorporeal. It must begin and end its movement outside of any physical obstacles, and passing through solid material is difficult terrain.\"},\"publication\":{\"license\":\"ORC\",\"remaster\":true,\"title\":\"Pathfinder Monster Core\"},\"rules\":[{\"key\":\"ActiveEffectLike\",\"mode\":\"override\",\"path\":\"system.attributes.hp.negativeHealing\",\"value\":true}],\"slug\":null,\"traits\":{\"rarity\":\"common\",\"value\":[]}},\"type\":\"action\"}");
+        const ghostlyPassage = JSON.parse("{\"_id\":\"\",\"_stats\":{\"compendiumSource\":\"Compendium.pf2e.bestiary-ability-glossary-srd.Item.TTCw5NusiSSkJU1x\"},\"img\":\"\",\"name\":\"Ghostly Passage\",\"sort\":400000,\"system\":{\"actionType\":{\"value\":\"action\"},\"actions\":{\"value\":1},\"category\":\"defensive\",\"description\":{\"value\":\"The creature Flies and, during this movement, can pass through walls, creatures, and other material obstacles as though incorporeal. It must begin and end its movement outside of any physical obstacles, and passing through solid material is difficult terrain.\"},\"publication\":{\"license\":\"ORC\",\"remaster\":true,\"title\":\"Pathfinder Monster Core\"},\"rules\":[{\"key\":\"ActiveEffectLike\",\"mode\":\"override\",\"path\":\"system.attributes.hp.negativeHealing\",\"value\":true}],\"slug\":null,\"traits\":{\"rarity\":\"common\",\"value\":[]}},\"type\":\"action\"}");
         
         sb.items.push(ghostlyPassage);
         
@@ -308,17 +322,187 @@ export const Mummy: CreatureAdjustment = {
     }
 }
 
+export const Shadow: CreatureAdjustment = {
+    _id: "adj_shadow",
+    name: "Shadow",
+    description: "A shadow creature is little more than a sentient shadow powered by negative energy. Shadows can easily travel to and from the Shadow Plane.",
+    priority: 1,
+    type: "Undead",
+
+    apply: (statblock: StatBlockProp) => {
+        let sb = cloneStatBlock(statblock);
+
+        sb = applyBaseUndead(sb);
+        AddTrait(sb, "shadow");
+        addLanguages(sb, "necril", true);
+
+        sb.name = "Shadow " + sb.name;
+
+        const higherSkill = getHighestSkill(sb);
+        
+        if(higherSkill.name !== "stealth")
+            AddSkill(sb, "stealth", higherSkill.value);    
+
+        addImmunity(sb, "precision");
+        const weaknessValue = undeadWeaknessTable.lookup(sb.system.details.level.value);
+        addWeaknesses(sb, ["force", "ghost-touch", "vitality"], weaknessValue);
+
+        // --- Replace speed with fly speed if not already able to fly ---
+        {
+            const base = sb.system.attributes.speed;
+            let maxSpeed = base.value;
+
+            for (const s of base.otherSpeeds ?? []) {
+                if (s.value > maxSpeed) maxSpeed = s.value;
+            }
+
+            // If it cannot fly, convert its highest speed to fly and remove others
+            const alreadyFly =
+                base.otherSpeeds?.some((s) => s.type === "fly") ?? false;
+
+            if (!alreadyFly) {
+                base.value = 0;
+                base.otherSpeeds = [{ type: "fly", value: maxSpeed }];
+            } else {
+                // Keep only fly speed entries
+                if (base.otherSpeeds)
+                    base.otherSpeeds = base.otherSpeeds.filter(
+                        (s) => s.type === "fly"
+                    );
+            }
+        }
+
+        //--- Change physical Strike damage to magical void ---
+        for (const strike of GetStrikes(sb).baseStrikes) {
+            for (const dmg of Object.values(
+                strike.system.damageRolls ?? {}
+            ) as any[]) {
+                dmg.damageType = "void";
+            }
+
+            // Ensure magical trait
+            if (!strike.system.traits.value.includes("magical"))
+                strike.system.traits.value.push("magical");
+        }
+
+        const darkness = JSON.parse("{\"_id\":\"sGyeCvgDJThi1CYg\",\"_stats\":{\"compendiumSource\":\"Compendium.pf2e.spells-srd.Item.4GE2ZdODgIQtg51c\"},\"img\":\"systems/pf2e/icons/spells/darkness.webp\",\"name\":\"Darkness\",\"sort\":200000,\"system\":{\"area\":{\"type\":\"burst\",\"value\":20},\"cost\":{\"value\":\"\"},\"counteraction\":false,\"damage\":{},\"defense\":null,\"description\":{\"value\":\"<p>You create a shroud of darkness that prevents light from penetrating or emanating within the area. Light does not enter the area and any non-magical light sources, such as a torch or lantern, do not emanate any light while inside the area, even if their light radius would extend beyond the darkness. This also suppresses magical light of your darkness spell's rank or lower. Light can't pass through, so creatures in the area can't see outside. From outside, it appears as a globe of pure darkness.</p>\\n<hr />\\n<p><strong>Heightened (4th)</strong> Even creatures with darkvision (but not greater darkvision) can barely see through the darkness. They treat targets seen through the darkness as @UUID[Compendium.pf2e.conditionitems.Item.Concealed].</p>\"},\"duration\":{\"sustained\":false,\"value\":\"1 minute\"},\"level\":{\"value\":2},\"location\":{\"heightenedLevel\":2,\"value\":\"\"},\"publication\":{\"license\":\"ORC\",\"remaster\":true,\"title\":\"Pathfinder Player Core\"},\"range\":{\"value\":\"120 feet\"},\"requirements\":\"\",\"rules\":[],\"slug\":\"darkness\",\"target\":{\"value\":\"\"},\"time\":{\"value\":\"3\"},\"traits\":{\"rarity\":\"common\",\"traditions\":[\"arcane\",\"divine\",\"occult\",\"primal\"],\"value\":[\"concentrate\",\"darkness\",\"manipulate\"]}},\"type\":\"spell\"}") as CreatureItemSpell;
+        const spellcasting = JSON.parse("{\"_id\":\"\",\"img\":\"systems/pf2e/icons/default-icons/spellcastingEntry.svg\",\"name\":\"Divine Innate Spells\",\"sort\":100000,\"system\":{\"autoHeightenLevel\":{\"value\":null},\"description\":{\"value\":\"\"},\"prepared\":{\"flexible\":false,\"value\":\"innate\"},\"proficiency\":{\"value\":0},\"publication\":{\"license\":\"ORC\",\"remaster\":true,\"title\":\"\"},\"rules\":[],\"showSlotlessLevels\":{\"value\":false},\"slots\":{},\"slug\":null,\"spelldc\":{\"dc\":0,\"mod\":0,\"value\":0},\"tradition\":{\"value\":\"divine\"},\"traits\":{}},\"type\":\"spellcastingEntry\"}") as SpellcastingItem;
+        
+        spellcasting.system.spelldc.dc = moderateSpellDcTable.lookup(sb.system.details.level.value);
+        spellcasting.system.spelldc.value = moderateSpellAttackBonusTable.lookup(sb.system.details.level.value);
+        
+        const id = crypto.randomUUID().replaceAll("-", "");
+
+        darkness.system.location.value = id;
+        spellcasting._id = id;
+        
+        const slinkInShadows = JSON.parse(`{"_id":"","img":"","name":"Slink in Shadows","type":"action","sort":400000,"system":{"actionType":{"value":"passive"},"actions":{"value":null},"category":"defensive","description":{"value":"The creature can Hide or end its Sneak in a creature’s or object’s shadow."},"traits":{"rarity":"common","value":[]}}}`);
+        sb.items.push(slinkInShadows);
+        sb.items.push(darkness);
+        sb.items.push(spellcasting);
+
+        return sb;
+    }
+};
+
+
 export const Vampire: CreatureAdjustment = {
     _id: "adj_vampire",
     name: "Vampire",
-    description: "",
+    description: " A vampiric creature consumes the blood of the living for sustenance. It might also possess the compulsions and revulsions of a specific vampire bloodline.",
     priority: 1,
     type: "Undead",
-    apply: (statblock: StatBlockProp) => {
-        const sb = cloneStatBlock(statblock);
+    apply: (statblock: StatBlockProp) =>
+    {
+        const resistanceTable: LookupTable<number> = {
+            ranges: [
+                { min: -Infinity,  max: -1,  value: 2 },
+                { min: 0,   max: 1,  value: 2 },
+                { min: 2,   max: 5,  value: 3 },
+                { min: 6,   max: 10,  value: 5 },
+                { min: 11,   max: Infinity,  value: 10 }
+            ],
+
+            lookup(level: number): number {
+                const x = this.ranges.find(r => level >= r.min && level <= r.max);
+                return x?.value ?? 0;
+            }
+        };
+
+        const hpDecreaseTable: LookupTable<number> = {
+            ranges: [
+                { min: -Infinity,  max: -1,  value: -3 },
+                { min: 0,   max: 1,  value: -5 },
+                { min: 2,   max: 5,  value: -10 },
+                { min: 6,   max: 10,  value: -20 },
+                { min: 11,   max: Infinity,  value: -40 }
+            ],
+
+            lookup(level: number): number {
+                const x = this.ranges.find(r => level >= r.min && level <= r.max);
+                return x?.value ?? 0;
+            }
+        };
+        
+        let sb = cloneStatBlock(statblock);
+        sb = applyBaseUndead(sb);
 
         sb.name = "Vampire " + sb.name;
+        AddTrait(sb, "vampire");
+        
+        sb.system.attributes.hp.value = sb.system.attributes.hp.value + hpDecreaseTable.lookup(sb.system.details.level.value); 
+        
+        addResistance(sb, {value:resistanceTable.lookup(sb.system.details.level.value), type:"physical", doubleVs:[], exceptions:["silver"]})
 
+        let fangStrike : CreatureItemStrike | undefined;
+        
+        for (const strike of GetStrikes(sb).baseStrikes)
+        {
+            if (strike.name.toLowerCase() === "jaws" || strike.name.toLowerCase() === "fangs" || strike.name.toLowerCase() === "tusks" || strike.name.toLowerCase() === "beak")
+                fangStrike = strike;
+        }
+
+        if (fangStrike === undefined)
+        {
+            let strikeJson = "{\"_id\":\"\",\"img\":\"systems/pf2e/icons/default-icons/melee.svg\",\"name\":\"Fangs\",\"sort\":100000,\"system\":{\"attack\":{\"value\":\"\"},\"attackEffects\":{\"custom\":\"\",\"value\":[]},\"bonus\":{\"value\":0},\"damageRolls\":{\"0\":{\"damage\":\"X\",\"damageType\":\"piercing\"}},\"description\":{\"value\":\"\"},\"publication\":{\"license\":\"ORC\",\"remaster\":true,\"title\":\"\"},\"range\":null,\"rules\":[],\"slug\":null,\"traits\":{\"rarity\":\"common\",\"value\":[\"agile\",\"finesse\"]}},\"type\":\"melee\"}";
+            const weakestStrike = getWeakestStrike(sb);
+
+            let damageDice : string;
+            let bonus : number;
+
+            if (weakestStrike === undefined)
+            {
+                bonus = moderateStrikeBonusTable.lookup(sb.system.details.level.value);
+                damageDice = moderateStrikeDamageTable.lookup(sb.system.details.level.value);
+            }
+            else
+            {
+                bonus = weakestStrike.system.bonus.value;
+                damageDice = GetDamagesInfo(weakestStrike.system)[0].damage;
+            }
+
+            strikeJson = strikeJson.replace(`"damage":"X"`, `"damage":"${damageDice}"`);
+
+            fangStrike = JSON.parse(strikeJson);
+            if (fangStrike !== undefined)
+            {
+                fangStrike.system.bonus.value = bonus;
+                sb.items.push(fangStrike);    
+            }
+        }
+        
+        if (fangStrike !== undefined)
+        {
+            const jawsDamage = GetDice(GetDamagesInfo(fangStrike.system)[0]);
+            let feedJson = "{\"_id\":\"\",\"_stats\":{\"compendiumSource\":\"\"},\"img\":\"\",\"name\":\"Feed\",\"sort\":400000,\"system\":{\"actionType\":{\"value\":\"action\"},\"actions\":{\"value\":1},\"category\":\"ofensive\",\"description\":{\"value\":\"<p><strong>Requirements</strong> The vampiric creature’s most recent action was a successful JAWSNAME Strike that dealt damage;</p><p><strong>Effect</strong> The vampiric creature drains blood from its victim, dealing JAWSDAMAGE damage and regaining HPGAIN Hit Points.</p>\"},\"publication\":{\"license\":\"ORC\",\"remaster\":true,\"title\":\"Pathfinder Monster Core\"},\"rules\":[],\"slug\":null,\"traits\":{\"rarity\":\"common\",\"value\":[\"divine\",\"necromancy\"]}},\"type\":\"action\"}";
+            feedJson = feedJson.replace("JAWSNAME", `<strong>${capitalize(fangStrike.name)}</strong>`)
+            feedJson = feedJson.replace("HPGAIN", `@Damage[${resistanceTable.lookup(sb.system.details.level.value)}[healing]]`)
+            feedJson = feedJson.replace("JAWSDAMAGE", `@Damage[${(jawsDamage.diceNumber??0)+jawsDamage.modifier}[void]]`)
+            
+            sb.items.push(JSON.parse(feedJson));
+        }
+        
+      
         return sb;
     }
 }

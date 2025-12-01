@@ -351,6 +351,15 @@ export function getStrongerStrike(value: StatBlockProp): CreatureItemStrike | un
     return strikes.sort((a, b) => {return a.system.bonus.value - b.system.bonus.value;})[strikes.length-1];    
 }
 
+export function getWeakestStrike(value: StatBlockProp): CreatureItemStrike | undefined
+{
+    const strikes = GetStrikes(value).baseStrikes;
+    if (strikes.length === 0)
+        return undefined;
+
+    return strikes.sort((a, b) => {return a.system.bonus.value - b.system.bonus.value;})[0];
+}
+
 function getReactiveStrike(value: StatBlockProp): CreatureItem | undefined
 {
     const reactiveStrike = value.items.filter(v => {return v.system.slug === "reactive-strike" || v.system.slug === "attack-of-opportunity"});

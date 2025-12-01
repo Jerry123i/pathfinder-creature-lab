@@ -405,11 +405,10 @@ export const Shadow: CreatureAdjustment = {
     }
 };
 
-
 export const Vampire: CreatureAdjustment = {
     _id: "adj_vampire",
     name: "Vampire",
-    description: " A vampiric creature consumes the blood of the living for sustenance. It might also possess the compulsions and revulsions of a specific vampire bloodline.",
+    description: "A vampiric creature consumes the blood of the living for sustenance. It might also possess the compulsions and revulsions of a specific vampire bloodline.",
     priority: 1,
     type: "Undead",
     apply: (statblock: StatBlockProp) =>
@@ -503,6 +502,54 @@ export const Vampire: CreatureAdjustment = {
         }
         
       
+        return sb;
+    }
+}
+
+export const Wight: CreatureAdjustment = {
+    _id: "adj_wight",
+    name: "Wight",
+    description: "All wights can drain life through their unarmed attacks, but some can draw life force through weapons as well.",
+    priority: 1,
+    type: "Undead",
+    apply: (statblock: StatBlockProp) =>
+    {
+        let sb = cloneStatBlock(statblock);
+        sb = applyBaseUndead(sb);
+
+        AddTrait(sb, "wight");
+        addLanguages(sb, "necril", true);
+
+        sb.name = "Wight " + sb.name;
+
+        const level = sb.system.details.level.value;
+        const drainLifeDc = moderateSpellDcTable.lookup(level);
+
+        const drainLifeItemJson = `{"_id":"","img":"systems/pf2e/icons/actions/Passive.webp","name":"Drain Life","sort":300000,"system":{"actionType":{"value":"passive"},"actions":{"value":null},"category":"offensive","description":{"value":"<p>When the creature damages a living creature with this Strike, it gains [[/r ${Math.max(1,level)} #Temporary Hit Points]]{${Math.max(1,level)} temporary Hit Points}, and the target must succeed at a @Check[fortitude|dc:${drainLifeDc}] save or become drained 1.</p>"},"publication":{"license":"ORC","remaster":true},"rules":[],"slug":"wight-life-drain","traits":{"rarity":"common","value":["divine","necromancy"]}},"type":"action"}`;
+
+        const drainLifeItem = JSON.parse(drainLifeItemJson);
+        sb.items.push(drainLifeItem);
+
+
+        const strongestStrike = getStrongerStrike(sb);
+        if (strongestStrike) {
+            const dmgInfo = GetDamagesInfo(strongestStrike.system);
+            const dmg = dmgInfo[0];
+            const dice = GetDice(dmg);
+
+
+            const reduction = Math.floor(level / 2);
+            const newMod = (dice.modifier ?? 0) - reduction;
+            dmg.damage = `${dice.diceNumber}d${dice.diceType}${newMod >= 0 ? "+"+newMod : newMod}`;
+
+
+// Add drain life effect
+            if (!strongestStrike.system.attackEffects)
+                strongestStrike.system.attackEffects = {custom: "", value: []};
+            strongestStrike.system.attackEffects.value.push("wight-life-drain");
+        }
+
+
         return sb;
     }
 }

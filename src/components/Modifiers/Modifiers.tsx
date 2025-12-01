@@ -21,7 +21,7 @@ import {
     Orc,
 } from "./Ancestry/AncestryModifiers.tsx";
 import {actionTooltipRegex, checkRegex, damageRegex, splitDamageDiceRegex} from "../Parsing.tsx";
-import {Ghost, Ghoul, Mummy, Shadow, Skeleton, Vampire, Zombie} from "./Undead/UndeadModifiers.tsx";
+import {Ghost, Ghoul, Mummy, Shadow, Skeleton, Vampire, Wight, Zombie} from "./Undead/UndeadModifiers.tsx";
 import type {Resistance} from "../HPItems.tsx";
 
 type ModifierType = "Level" | "Ancestry" | "Elemental" | "Undead" | "CreatureType";
@@ -311,5 +311,5 @@ export function modifyAbilitiesDamage(creature : StatBlockProp, valueToIncrease 
 
 export const CreatureAdjustmentList = [Elite, Weak, 
     Catfolk, Dwarf, Elf, Gnome, Goblin, Halfling, Leshy, Minotaur, Merfolk, Orc,
-    Zombie, Skeleton, Ghost, Ghoul, Mummy, Shadow, Vampire];
+    Zombie, Skeleton, Ghost, Ghoul, Mummy, Shadow, Vampire, Wight];
 

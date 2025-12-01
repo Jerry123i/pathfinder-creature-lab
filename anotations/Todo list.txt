@@ -5,3 +5,5 @@ werebear
 
 Levaloch tem spells // Ritual
 Elder Wyrmwraith / Tarn Linnorm / Tor Linnorm
+
+Living creatures of the mummy creature’s level or lower are frightened 1 while in its despair aura. They can’t naturally recover from this fear while in the area but recover instantly once they leave.

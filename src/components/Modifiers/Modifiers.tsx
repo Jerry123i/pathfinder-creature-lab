@@ -21,7 +21,7 @@ import {
     Orc,
 } from "./Ancestry/AncestryModifiers.tsx";
 import {actionTooltipRegex, checkRegex, damageRegex, splitDamageDiceRegex} from "../Parsing.tsx";
-import {MindlessUndead, Skeleton, Undead, Zombie} from "./Undead/UndeadModifiers.tsx";
+import {Ghost, Ghoul, Mummy, Skeleton, Zombie} from "./Undead/UndeadModifiers.tsx";
 
 type ModifierType = "Level" | "Ancestry" | "Elemental" | "Undead" | "CreatureType";
 
@@ -65,7 +65,7 @@ export const Elite : CreatureAdjustment = {
         sb.system.attributes.hp.value += hpIncreaseValue;
         modifyAllStrikes(sb, 2, 2);
         modifySpellDc(sb, 2);
-        modifyAbilitiesSaves(sb, 2);
+        modifyAbilitiesDcs(sb, 2);
         modifyAbilitiesDamage(sb, 2);
         
         sb.name = "Elite " + sb.name;
@@ -105,7 +105,7 @@ export const Weak : CreatureAdjustment = {
         sb.system.attributes.hp.value -= hpDecreaseValue;
         modifyAllStrikes(sb, -2, -2);
         modifySpellDc(sb, -2);
-        modifyAbilitiesSaves(sb, -2);
+        modifyAbilitiesDcs(sb, -2);
         modifyAbilitiesDamage(sb, -2);
 
         sb.name = "Weak " + sb.name;
@@ -183,6 +183,12 @@ export function addResistance(baseCreature : StatBlockProp, value: TypedValue)
     baseCreature.system.attributes.resistances.push(value);
 }
 
+export function addWeaknesses(sb: StatBlockProp, weaknesses: string[], value: number){
+    for (const weakness of weaknesses) {
+        addWeakness(sb, {type:weakness, value:value});
+    }
+}
+
 export function addWeakness(baseCreature : StatBlockProp, value: TypedValue)
 {
     if (baseCreature.system.attributes.weaknesses === undefined)
@@ -220,7 +226,7 @@ export function changeSize(baseCreature : StatBlockProp, value: ("tiny"|"small"|
     return sb;
 }
 
-export function modifyAbilitiesSaves(creature : StatBlockProp, value : number)
+export function modifyAbilitiesDcs(creature : StatBlockProp, value : number)
 {
     const abilities = GetGenericAbilities(creature);
 
@@ -304,5 +310,5 @@ export function modifyAbilitiesDamage(creature : StatBlockProp, valueToIncrease 
 
 export const CreatureAdjustmentList = [Elite, Weak, 
     Catfolk, Dwarf, Elf, Gnome, Goblin, Halfling, Leshy, Minotaur, Merfolk, Orc,
-    Undead,  MindlessUndead, Zombie, Skeleton];
+    Zombie, Skeleton, Ghost, Ghoul, Mummy];
 

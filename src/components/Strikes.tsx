@@ -8,7 +8,7 @@
     printNumberWithSignalElement,
     type StatBlockProp,
     type StringHolder,
-    type NullableValueHolder, NullableValueChange
+    type NullableValueHolder, NullableValueChange, type ValueHolder
 } from "./StatBlock.tsx";
 import {printTraitsSeparator} from "./Traits.tsx";
 import {capitalize} from "./TypeScriptHelpFunctions.tsx";
@@ -20,7 +20,7 @@ export interface CreatureItemStrike extends CreatureItem {
 }
 
 export interface StrikeSystem extends ItemSystem {
-    bonus: NullableValueHolder,
+    bonus: ValueHolder,
     weaponType?: StringHolder,
     range: { increment: number, max: number },
     damageRolls: Record<string, DamageRollInfo>
@@ -124,7 +124,7 @@ export function GetStrikesFromEquipment(value: StatBlockProp) : CreatureItem[]
     
 }
 
-function GetDamagesInfo(value: StrikeSystem): DamageRollInfo[] {
+export function GetDamagesInfo(value: StrikeSystem): DamageRollInfo[] {
     const roll = value.damageRolls!;
     const keys = Object.keys(roll);
 
@@ -340,6 +340,15 @@ export function PrintReactiveStrikeLabel(value: StatBlockProp)
                 {(<span className="text-s "><span className="pathfinder-action text-[1.25rem] leading-none">R</span><span className="font-semibold">{reactiveStrike.name}</span></span>)}
             </span>)
             </>
+}
+
+export function getStrongerStrike(value: StatBlockProp): CreatureItemStrike | undefined
+{
+    const strikes = GetStrikes(value).baseStrikes;
+    if (strikes.length === 0)
+        return undefined;
+    
+    return strikes.sort((a, b) => {return a.system.bonus.value - b.system.bonus.value;})[strikes.length-1];    
 }
 
 function getReactiveStrike(value: StatBlockProp): CreatureItem | undefined

@@ -235,12 +235,12 @@ export function modifyAbilitiesDcs(creature : StatBlockProp, value : number)
     {
         let desc = ability.system.description.value;
 
-        desc = desc.replace(checkRegex, (_match, save, dc) => {
+        desc = desc.replace(checkRegex, (_match, _save, dc) => {
             if (dc === undefined) return _match;
             return _match.replace(dc, (parseInt(dc) + value).toString());
         });
 
-        desc = desc.replace(actionTooltipRegex, (_match, text, dc) => {
+        desc = desc.replace(actionTooltipRegex, (_match, _text, dc) => {
             if (dc === undefined) return _match;
             return _match.replace(dc, (parseInt(dc) + value).toString());
         });
@@ -259,7 +259,7 @@ export function modifyAbilitiesDamage(creature : StatBlockProp, valueToIncrease 
         desc = desc.replace(damageRegex, (_match, damageInfoMatch) => 
             {
                 const split = damageInfoMatch.toString().split(/(?<=\]),/);
-                let roll: { dice: string, dmgType1: string, dmgType2: string };
+                //let roll: { dice: string, dmgType1: string, dmgType2: string };
 
                 let damageInstance = split[0] as string;
                 damageInstance = damageInstance.replace(splitDamageDiceRegex, (_matchJ, dice) =>
@@ -282,7 +282,7 @@ export function modifyAbilitiesDamage(creature : StatBlockProp, valueToIncrease 
                             {
                                 const newValue = parseInt(diceMatch[1]) + valueToIncrease;
                                 //// const newDice  = diceMatch.replace(diceMatch[1], newValue.toString());
-                                const newDice = dice.replace(diceRegex, (_m) =>{
+                                const newDice = dice.replace(diceRegex, (_m:  string) =>{
                                     return _m.replace(diceMatch[1], (newValue>0?"+":"")+(newValue.toString()));
                                 })
                                 return _matchJ.replace(dice, newDice.toString());

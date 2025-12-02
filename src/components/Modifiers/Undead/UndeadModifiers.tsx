@@ -1,7 +1,7 @@
 ﻿import {
     AddDarkVision,
     cloneStatBlock,
-    type CreatureItem, GetDarknessVision, GetDice,
+    type CreatureItem, GetDice,
     modifyAllSaves,
     type StatBlockProp
 } from "../../StatBlock.tsx";
@@ -11,7 +11,7 @@ import {
     addLanguages, addResistance,
     addResistances,
     addWeakness, addWeaknesses,
-    type CreatureAdjustment, modifyAbilitiesDcs
+    type CreatureAdjustment
 } from "../Modifiers.tsx";
 import {AddTrait, ReplaceTrait} from "../../Traits.tsx";
 import type {LookupTable} from "../../LookupTable.tsx";

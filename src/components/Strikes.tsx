@@ -8,7 +8,7 @@
     printNumberWithSignalElement,
     type StatBlockProp,
     type StringHolder,
-    type NullableValueHolder, NullableValueChange, type ValueHolder
+    NullableValueChange, type ValueHolder
 } from "./StatBlock.tsx";
 import {printTraitsSeparator} from "./Traits.tsx";
 import {capitalize} from "./TypeScriptHelpFunctions.tsx";
@@ -138,7 +138,7 @@ export function GetDamagesInfo(value: StrikeSystem): DamageRollInfo[] {
     const physical = ["slashing", "bludgeoning", "piercing"];
     
     damages.sort((a,b) => {
-        const score = x =>
+        const score = (x : DamageRollInfo) =>
             (physical.includes(x.damageType) ? 2 : 0) +
             (x.damage.includes("d") ? 1 : 0);
 

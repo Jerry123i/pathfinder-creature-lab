@@ -141,7 +141,7 @@ function GetSpecialSkills(skill: Skill) {
 export function getHighestSkill(creature:StatBlockProp) : {name: SkillName, value: number}
 {
     let higherValue = 0;
-    let higherSkill : SkillName = null ;
+    let higherSkill : SkillName | null = null ;
     
     for (const key of Object.keys(creature.system.skills) as SkillName[])
     {
@@ -157,7 +157,7 @@ export function getHighestSkill(creature:StatBlockProp) : {name: SkillName, valu
         }
     }
     
-    return {name:higherSkill, value:higherValue};
+    return {name:(higherSkill as SkillName), value:higherValue};
     
 }
 

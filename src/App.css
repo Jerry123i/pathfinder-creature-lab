@@ -27,6 +27,8 @@
         padding-left: 0;
     }
     
+    
+    /*Base HTML Table */
     table{
         border: 1px solid black;
         margin: 2px;
@@ -47,7 +49,14 @@
         border: 1px solid black;
         text-align: center;
     }
-
+    /*Spells Table*/
+    .spellTable{
+        @apply h-0 w-80 table-auto border-0;
+    }
+    
+    .spellHeader{
+        @apply bg-violet-300 px-2 py-0.5;
+    }
 
     .pathfinder-action{
         @apply font-[PF2A] text-[1.75rem] pr-1;

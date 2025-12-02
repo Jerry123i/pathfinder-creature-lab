@@ -53,9 +53,22 @@
     .spellTable{
         @apply h-0 w-80 table-auto border-0;
     }
-    
+
+    /*bg-violet-300 px-2 py-0.5*/
     .spellHeader{
-        @apply bg-violet-300 px-2 py-0.5;
+        @apply px-2 py-0.5 bg-violet-400 flex items-center justify-center border-0;
+    }
+    
+    .spellLevelField{
+        @apply bg-violet-50 rounded-md mx-3 h-5 w-5 inline-flex items-center justify-center;
+    }
+    
+    .spellCell{
+        @apply odd:bg-violet-100 not-odd:bg-gray-100 border-0;
+    }
+    
+    .spellContent{
+        @apply px-2 py-1 border-0;
     }
 
     .pathfinder-action{

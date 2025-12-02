@@ -9,5 +9,6 @@ werebear
 Levaloch tem spells // Ritual
 Elder Wyrmwraith / Tarn Linnorm / Tor Linnorm
 
+Gourd Leshy Witch
 Gnome Philomath
 Hryngar Bombardier - Light Blindness

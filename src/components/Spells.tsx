@@ -77,33 +77,33 @@ interface SpellSlotsList
     slot10? : SpellSlot;
 }
 
-function GetSpellSlot(list: SpellSlotsList, index: number) : SpellSlot
+function GetSpellSlot(list: SpellSlotsList, index: number) : SpellSlot | undefined
 {
     switch (index){
         case 0:
-            return list.slot0 ?? {max:0};
+            return list.slot0;
         case 1:
-            return list.slot1 ?? {max:0};
+            return list.slot1;
         case 2:
-            return list.slot2 ?? {max:0};
+            return list.slot2;
         case 3:
-            return list.slot3 ?? {max:0};
+            return list.slot3;
         case 4:
-            return list.slot4 ?? {max:0};
+            return list.slot4;
         case 5:
-            return list.slot5 ?? {max:0};
+            return list.slot5;
         case 6:
-            return list.slot6 ?? {max:0};
+            return list.slot6;
         case 7:
-            return list.slot7 ?? {max:0};
+            return list.slot7;
         case 8:
-            return list.slot8 ?? {max:0};
+            return list.slot8;
         case 9:
-            return list.slot9 ?? {max:0};
+            return list.slot9;
         case 10:
-            return list.slot10 ?? {max:0};
+            return list.slot10;
     }
-    return {max:0};
+    return undefined;
 }
 
 export interface SpellcasterEntrySystem extends ItemSystem {
@@ -225,21 +225,21 @@ function PrintSpontaneousSpells(value:{spellcaster:SpontaneousSpellcastingItem, 
     return (
         <table className="spellTable">
             <thead>
-            <tr>
-                <th className="bg-violet-300 px-2 py-0.5">{value.spellcaster.name} : DC{value.spellcaster.system.spelldc.dc}</th>
+            <tr className="spellCell">
+                <th className="spellHeader bg-violet-300">{value.spellcaster.name} : DC{value.spellcaster.system.spelldc.dc}</th>
             </tr>
             </thead>
             <tbody>
             {spells.some(x=> x.system.traits.value.includes("cantrip"))&&
                 <>
-                <tr key={`header-cantrip`}>
-                    <th className="px-2 py-0.5 bg-violet-400 flex items-center justify-center border-0"><span>Cantrips</span></th>
+                <tr className="spellCell" key={`header-cantrip`}>
+                    <th className="spellHeader"><span>Cantrips</span></th>
                 </tr>
                     {spells.filter(x=> x.system.traits.value.includes("cantrip")).map((spell)=>{
                         return(
                             <Fragment key={spell._id}>
-                                <tr className="odd:bg-violet-100 not-odd:bg-gray-100">
-                                    <td className="px-2 py-1  ">{spell.name}</td>
+                                <tr className="spellCell">
+                                    <td className="spellContent">{spell.name}</td>
                                 </tr>
                             </Fragment>
                         )
@@ -254,8 +254,8 @@ function PrintSpontaneousSpells(value:{spellcaster:SpontaneousSpellcastingItem, 
                 const level = GetActiveLevel(spell.system);
                 const levelHeader =
                     level > lastLevel ? (
-                        <tr key={`header-${level}`}>
-                            <th className="px-2 py-0.5 bg-violet-400 flex items-center justify-center border-0"><span>Level {level}</span><span className="bg-violet-50 rounded-md mx-3 h-5 w-5 inline-flex items-center justify-center">{GetSpellSlot(value.spellcaster.system.slots, level).max}</span></th>
+                        <tr className="spellCell" key={`header-${level}`}>
+                            <th className="spellHeader"><span>Level {level}</span><span className="spellLevelField">{GetSpellSlot(value.spellcaster.system.slots, level)?.max}</span></th>
                         </tr>
                     ) : null;
 
@@ -264,8 +264,8 @@ function PrintSpontaneousSpells(value:{spellcaster:SpontaneousSpellcastingItem, 
                 return (
                     <Fragment key={spell._id}>
                         {levelHeader}
-                        <tr className="odd:bg-violet-100 not-odd:bg-gray-100">
-                            <td className="px-2 py-1  ">{spell.name}</td>
+                        <tr className="spellCell">
+                            <td className="spellContent">{spell.name}</td>
                         </tr>
                     </Fragment>
                 );
@@ -277,12 +277,100 @@ function PrintSpontaneousSpells(value:{spellcaster:SpontaneousSpellcastingItem, 
 
 function PrintPreparedSpells(value:{spellcaster:PreparedSpellcastingItem, spells: CreatureItemSpell[]}) 
 {
-    return (<>{value.spellcaster.name}</>);
+    const spells = value.spells;
+    
+    return (<table className="spellTable">
+            <thead>
+            <tr className="spellCell">
+                <th className="spellHeader bg-violet-300">{value.spellcaster.name} : DC{value.spellcaster.system.spelldc.dc}</th>
+            </tr>
+            </thead>
+            <tbody>
+            {[0,1,2,3,4,5,6,7,8,9,10].map((index) =>
+            {
+                const slot = GetSpellSlot(value.spellcaster.system.slots, index);
+
+                if (slot !== undefined)
+                {
+                    const header = index>0?
+                        (<th className="spellHeader"><span>Level {index}</span><span className="spellLevelField">{GetSpellSlot(value.spellcaster.system.slots, index)?.max}</span></th>):
+                        (<th className="spellHeader"><span>Cantrips</span></th>);
+                    
+                    const prep = slot as PreparedSpellSlot;
+                    return prep.prepared.map((spellId, index) =>  {return (
+                        <>
+                            {index===0?header:null}
+                            <tr className="spellCell">
+                                <td className="spellContent">{spells.find(v=> {return v._id === spellId.id})?.name}</td>
+                            </tr>
+                        </>
+                    )});
+                }
+            })}
+            </tbody>
+        </table>
+    );
 }
 
 function PrintInnateSpells(value:{spellcaster:SpellcastingItem, spells: CreatureItemSpell[]})
 {
-    return (<>{value.spellcaster.name}</>);
+    const spells = value.spells;
+
+    spells.sort((a, b) => GetActiveLevel(a.system) - GetActiveLevel(b.system));
+
+    let lastLevel = -1;
+
+    return (
+        <table className="spellTable">
+            <thead>
+            <tr className="spellCell">
+                <th className="spellHeader bg-violet-300">{value.spellcaster.name} : DC{value.spellcaster.system.spelldc.dc}</th>
+            </tr>
+            </thead>
+            <tbody>
+            {spells.some(x=> x.system.traits.value.includes("cantrip"))&&
+                <>
+                    <tr className="spellCell" key={`header-cantrip`}>
+                        <th className="spellHeader"><span>Cantrips</span></th>
+                    </tr>
+                    {spells.filter(x=> x.system.traits.value.includes("cantrip")).map((spell)=>{
+                        return(
+                            <Fragment key={spell._id}>
+                                <tr className="spellCell">
+                                    <td className="spellContent">{spell.name}</td>
+                                </tr>
+                            </Fragment>
+                        )
+                    })}
+                </>
+            }
+            {spells.map((spell) =>
+            {
+                if (spell.system.traits.value.includes("cantrip"))
+                    return;
+
+                const level = GetActiveLevel(spell.system);
+                const levelHeader =
+                    level > lastLevel ? (
+                        <tr className="spellCell" key={`header-${level}`}>
+                            <th className="spellHeader"><span>Level {level}</span></th>
+                        </tr>
+                    ) : null;
+
+                lastLevel = level;
+
+                return (
+                    <Fragment key={spell._id}>
+                        {levelHeader}
+                        <tr className="spellCell">
+                            <td className="spellContent">{spell.name}</td>
+                        </tr>
+                    </Fragment>
+                );
+            })}
+            </tbody>
+        </table>
+    );
 }
 
 function GetSpellFromId(creature:StatBlockProp ,id:string) : CreatureItemSpell | undefined

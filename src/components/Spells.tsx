@@ -5,6 +5,15 @@
     type NullableValueHolder,
 } from "./StatBlock.tsx";
 import {Fragment} from "react";
+import {
+    BookBookmarkIcon,
+    HandPalmIcon,
+    HandsPrayingIcon,
+    LeafIcon,
+    MagicWandIcon,
+    PentagramIcon, PersonIcon,
+    SparkleIcon
+} from "@phosphor-icons/react";
 
 export type SpellTraditions = "arcane" | "divine" | "primal" | "occult";
 
@@ -214,6 +223,48 @@ function PrintSpellcastingEntry(value:{spellList:SpellcastingItem, spells: Creat
         return PrintInnateSpells({spellcaster:value.spellList, spells: value.spells})
 }
 
+function printSpellcastingHeader(spellcaster: SpontaneousSpellcastingItem)
+{
+    let traditionIcon;
+    let preparationIcon;
+    
+    const iconStyle = "";
+    
+    switch (spellcaster.system.tradition.value)
+    {
+        case "arcane":
+            traditionIcon = <MagicWandIcon className={iconStyle} weight="duotone"/>
+            break
+        case "divine":
+            traditionIcon = <HandsPrayingIcon className={iconStyle} weight="duotone"/>
+            break
+        case "occult":
+            traditionIcon = <PentagramIcon className={iconStyle} weight="duotone"/>
+            break
+        case "primal":
+            traditionIcon = <LeafIcon className={iconStyle} weight="duotone"/>
+            break
+    }
+
+    switch (spellcaster.system.prepared.value)
+    {
+        case "spontaneous":
+            preparationIcon = <SparkleIcon className={iconStyle} weight="duotone"/>
+            break;
+        case "prepared":
+            preparationIcon = <BookBookmarkIcon className={iconStyle} weight="duotone"/>
+            break;
+        case "innate":
+            preparationIcon = <PersonIcon className={iconStyle} weight="duotone"/>
+            break;
+        case "focus":
+            preparationIcon = <HandPalmIcon className={iconStyle} weight="duotone"/>
+            break;
+    }
+    
+    return <>{traditionIcon}{preparationIcon} {spellcaster.name} : DC{spellcaster.system.spelldc.dc}</>;
+}
+
 function PrintSpontaneousSpells(value:{spellcaster:SpontaneousSpellcastingItem, spells: CreatureItemSpell[]})
 {
     const spells = value.spells;
@@ -226,17 +277,17 @@ function PrintSpontaneousSpells(value:{spellcaster:SpontaneousSpellcastingItem, 
         <table className="spellTable">
             <thead>
             <tr className="spellCell">
-                <th className="spellHeader bg-violet-300">{value.spellcaster.name} : DC{value.spellcaster.system.spelldc.dc}</th>
+                <th className="spellTableHeader">{printSpellcastingHeader(value.spellcaster)}</th>
             </tr>
             </thead>
             <tbody>
-            {spells.some(x=> x.system.traits.value.includes("cantrip"))&&
+            {spells.some(x => x.system.traits.value.includes("cantrip")) &&
                 <>
-                <tr className="spellCell" key={`header-cantrip`}>
-                    <th className="spellHeader"><span>Cantrips</span></th>
-                </tr>
-                    {spells.filter(x=> x.system.traits.value.includes("cantrip")).map((spell)=>{
-                        return(
+                    <tr className="spellCell" key={`header-cantrip`}>
+                        <th className="spellLevelHeader"><span>Cantrips</span></th>
+                    </tr>
+                    {spells.filter(x => x.system.traits.value.includes("cantrip")).map((spell) => {
+                        return (
                             <Fragment key={spell._id}>
                                 <tr className="spellCell">
                                     <td className="spellContent">{spell.name}</td>
@@ -246,16 +297,17 @@ function PrintSpontaneousSpells(value:{spellcaster:SpontaneousSpellcastingItem, 
                     })}
                 </>
             }
-            {spells.map((spell) =>
-            {
+            {spells.map((spell) => {
                 if (spell.system.traits.value.includes("cantrip"))
                     return;
-                
+
                 const level = GetActiveLevel(spell.system);
                 const levelHeader =
                     level > lastLevel ? (
                         <tr className="spellCell" key={`header-${level}`}>
-                            <th className="spellHeader"><span>Level {level}</span><span className="spellLevelField">{GetSpellSlot(value.spellcaster.system.slots, level)?.max}</span></th>
+                            <th className="spellLevelHeader"><span>Level {level}</span><span
+                                className="spellSlotsField">{GetSpellSlot(value.spellcaster.system.slots, level)?.max}</span>
+                            </th>
                         </tr>
                     ) : null;
 
@@ -282,7 +334,7 @@ function PrintPreparedSpells(value:{spellcaster:PreparedSpellcastingItem, spells
     return (<table className="spellTable">
             <thead>
             <tr className="spellCell">
-                <th className="spellHeader bg-violet-300">{value.spellcaster.name} : DC{value.spellcaster.system.spelldc.dc}</th>
+                <th className="spellTableHeader">{printSpellcastingHeader(value.spellcaster)}</th>
             </tr>
             </thead>
             <tbody>
@@ -293,8 +345,8 @@ function PrintPreparedSpells(value:{spellcaster:PreparedSpellcastingItem, spells
                 if (slot !== undefined)
                 {
                     const header = index>0?
-                        (<th className="spellHeader"><span>Level {index}</span><span className="spellLevelField">{GetSpellSlot(value.spellcaster.system.slots, index)?.max}</span></th>):
-                        (<th className="spellHeader"><span>Cantrips</span></th>);
+                        (<th className="spellLevelHeader"><span>Level {index}</span><span className="spellSlotsField">{GetSpellSlot(value.spellcaster.system.slots, index)?.max}</span></th>):
+                        (<th className="spellLevelHeader"><span>Cantrips</span></th>);
                     
                     const prep = slot as PreparedSpellSlot;
                     return prep.prepared.map((spellId, index) =>  {return (
@@ -324,14 +376,14 @@ function PrintInnateSpells(value:{spellcaster:SpellcastingItem, spells: Creature
         <table className="spellTable">
             <thead>
             <tr className="spellCell">
-                <th className="spellHeader bg-violet-300">{value.spellcaster.name} : DC{value.spellcaster.system.spelldc.dc}</th>
+                <th className="spellTableHeader">{printSpellcastingHeader(value.spellcaster)}</th>
             </tr>
             </thead>
             <tbody>
             {spells.some(x=> x.system.traits.value.includes("cantrip"))&&
                 <>
                     <tr className="spellCell" key={`header-cantrip`}>
-                        <th className="spellHeader"><span>Cantrips</span></th>
+                        <th className="spellLevelHeader"><span>Cantrips</span></th>
                     </tr>
                     {spells.filter(x=> x.system.traits.value.includes("cantrip")).map((spell)=>{
                         return(
@@ -353,7 +405,7 @@ function PrintInnateSpells(value:{spellcaster:SpellcastingItem, spells: Creature
                 const levelHeader =
                     level > lastLevel ? (
                         <tr className="spellCell" key={`header-${level}`}>
-                            <th className="spellHeader"><span>Level {level}</span></th>
+                            <th className="spellLevelHeader"><span>Level {level}</span></th>
                         </tr>
                     ) : null;
 

@@ -55,11 +55,15 @@
     }
 
     /*bg-violet-300 px-2 py-0.5*/
-    .spellHeader{
+    .spellLevelHeader{
         @apply px-2 py-0.5 bg-violet-400 flex items-center justify-center border-0;
     }
     
-    .spellLevelField{
+    .spellTableHeader{
+        @apply px-2 py-0.5 bg-violet-300 flex items-center justify-center border-0;
+    }
+    
+    .spellSlotsField{
         @apply bg-violet-50 rounded-md mx-3 h-5 w-5 inline-flex items-center justify-center;
     }
     

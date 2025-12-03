@@ -1,0 +1,8 @@
+﻿\[\[\/act ([\w-]+)(?: dc=(\d+))?(?: skill=(\w+))?(?: options=([\w-]+))?(?: statistic=([\w-]+))?\]\](?:{([\w ]+)})?
+
+[[/act demoralize statistic=performance]]
+[[/act disarm options=mind-if-i-borrow-that]]
+[[/act steal options=mind-if-i-borrow-that]]
+[[/act shove options=sweeping-spell]]
+[[/act escape dc=21]]
+[[/act request]]

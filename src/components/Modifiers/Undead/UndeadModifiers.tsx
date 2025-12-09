@@ -138,7 +138,7 @@ export const Skeleton: CreatureAdjustment = {
         sb.name = "Skeleton " + sb.name;
 
         AddTrait(sb, "skeleton");
-        addLanguages(sb,  "necril", true);
+        sb = addLanguages(sb,  "necril", true);
 
         const hpTable: LookupTable<number> = {
             ranges: [
@@ -192,7 +192,7 @@ export const Ghost: CreatureAdjustment = {
         AddTrait(sb, "spirit");
         AddTrait(sb, "ghost");
 
-        addLanguages(sb,  "necril", true);
+        sb = addLanguages(sb,  "necril", true);
         
         sb.name = "Ghost " + sb.name;
         
@@ -308,7 +308,7 @@ export const Mummy: CreatureAdjustment = {
         let sb = cloneStatBlock(statblock);
         sb = applyBaseUndead(sb);
         AddTrait(sb, "mummy");
-        addLanguages(sb,  "necril", true);
+        sb = addLanguages(sb,  "necril", true);
 
         sb.name = "Mummy " + sb.name;
         
@@ -334,7 +334,7 @@ export const Shadow: CreatureAdjustment = {
 
         sb = applyBaseUndead(sb);
         AddTrait(sb, "shadow");
-        addLanguages(sb, "necril", true);
+        sb = addLanguages(sb, "necril", true);
 
         sb.name = "Shadow " + sb.name;
 
@@ -518,7 +518,7 @@ export const Wight: CreatureAdjustment = {
         sb = applyBaseUndead(sb);
 
         AddTrait(sb, "wight");
-        addLanguages(sb, "necril", true);
+        sb = addLanguages(sb, "necril", true);
 
         sb.name = "Wight " + sb.name;
 

@@ -439,7 +439,7 @@ function statBlock(value: StatBlockProp | undefined, isDescriptionOpen: boolean,
         {DescriptionArea(isDescriptionOpen, setIsDescriptionOpen, value)}
         {value.system.details.languages.value.length > 0 && (<>
             <hr/>
-            <b>Languages: </b> {value.system.details.languages.value.map((l, index) => {
+            <b>Languages: </b> {value.system.details.languages.value.sort((a, b) => a.localeCompare(b)).map((l, index) => {
                 return ((index === 0 ? "" : ", ") + capitalize(l))
             }
         )}</>)}{value.system.details.languages?.details && (<>, ({value.system.details.languages?.details})</>)}

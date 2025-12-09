@@ -210,6 +210,7 @@ export const Orc: CustomAncestryCreatureAdjustment = {
     name: "Orc",
     description: "Orcs are proud, strong people with hardened physiques who value physical might and glory in combat.",
     namePrefix: "Orc",
+    languages: ["orcish"],
     abilityModifiers: { str: 1 },
     traitChanges: { replace: [{ from: "human", to: "orc" }] },
     apply: (statBlock) =>

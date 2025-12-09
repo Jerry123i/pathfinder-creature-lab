@@ -157,7 +157,10 @@ export function parseAbilityDescription(input: string): string {
         (_match, content) => `<b>${content}</b>`
     );
 
-    output = output.replace(/(<hr \/>(?:(?:<br>)*|(?:<p><\/p>)*)*)$/g, (_match) => "")
+    output = output.replace(/(<hr \/>(?:(?:<br>)*|(?:<p><\/p>)*)*)$/g, (_match) => "");
 
+    //Last line cleanup
+    output = output.replace(/(\n?(?:(?:<hr>)|(?:<hr \/>)|(?:<p><\/p>)))+(?:<\/p>)?$/, (_match) => "</p>");
+    
     return output;
 }

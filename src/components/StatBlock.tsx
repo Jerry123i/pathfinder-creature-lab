@@ -21,6 +21,7 @@ import {
     PrintWeakness, type Resistance
 } from "./HPItems.tsx";
 import {parseAbilityDescription} from "./Parsing.tsx";
+import {RadioButtonIcon} from "@phosphor-icons/react";
 
 export interface StatBlockProp {
     _id: string;
@@ -143,6 +144,7 @@ export function GetGenericAbilities(value: StatBlockProp): CreatureItem[] {
             && item.type != "ammo"
             && item.type != "condition"
             && item.type != "shield"
+            && item.type != "treasure"
             && item.system.slug != "push"
             && item.system.slug != "improved-push"
             && item.system.slug != "grab"
@@ -162,6 +164,7 @@ export function GetGenericAbilities(value: StatBlockProp): CreatureItem[] {
             && item.system.slug != "darkvision"
             && item.system.slug != "tremorsense"
             && item.system.slug != "wavesense"
+            && item.system.slug != "lifesense"
             && !(item.system.slug === "reactive-strike" && (item.name === "Reactive Strike" || item.name === "Attack of Opportunity"))
             && !(item.system.slug === "attack-of-opportunity" && (item.name === "Reactive Strike" || item.name === "Attack of Opportunity"))
         )
@@ -233,6 +236,13 @@ export interface Rule {
     damageType?: string;
     value?: any;
     selector: string;
+    radius?: number;
+}
+
+export function getAuraRules(item: ItemSystem): Rule | undefined
+{
+    const rule = item.rules.find(x=> x.key.toLowerCase() === "aura")
+    return rule;
 }
 
 export interface Damage {
@@ -350,6 +360,10 @@ export interface Details {
 
 function GetActionIcon(value: CreatureItem) 
 {
+    if(value.system.traits.value.some(x=> x === "aura")){
+        return (<span><RadioButtonIcon weight="bold" /></span>)
+    }
+    
     if (value.system.actionType === undefined)
         return null;
     if (value.system.actionType.value === undefined)
@@ -380,6 +394,32 @@ function GetActionIcon(value: CreatureItem)
         default:
             return (<span className="pathfinder-action">T</span>);
     }
+}
+
+function PrintGenericAbility(abilityItem: CreatureItem) {
+    
+    let description = abilityItem.system.description.value;
+
+    const isAura = abilityItem.system.traits.value.some(x=> x === "aura");
+    let radius = 0; 
+    if (isAura)
+    {
+        radius = getAuraRules(abilityItem.system)?.radius ?? 0 ;
+        const pattern = "(?:<p>)?" + radius.toString() + " feet\\.?(?: )?(?:<\\/p>)?(?:\\\\n)?"
+        description = description.replace(new RegExp(pattern), "");
+    }
+    
+    return(
+        <li className="py-1 border-t-2 border-amber-300">
+                    <span className="flex gap-0.5 items-center">
+                        <span className="text-lg pr-1 flex gap-0.5 items-center">{GetActionIcon(abilityItem)}{abilityItem.name}</span>
+                        {isAura && (<span className="pr-1">({radius} feet)</span>)}
+                        {abilityItem.system.traits.value?.length > 0 ?
+                        <span
+                            className="text-stone-500">({printTraitsSeparator(abilityItem.system.traits, ", ")})</span> : null}
+                    </span>
+            <p dangerouslySetInnerHTML={{__html: parseAbilityDescription(description)}}></p>
+        </li>);
 }
 
 function statBlock(value: StatBlockProp | undefined, isDescriptionOpen: boolean, setIsDescriptionOpen: ((a:boolean)=>void) ) {
@@ -451,14 +491,7 @@ function statBlock(value: StatBlockProp | undefined, isDescriptionOpen: boolean,
             {GetCombinedStrikes(GetStrikes(value)).map(i => <li>{PrintStrike(value, i)}</li>)}
         </ul>
         <ul className="undottedList">
-            {GetGenericAbilities(value).map(abilityItem => (
-                <li className="py-1 border-t-2 border-amber-300">
-                    <span
-                        className="text-lg pr-2">{GetActionIcon(abilityItem)}{abilityItem.name}</span>{abilityItem.system.traits.value?.length > 0 ?
-                    <span
-                        className="text-stone-500">({printTraitsSeparator(abilityItem.system.traits, ", ")})</span> : null}
-                    <p dangerouslySetInnerHTML={{__html: parseAbilityDescription(abilityItem.system.description.value)}}></p>
-                </li>))}
+            {GetGenericAbilities(value).map(abilityItem => PrintGenericAbility(abilityItem))}
         </ul>
         {HasSpells(value) ? (<>
             <h2>Spells</h2>

@@ -188,7 +188,7 @@ export interface CreatureItemSpell extends CreatureItem {
     system: SpellSystem;
 }
 
-function GetActiveLevel(spell : SpellSystem): number{
+export function GetActiveLevel(spell : SpellSystem): number{
     
     if (spell.location?.heightenedLevel > (spell.level.value ?? 0))
         return spell.location.heightenedLevel;

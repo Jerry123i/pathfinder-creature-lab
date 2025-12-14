@@ -93,6 +93,26 @@ export function GetSpecialSenses(value: Perception): Sense[]
     return specialSenses;
 }
 
+export function AddSpecialSenses(value : Perception, sense : Sense)
+{
+    for (const x of value.senses)
+    {
+        if (x.type === sense.type)
+        {
+            if (x.acuity === sense.acuity)
+            {
+                if (x.range === undefined){
+                    x.range = sense.range;
+                    return
+                }
+                x.range = Math.max(x.range, sense.range??0);    
+            }
+        }
+    }   
+    
+    value.senses.push(sense);
+}
+
 export type SensePrecision = "precise"|"imprecise"|"vague";
 
 export function modifyAllSaves(creature: CreatureSystems, value: number) {

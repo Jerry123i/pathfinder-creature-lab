@@ -1,8 +1,8 @@
-﻿import {AddDarkVision, cloneStatBlock, type CreatureItem, type StatBlockProp} from "../../StatBlock.tsx";
-import {ModifyAbilitiesAndRelatedStats} from "../../Abilities.tsx";
-import {AddTrait, RemoveTrait, ReplaceTrait} from "../../Traits.tsx";
-import {addLanguages, addSpeed, changeSize, type CreatureAdjustment} from "../Modifiers.tsx";
-import type {LookupTable} from "../../LookupTable.tsx";
+﻿import {AddDarkVision, cloneStatBlock, type CreatureItem, type StatBlockProp} from "../StatBlock.tsx";
+import {ModifyAbilitiesAndRelatedStats} from "../Abilities.tsx";
+import {AddTrait, RemoveTrait, ReplaceTrait} from "../Traits.tsx";
+import {addLanguages, addSpeed, changeSize, type CreatureAdjustment} from "./Modifiers.tsx";
+import type {LookupTable} from "../LookupTable.tsx";
 
 export interface AbilityModifiers {
     str?: number;

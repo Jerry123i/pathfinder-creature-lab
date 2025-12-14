@@ -4,7 +4,7 @@
     type CreatureItem, GetDice,
     modifyAllSaves,
     type StatBlockProp
-} from "../../StatBlock.tsx";
+} from "../StatBlock.tsx";
 import {
     addImmunities,
     addImmunity,
@@ -12,25 +12,25 @@ import {
     addResistances,
     addWeakness, addWeaknesses,
     type CreatureAdjustment
-} from "../Modifiers.tsx";
-import {AddTrait, ReplaceTrait} from "../../Traits.tsx";
-import type {LookupTable} from "../../LookupTable.tsx";
+} from "./Modifiers.tsx";
+import {AddTrait, ReplaceTrait} from "../Traits.tsx";
+import type {LookupTable} from "../LookupTable.tsx";
 import {
     type CreatureItemStrike,
     GetDamagesInfo,
     GetStrikes,
     getStrongerStrike,
     getWeakestStrike
-} from "../../Strikes.tsx";
+} from "../Strikes.tsx";
 import {
     moderateSpellAttackBonusTable,
     moderateSpellDcTable,
     moderateStrikeBonusTable,
     moderateStrikeDamageTable
-} from "../../../assets/GMTables.tsx";
-import {AddSkill, getHighestSkill} from "../../Skills.tsx";
-import type {CreatureItemSpell, SpellcastingItem} from "../../Spells.tsx";
-import {capitalize} from "../../TypeScriptHelpFunctions.tsx";
+} from "../../assets/GMTables.tsx";
+import {AddSkill, getHighestSkill} from "../Skills.tsx";
+import type {CreatureItemSpell, SpellcastingItem} from "../Spells.tsx";
+import {capitalize} from "../TypeScriptHelpFunctions.tsx";
 
 const voidHealing = JSON.parse("{\"_id\":\"q1OobVjFqRsc58KI\",\"_stats\":{\"compendiumSource\":\"Compendium.pf2e.bestiary-ability-glossary-srd.Item.TTCw5NusiSSkJU1x\"},\"img\":\"systems/pf2e/icons/actions/Passive.webp\",\"name\":\"Void Healing\",\"sort\":400000,\"system\":{\"actionType\":{\"value\":\"passive\"},\"actions\":{\"value\":null},\"category\":\"defensive\",\"description\":{\"value\":\"<p>@Localize[PF2E.NPC.Abilities.Glossary.NegativeHealing]</p>\"},\"publication\":{\"license\":\"ORC\",\"remaster\":true,\"title\":\"Pathfinder Monster Core\"},\"rules\":[{\"key\":\"ActiveEffectLike\",\"mode\":\"override\",\"path\":\"system.attributes.hp.negativeHealing\",\"value\":true}],\"slug\":\"void-healing\",\"traits\":{\"rarity\":\"common\",\"value\":[]}},\"type\":\"action\"}");
 

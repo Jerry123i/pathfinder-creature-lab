@@ -19,10 +19,11 @@ import {
     Merfolk,
     Minotaur,
     Orc,
-} from "./Ancestry/AncestryModifiers.tsx";
+} from "./AncestryModifiers.tsx";
 import {actionTooltipRegex, checkRegex, damageRegex, splitDamageDiceRegex} from "../Parsing.tsx";
-import {Ghost, Ghoul, Mummy, Shadow, Skeleton, Vampire, Wight, Zombie} from "./Undead/UndeadModifiers.tsx";
+import {Ghost, Ghoul, Mummy, Shadow, Skeleton, Vampire, Wight, Zombie} from "./UndeadModifiers.tsx";
 import type {Resistance} from "../HPItems.tsx";
+import {Air, Earth, Fire, Metal, Water, Wood} from "./ElementalModifiers.tsx";
 
 type ModifierType = "Level" | "Ancestry" | "Elemental" | "Undead" | "CreatureType";
 
@@ -150,6 +151,9 @@ export function addLanguages(baseCreature : StatBlockProp, language: string, add
 
 export function addSpeed(baseCreature : StatBlockProp, value: TypedValue)
 {
+    if (baseCreature.system.attributes.speed.otherSpeeds === undefined)
+        baseCreature.system.attributes.speed.otherSpeeds = [];
+    
     for (const speed of baseCreature.system.attributes.speed.otherSpeeds)
     {
         if (speed.type == value.type)
@@ -311,5 +315,6 @@ export function modifyAbilitiesDamage(creature : StatBlockProp, valueToIncrease 
 
 export const CreatureAdjustmentList = [Elite, Weak, 
     Catfolk, Dwarf, Elf, Gnome, Goblin, Halfling, Leshy, Minotaur, Merfolk, Orc,
-    Zombie, Skeleton, Ghost, Ghoul, Mummy, Shadow, Vampire, Wight];
+    Zombie, Skeleton, Ghost, Ghoul, Mummy, Shadow, Vampire, Wight,
+    Air, Earth, Fire, Metal, Wood, Water];
 

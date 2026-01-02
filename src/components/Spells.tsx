@@ -223,7 +223,7 @@ function PrintSpellcastingEntry(value:{spellList:SpellcastingItem, spells: Creat
         return PrintInnateSpells({spellcaster:value.spellList, spells: value.spells})
 }
 
-function printSpellcastingHeader(spellcaster: SpontaneousSpellcastingItem)
+function printSpellcastingHeader(spellcaster: SpellcastingItem)
 {
     let traditionIcon;
     let preparationIcon;
@@ -425,10 +425,10 @@ function PrintInnateSpells(value:{spellcaster:SpellcastingItem, spells: Creature
     );
 }
 
-function GetSpellFromId(creature:StatBlockProp ,id:string) : CreatureItemSpell | undefined
-{
-    const spell = (creature.items.find(v => v._id === id) as CreatureItemSpell);
-    return spell;    
-}
+// function GetSpellFromId(creature:StatBlockProp ,id:string) : CreatureItemSpell | undefined
+// {
+//     const spell = (creature.items.find(v => v._id === id) as CreatureItemSpell);
+//     return spell;    
+// }
 
 //<th key={spell._id}>{spell.name}</th>

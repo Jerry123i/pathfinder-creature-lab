@@ -40,7 +40,7 @@ function App()
         <div className="flex bg-gray-50 min-h-screen">
             {/* Sidebar */}
             <div className="flex flex-1/5 bg-amber-100 border-amber-200 border-r-4 p-3">
-                {SideBar(monsters, setCreature)}
+                {SideBar(monsters, setCreature, setSelectedAdjustments)}
             </div>
 
             {/* Main Content */}

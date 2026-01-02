@@ -20,7 +20,7 @@ export type FilterValues = {
     traitsArray: string[];
 }
 
-export function SideBar(allCreatures: StatBlockProp[], onSelectCreature: (creature: StatBlockProp) => void)
+export function SideBar(allCreatures: StatBlockProp[], onSelectCreature: (creature: StatBlockProp) => void, setSelectedAdjustments: (adjsArray: number[])=>void)
 {
     const [filters, setFilters] = useState<FilterValues>({min: -1, max: 30, sort: "LevelUp", nameFilter: "", traitsArray: []});
     
@@ -44,7 +44,7 @@ export function SideBar(allCreatures: StatBlockProp[], onSelectCreature: (creatu
             {SortArea(filters, setFilters)}
         </div>
         <div
-            className=" flex-[8] overflow-y-scroll border-1 border-gray-300">{CreaturesArea(FilterAndSortCreatures(allCreatures, filters), onSelectCreature)}</div>
+            className=" flex-[8] overflow-y-scroll border-1 border-gray-300">{CreaturesArea(FilterAndSortCreatures(allCreatures, filters), onSelectCreature, setSelectedAdjustments)}</div>
     </div>);
 }
 
@@ -221,12 +221,15 @@ function FilterAndSortCreatures(creatures: StatBlockProp[], filter: FilterValues
     return creaturesToShow;
 }
 
-function CreaturesArea(creatures : StatBlockProp[], onSelectCreature : (creature: StatBlockProp) => void)
+function CreaturesArea(creatures : StatBlockProp[], onSelectCreature : (creature: StatBlockProp) => void, setSelectedAdjustments: (adjsArray: number[])=>void)
 {
     return(<div className="">
             {creatures.map(value => {
                 return(<div className="border-1 border-gray-400 p-2 rounded-2xl bg-gray-200 m-2 select-none hover:bg-gray-600 hover:text-white " key={value._id}
-                            onClick={()=> { onSelectCreature(value) }}>
+                            onClick={()=> { 
+                                onSelectCreature(value)
+                                setSelectedAdjustments([])
+                            }}>
                     <p>{value.name}     {value.system.details.level.value}</p>
                     {value.system.traits.value.map((value, i) =>{return(<span className="text-gray-500 text-xs" key={i}>{capitalize(value)} | </span>);} )}
                 </div>)

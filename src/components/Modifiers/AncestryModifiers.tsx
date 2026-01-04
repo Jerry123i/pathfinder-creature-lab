@@ -2,7 +2,7 @@
 import {ModifyAbilitiesAndRelatedStats} from "../Abilities.tsx";
 import {AddTrait, RemoveTrait, ReplaceTrait} from "../Traits.tsx";
 import {addLanguages, addSpeed, changeSize, type CreatureAdjustment} from "./Modifiers.tsx";
-import type {LookupTable} from "../LookupTable.tsx";
+import type {RangeLevelLookupTable} from "../LookupTable.tsx";
 
 export interface AbilityModifiers {
     str?: number;
@@ -171,7 +171,7 @@ export const Leshy: CustomAncestryCreatureAdjustment = {
     },
     apply: (statBlock) => 
     {
-        const healingTable: LookupTable<string> = {
+        const healingTable: RangeLevelLookupTable<string> = {
             ranges: [
                 { min: -1,  max: 0,  value: "1d4" },
                 { min: 1,   max: 1,  value: "1d8" },

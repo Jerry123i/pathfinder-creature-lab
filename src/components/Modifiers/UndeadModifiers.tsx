@@ -14,7 +14,7 @@ import {
     type CreatureAdjustment
 } from "./Modifiers.tsx";
 import {AddTrait, ReplaceTrait} from "../Traits.tsx";
-import type {LookupTable} from "../LookupTable.tsx";
+import type {RangeLevelLookupTable} from "../LookupTable.tsx";
 import {
     type CreatureItemStrike,
     GetDamagesInfo,
@@ -34,7 +34,7 @@ import {capitalize} from "../TypeScriptHelpFunctions.tsx";
 
 const voidHealing = JSON.parse("{\"_id\":\"q1OobVjFqRsc58KI\",\"_stats\":{\"compendiumSource\":\"Compendium.pf2e.bestiary-ability-glossary-srd.Item.TTCw5NusiSSkJU1x\"},\"img\":\"systems/pf2e/icons/actions/Passive.webp\",\"name\":\"Void Healing\",\"sort\":400000,\"system\":{\"actionType\":{\"value\":\"passive\"},\"actions\":{\"value\":null},\"category\":\"defensive\",\"description\":{\"value\":\"<p>@Localize[PF2E.NPC.Abilities.Glossary.NegativeHealing]</p>\"},\"publication\":{\"license\":\"ORC\",\"remaster\":true,\"title\":\"Pathfinder Monster Core\"},\"rules\":[{\"key\":\"ActiveEffectLike\",\"mode\":\"override\",\"path\":\"system.attributes.hp.negativeHealing\",\"value\":true}],\"slug\":\"void-healing\",\"traits\":{\"rarity\":\"common\",\"value\":[]}},\"type\":\"action\"}");
 
-const undeadWeaknessTable: LookupTable<number> = {
+const undeadWeaknessTable: RangeLevelLookupTable<number> = {
     ranges: [
         { min: -Infinity,  max: 3,  value: 3 },
         { min: 4,   max: 8,  value: 5 },
@@ -79,7 +79,7 @@ export const Zombie: CreatureAdjustment = {
         AddTrait(sb, "mindless");
         AddTrait(sb, "zombie");
 
-        const hpTable: LookupTable<number> = {
+        const hpTable: RangeLevelLookupTable<number> = {
             ranges: [
                 { min: -Infinity,  max: 1,  value: 10 },
                 { min: 2,   max: 5,  value: 20 },
@@ -95,7 +95,7 @@ export const Zombie: CreatureAdjustment = {
             }
         };
 
-        const weaknessTable: LookupTable<number> = {
+        const weaknessTable: RangeLevelLookupTable<number> = {
             ranges: [
                 { min: -Infinity,  max: 1,  value: 5 },
                 { min: 2,   max: 5,  value: 5 },
@@ -140,7 +140,7 @@ export const Skeleton: CreatureAdjustment = {
         AddTrait(sb, "skeleton");
         sb = addLanguages(sb,  "necril", true);
 
-        const hpTable: LookupTable<number> = {
+        const hpTable: RangeLevelLookupTable<number> = {
             ranges: [
                 { min: -Infinity,  max: -1,  value: -2 },
                 { min: 0,   max: 1,  value: -4 },
@@ -155,7 +155,7 @@ export const Skeleton: CreatureAdjustment = {
             }
         };
 
-        const weaknessTable: LookupTable<number> = {
+        const weaknessTable: RangeLevelLookupTable<number> = {
             ranges: [
                 { min: -Infinity,  max: -1,  value: 2 },
                 { min: 0,   max: 1,  value: 2 },
@@ -413,7 +413,7 @@ export const Vampire: CreatureAdjustment = {
     type: "Undead",
     apply: (statblock: StatBlockProp) =>
     {
-        const resistanceTable: LookupTable<number> = {
+        const resistanceTable: RangeLevelLookupTable<number> = {
             ranges: [
                 { min: -Infinity,  max: -1,  value: 2 },
                 { min: 0,   max: 1,  value: 2 },
@@ -428,7 +428,7 @@ export const Vampire: CreatureAdjustment = {
             }
         };
 
-        const hpDecreaseTable: LookupTable<number> = {
+        const hpDecreaseTable: RangeLevelLookupTable<number> = {
             ranges: [
                 { min: -Infinity,  max: -1,  value: -3 },
                 { min: 0,   max: 1,  value: -5 },

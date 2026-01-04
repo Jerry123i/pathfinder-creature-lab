@@ -16,7 +16,7 @@ import {
 import {AddTrait} from "../Traits.tsx";
 import {type CreatureItemStrike, GetDamagesInfo, GetStrikes} from "../Strikes.tsx";
 import {capitalize} from "../TypeScriptHelpFunctions.tsx";
-import type {LookupTable} from "../LookupTable.tsx";
+import type {RangeLevelLookupTable} from "../LookupTable.tsx";
 import {
     type CreatureItemSpell, GetActiveLevel, GetSpells,
     HasSpells,
@@ -67,7 +67,7 @@ function elementalAdjustments(statblock: StatBlockProp, language: string, name: 
     return sb;
 }
 
-const resistanceTable: LookupTable<number> = {
+const resistanceTable: RangeLevelLookupTable<number> = {
     ranges: [
         { min: -Infinity,  max: 3,  value: 3 },
         { min: 4,   max: 8,  value: 5 },
@@ -81,7 +81,7 @@ const resistanceTable: LookupTable<number> = {
     }
 };
 
-const hpReductionTable: LookupTable<number> = {
+const hpReductionTable: RangeLevelLookupTable<number> = {
     ranges: [
         { min: -Infinity,  max: 3,  value: 6  },
         { min: 4,   max: 8,         value: 10 },
@@ -95,7 +95,7 @@ const hpReductionTable: LookupTable<number> = {
     }
 };
 
-const hpIncreaseTable: LookupTable<number> = {
+const hpIncreaseTable: RangeLevelLookupTable<number> = {
     ranges: [
         { min: -Infinity,  max: 3,  value: 3  },
         { min: 4,   max: 8,         value: 5 },

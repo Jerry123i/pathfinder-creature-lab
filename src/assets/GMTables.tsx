@@ -1,4 +1,4 @@
-﻿import type {GMTable, RangeLevelLookupTable, Range} from "../components/LookupTable.tsx";
+﻿import type {GMTable, RangeLevelLookupTable, Range, AttributeTiers} from "../components/LookupTable.tsx";
 
 export const attributeModifierScales : GMTable<number> =
 {
@@ -34,7 +34,7 @@ export const skillsScales : GMTable<Range|number> =
     terrible:   Array(26).fill(0)
 }
  
-export const ArmorClassScales : GMTable<number> = 
+export const armorClassScales : GMTable<number> = 
 {
     extreme:  [18,19,19,21,22,24,25,27,28,30,31,33,34,36,37,39,40,42,43,45,46,48,49,51,52,54],
     high:     [15,16,16,18,19,21,22,24,25,27,28,30,31,33,34,36,37,39,40,42,43,45,46,48,49,51],
@@ -80,11 +80,19 @@ export const hitPointScales: GMTable<Range|number> = {
     extreme:  Array.from({ length: 26 }, () => 999),
 };
 
+export const strikeAttackBonusScales: GMTable<number> = {
+    extreme:  [10,10,11,13,14,16,17,19,20,22,23,25,27,28,29,31,32,34,35,37,38,40,41,43,44,46],
+    high:     [ 8, 8, 9,11,12,14,15,17,18,20,21,23,24,26,27,29,30,32,33,35,36,38,39,41,42,44],
+    moderate: [ 6, 6, 7, 9,10,12,13,15,16,18,19,21,22,24,25,27,28,30,31,33,34,36,37,39,40,42],
+    low:      [ 4, 4, 5, 7, 8, 9,11,12,13,15,16,17,19,20,21,23,24,25,27,28,29,31,32,33,35,36],
+    terrible: Array.from({ length: 26 }, () => 1),
+};
+
 export const strikeDamageScales: GMTable<number> = {
-    extreme:  [ 4, 6, 8,11,15,20,23,25,28,30,33,35,38,40,43,45,48,50,53,55,58,60,63,65,68 ],
-    high:     [ 3, 5, 6, 9,12,16,18,20,22,24,26,28,30,32,34,36,37,38,40,42,44,46,48,50,52 ],
-    moderate: [ 3, 4, 5, 8,10,13,15,17,18,20,22,23,25,27,28,30,31,32,33,35,37,38,40,42,44 ],
-    low:      [ 2, 3, 4, 6, 8,11,12,13,15,16,17,19,20,21,23,24,25,26,27,28,29,31,32,33,35 ],
+    extreme:  [ 4, 6, 8,11,15,18,20,23,25,28,30,33,35,38,40,43,45,48,50,53,55,58,60,63,65,68 ],
+    high:     [ 3, 5, 6, 9,12,14,16,18,20,22,24,26,28,30,32,34,36,37,38,40,42,44,46,48,50,52 ],
+    moderate: [ 3, 4, 5, 8,10,12,13,15,17,18,20,22,23,25,27,28,30,31,32,33,35,37,38,40,42,44 ],
+    low:      [ 2, 3, 4, 6, 8, 9,11,12,13,15,16,17,19,20,21,23,24,25,26,27,28,29,31,32,33,35 ],
     terrible: Array.from({ length: 26 }, () => 1)
 };
 
@@ -104,6 +112,47 @@ export const spellAttackScales: GMTable<number> = {
     moderate: [ 5, 5, 6, 7, 9,10,11,13,14,15,17,18,19,21,22,23,25,26,27,29,30,31,33,34,35,37]
 };
 
+export function getValueTier(table:GMTable<number|Range>, level : number, value:number): AttributeTiers
+{
+    level = level+1;
+    const terribleRef = table.terrible[level];
+    const lowRef = table.low[level];
+    const moderateRef = table.moderate[level];
+    const extremeRef = table.extreme[level];
+    const highRef = table.high[level];
+
+    const comparisons : {label : AttributeTiers, value : number}[] = [
+        { label: "terrible", value: Math.abs(compare(terribleRef, value)) },
+        { label: "low", value: Math.abs(compare(lowRef, value)) },
+        { label: "moderate", value: Math.abs(compare(moderateRef, value)) },
+        { label: "high", value: Math.abs(compare(highRef, value)) },
+        { label: "extreme", value: Math.abs(compare(extremeRef, value)) },
+    ];
+
+    return comparisons.reduce((best, current) =>
+        current.value < best.value ? current : best
+    ).label;
+    
+    
+}
+
+function compare(reference:number|Range, value:number)
+{
+    if (typeof reference === "number") {
+        return value - reference;
+    }   
+    else {
+        if (value >= reference.min && value <= reference.max)
+            return 0;
+        
+        if (value < reference.min)
+            return value - reference.min;
+        
+        return value - reference.max;
+    }
+}
+
+//Remove these
 export const moderateStrikeBonusTable: RangeLevelLookupTable<number> = {
     ranges: [
         { min: -Infinity,  max: 0,  value: 6 },

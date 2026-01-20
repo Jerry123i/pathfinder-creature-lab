@@ -10,3 +10,18 @@ Elder Wyrmwraith / Tarn Linnorm / Tor Linnorm
 Roll up quando seleciona outra
 
 Warsworn double ()
+
+Creator:
+- Lens
+- Values Editor
+- Abilities Editor
+- Abilities Transfer
+
+Custom modfiers:
+- Ver os do lost omens
+- Demon, Angel, Devil, Azata etc
+- Corrupt e Redeemed (pra inverter)
+- Cold e Lighting para lançar junto com o clérigo (?)
+
+Créditos:
+-Pathfinder2eActions.ttf

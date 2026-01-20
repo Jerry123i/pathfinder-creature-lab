@@ -1,6 +1,7 @@
 ﻿import {Fragment} from "react";
 import {type CreatureSystems, GetLoreItems, GetValue, NullableValueChange, type StatBlockProp} from "./StatBlock.tsx";
 import type {AbilityName} from "./Abilities.tsx";
+import {PrintSkillTier} from "./GMValuesMarkers.tsx";
 
 export interface Skill {
     base: number;
@@ -161,7 +162,7 @@ export function getHighestSkill(creature:StatBlockProp) : {name: SkillName, valu
     
 }
 
-export function printSkills(creature:StatBlockProp,list: SkillList) {
+export function printSkills(creature:StatBlockProp,list: SkillList, showPowerMarkers : boolean) {
     
     if (list === undefined)
         return <></>;
@@ -180,11 +181,11 @@ export function printSkills(creature:StatBlockProp,list: SkillList) {
                 let skillName = skillInterfaceKey;
                 skillName = skillName[0].toUpperCase() + skillName.slice(1);
                 return (
-                    <Fragment key={skillInterfaceKey}>{skillName} {skill.base >= 0 ? "+" : ""}{skill.base}{skill.special !== undefined && GetSpecialSkills(skill)}; </Fragment>
+                    <Fragment key={skillInterfaceKey}>{skillName} {skill.base >= 0 ? "+" : ""}{skill.base}{showPowerMarkers?PrintSkillTier(creature.system.details.level.value, skill.base):null}{skill.special !== undefined && GetSpecialSkills(skill)}; </Fragment>
                 );
             })}
             {lores.length > 0 && lores.map((loreInterfaceKey) => {
-                return <Fragment key={loreInterfaceKey.name}>{loreInterfaceKey.name} {GetValue(loreInterfaceKey.system.mod) >= 0 ? "+" : ""}{loreInterfaceKey.system.mod.value}; </Fragment>
+                return <Fragment key={loreInterfaceKey.name}>{loreInterfaceKey.name} {GetValue(loreInterfaceKey.system.mod) >= 0 ? "+" : ""}{loreInterfaceKey.system.mod.value}{showPowerMarkers?PrintSkillTier(creature.system.details.level.value, loreInterfaceKey.system.mod.value??0):null}; </Fragment>
             })}
         </>
     );

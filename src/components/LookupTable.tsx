@@ -1,10 +1,10 @@
 ﻿import {inLerp, lerp, remap} from "./LinearInterpolation.tsx";
 
-type AttributeTiers = "extreme" | "high" | "moderate" | "low" | "terrible";
+export type AttributeTiers = "extreme" | "high" | "moderate" | "low" | "terrible";
 
 interface RangeTableLine<T> {
     min: number;
-    max: number; // use Infinity for open-ended ranges
+    max: number;
     value: T;
 }
 

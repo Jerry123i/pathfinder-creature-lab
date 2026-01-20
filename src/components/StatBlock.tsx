@@ -21,7 +21,9 @@ import {
     PrintWeakness, type Resistance
 } from "./HPItems.tsx";
 import {parseAbilityDescription} from "./Parsing.tsx";
-import {RadioButtonIcon} from "@phosphor-icons/react";
+import {MagnifyingGlassIcon, RadioButtonIcon} from "@phosphor-icons/react";
+import {SquareButtonIcon} from "./UIElements/Buttons.tsx";
+import {PrintACTier, PrintAttributeTier, PrintHPTier, PrintPerceptionTier, PrintSavesTier} from "./GMValuesMarkers.tsx";
 
 export interface StatBlockProp {
     _id: string;
@@ -331,7 +333,7 @@ export interface DiceAndModifier {
 
 export function GetDice(value: DamageRollInfo): DiceAndModifier
 {
-    const dicePattern = /(\d+)d(\d+)([+-]\d+)?/i; // matches e.g. 2d6, 3d10+5, 12d4-3
+    const dicePattern = /(\d+)d(\d+)([+-]\d+)?/i;
     const staticDamagePattern = /(\d+)/;
     
     const matchDice = value.damage.toString().match(dicePattern);
@@ -442,16 +444,24 @@ function PrintGenericAbility(abilityItem: CreatureItem) {
         </li>);
 }
 
-function statBlock(value: StatBlockProp | undefined, isDescriptionOpen: boolean, setIsDescriptionOpen: ((a:boolean)=>void) ) {
+let powerTierVision = true;
+
+function statBlock(value: StatBlockProp | undefined, isDescriptionOpen: boolean, setIsDescriptionOpen: ((a:boolean)=>void) )
+{
 
     if(value === undefined)
         return (<p className="italic text-gray-400 px-3 py-1">Select a creature</p>)
     
+    let level = value.system.details.level.value;
+    
     return (<div className="px-3 py-1">
-        <h1 className="space-x-6 font-semibold">
-            <span>{value.name}</span>
-            <span>{value.system.details.level.value}</span>
-        </h1>
+        <div className="flex flex-row whitespace-nowrap items-center justify-between">
+            <h1 className=" flex space-x-6 font-semibold">
+                <span>{value.name}</span>
+                <span>{level}</span>
+            </h1>
+                {SquareButtonIcon(<MagnifyingGlassIcon />)}
+        </div>
         {printTraitsTransformElement(value.system.traits, (s) => {
             return (
                 <p className={`inline-block ${GetTraitColor(s)} text-white border-double border-2 border-[#d5c489] font-semibold text-[1.0em] not-italic px-[5px] text-left indent-0 my-[0.1em]`}>{s.toString()}</p>)
@@ -466,13 +476,13 @@ function statBlock(value: StatBlockProp | undefined, isDescriptionOpen: boolean,
         <hr/>
         {PrintPerceptionLine(value)}
         <br/>
-        <b>Skills</b> {printSkills(value, value.system.skills)}<br/>
+        <b>Skills</b> {printSkills(value, value.system.skills, powerTierVision)}<br/>
         <hr/>
         <span
-            className="flex gap-1 items-center">{printValue(value.system.attributes.ac, "AC")}{";"}{PrintShield(value)}</span>
-        {printValueWithSignal(value.system.saves.fortitude, "Fort")}{";"}
-        {printValueWithSignal(value.system.saves.reflex, "Ref")}{";"}
-        {printValueWithSignal(value.system.saves.will, "Will")}
+            className="flex gap-1 items-center">{printValue(value.system.attributes.ac, "AC")}{powerTierVision?PrintACTier(level, value.system.attributes.ac.value):null}{";"}{PrintShield(value)}</span>
+        {printValueWithSignal(value.system.saves.fortitude, "Fort")}{powerTierVision?PrintSavesTier(level, value.system.saves.fortitude.value):null}{";"}
+        {printValueWithSignal(value.system.saves.reflex, "Ref")}{powerTierVision?PrintSavesTier(level, value.system.saves.reflex.value):null}{";"}
+        {printValueWithSignal(value.system.saves.will, "Will")}{powerTierVision?PrintSavesTier(level, value.system.saves.will.value):null}
         {value.items.some(i => i.system?.slug === "1-status-to-all-saves-vs-magic") && 
             (
             <span className="text-gray-500 italic"> {" "}
@@ -482,7 +492,7 @@ function statBlock(value: StatBlockProp | undefined, isDescriptionOpen: boolean,
             </span>
         )}
         <br></br>
-        {PrintHP(value)}
+        {PrintHP(value)}{powerTierVision?PrintHPTier(level, value.system.attributes.hp.value):null}
         {isVoidHealing(value) ? ` (void healing)` : null}
         {GetFastHealing(value) !== undefined ? ` (${GetFastHealing(value)?.name})` : null}
         {GetRegeneration(value) !== undefined ? ` (${GetRegeneration(value)?.name})` : null}
@@ -497,18 +507,18 @@ function statBlock(value: StatBlockProp | undefined, isDescriptionOpen: boolean,
             })
             : null}
         <p>
-            {printMod(value.system.abilities.str, "STR")}{";"}
-            {printMod(value.system.abilities.dex, "DEX")}{";"}
-            {printMod(value.system.abilities.con, "CON")}{";"}
-            {printMod(value.system.abilities.int, "INT")}{";"}
-            {printMod(value.system.abilities.wis, "WIS")}{";"}
-            {printMod(value.system.abilities.cha, "CHA")}
+            {printMod(value.system.abilities.str, "STR")}{powerTierVision?PrintAttributeTier(level, value.system.abilities.str.mod):null}{";"}
+            {printMod(value.system.abilities.dex, "DEX")}{powerTierVision?PrintAttributeTier(level, value.system.abilities.dex.mod):null}{";"}
+            {printMod(value.system.abilities.con, "CON")}{powerTierVision?PrintAttributeTier(level, value.system.abilities.con.mod):null}{";"}
+            {printMod(value.system.abilities.int, "INT")}{powerTierVision?PrintAttributeTier(level, value.system.abilities.int.mod):null}{";"}
+            {printMod(value.system.abilities.wis, "WIS")}{powerTierVision?PrintAttributeTier(level, value.system.abilities.wis.mod):null}{";"}
+            {printMod(value.system.abilities.cha, "CHA")}{powerTierVision?PrintAttributeTier(level, value.system.abilities.cha.mod):null}
         </p>
         <hr/>
         <span className="flex align-middle"><h2>Strikes</h2><span
             className="ml-2 flex">{PrintReactiveStrikeLabel(value)}</span></span>
         <ul className="undottedList">
-            {GetCombinedStrikes(GetStrikes(value)).map(i => <li>{PrintStrike(value, i)}</li>)}
+            {GetCombinedStrikes(GetStrikes(value)).map(i => <li>{PrintStrike(value, i, powerTierVision)}</li>)}
         </ul>
         <ul className="undottedList">
             {GetGenericAbilities(value).map(abilityItem => PrintGenericAbility(abilityItem))}
@@ -535,7 +545,7 @@ function DescriptionArea(isDescriptionOpen: boolean, setIsDescriptionOpen: (a: b
 
 function PrintPerceptionLine(value: StatBlockProp)
 {
-    return (<><b>Perception</b> {printNumberWithSignalString(value.system.perception.mod)}
+    return (<><b>Perception</b> {printNumberWithSignalString(value.system.perception.mod)}{powerTierVision?PrintPerceptionTier(value.system.details.level.value, value.system.perception.mod):null}
         {GetDarknessVision(value.system.perception)&&` ; ${GetDarknessVision(value.system.perception)?.type}`}
         {GetSpecialSenses(value.system.perception).map(sense => {return ` (${sense.acuity} ${sense.type} ${sense.range&&`${sense.range} feet`})`})}
     </>);

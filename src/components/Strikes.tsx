@@ -14,6 +14,7 @@ import {printTraitsSeparator} from "./Traits.tsx";
 import {capitalize} from "./TypeScriptHelpFunctions.tsx";
 import type {AbilityName} from "./Abilities.tsx";
 import {parseAbilityDescription} from "./Parsing.tsx";
+import {PrintDamageTier, PrintStrikeTier} from "./GMValuesMarkers.tsx";
 
 export interface CreatureItemStrike extends CreatureItem {
     system: StrikeSystem
@@ -148,18 +149,18 @@ export function GetDamagesInfo(value: StrikeSystem): DamageRollInfo[] {
     return damages;
 }
 
-export function PrintStrike(creature: StatBlockProp,item: CreatureItem){
+export function PrintStrike(creature: StatBlockProp,item: CreatureItem, showTier :boolean){
     
     if (item.type === "melee")
-        return PrintStrike_StrikeType(creature, item as CreatureItemStrike);
+        return PrintStrike_StrikeType(creature, item as CreatureItemStrike, showTier);
     
     if (item.type === "equipment")
-        return PrintStrike_EquipmentType(item);
+        return PrintStrike_EquipmentType(creature, item, showTier);
     
     return <></>;
 }
 
-export function PrintStrike_StrikeType(creature: StatBlockProp,item: CreatureItemStrike) {
+export function PrintStrike_StrikeType(creature: StatBlockProp,item: CreatureItemStrike, showTier : boolean) {
     if (item.system.weaponType === undefined) {
         item.system.weaponType = {value: "melee"};
 
@@ -169,6 +170,8 @@ export function PrintStrike_StrikeType(creature: StatBlockProp,item: CreatureIte
         }
     }
 
+    const level = creature.system.details.level.value;
+    
     let atkPenalty: number;
     atkPenalty = 5;
 
@@ -196,18 +199,20 @@ export function PrintStrike_StrikeType(creature: StatBlockProp,item: CreatureIte
     }
     
     return (<>
-        <b>{isThrow(item)?"Ranged":capitalize(item.system.weaponType.value)}</b> <span className="pathfinder-action">A</span>{item.name} {printNumberWithSignalElement(item.system.bonus.value)}[{printNumberWithSignalElement((item.system.bonus.value ?? 0) - atkPenalty)}/{printNumberWithSignalElement((item.system.bonus.value??0) - (atkPenalty * 2))}]
-        {" "}{traits.value.length > 0 && <>({printTraitsSeparator(traits, ", ")})</>} {GetDamagesInfo(item.system).map(dmg => (<> {dmg.damage} {dmg.category && dmg.category+" "}{dmg.damageType}</>))} {attackEffectsString !== "" && <span className="text-green-800 italic"> {attackEffectsString}</span>} <span className="text-gray-500 italic" dangerouslySetInnerHTML={{__html: parseAbilityDescription(item.system.description.value.replace("<p>", "").replace("</p>",""))}}></span>
+        <b>{isThrow(item)?"Ranged":capitalize(item.system.weaponType.value)}</b> <span className="pathfinder-action">A</span>{item.name} {printNumberWithSignalElement(item.system.bonus.value)}{showTier?PrintStrikeTier(level, item.system.bonus.value):null}[{printNumberWithSignalElement((item.system.bonus.value ?? 0) - atkPenalty)}/{printNumberWithSignalElement((item.system.bonus.value??0) - (atkPenalty * 2))}]
+        {" "}{traits.value.length > 0 && <>({printTraitsSeparator(traits, ", ")})</>} {GetDamagesInfo(item.system).map(dmg => (<> {dmg.damage} {dmg.category && dmg.category+" "}{dmg.damageType}</>))}{showTier?PrintDamageTier(level, item):null} {attackEffectsString !== "" && <span className="text-green-800 italic"> {attackEffectsString}</span>} <span className="text-gray-500 italic" dangerouslySetInnerHTML={{__html: parseAbilityDescription(item.system.description.value.replace("<p>", "").replace("</p>",""))}}></span>
     </>)
 }
 
-export function PrintStrike_EquipmentType(item: CreatureItem){
+export function PrintStrike_EquipmentType(creature: StatBlockProp,item: CreatureItem, showTier : boolean){
 
     let atkPenalty = 5;
 
     const traits = item.system.traits;
     if (traits.value.includes("agile"))
         atkPenalty = 4;
+
+    const level = creature.system.details.level.value;
     
     let bonus = 0;
     const damages : string[] = [];
@@ -234,7 +239,7 @@ export function PrintStrike_EquipmentType(item: CreatureItem){
         damageString += `${i === 0?"":" plus "}${damages[i]}`;    
     
     return (<>
-        <b>{capitalize("Melee")}</b> <span className="pathfinder-action">A</span>{item.name} {printNumberWithSignalElement(bonus)}[{printNumberWithSignalElement(bonus - atkPenalty)}/{printNumberWithSignalElement(bonus - (atkPenalty * 2))}]
+        <b>{capitalize("Melee")}</b> <span className="pathfinder-action">A</span>{item.name} {printNumberWithSignalElement(bonus)}{showTier?PrintStrikeTier(level, bonus):null}[{printNumberWithSignalElement(bonus - atkPenalty)}/{printNumberWithSignalElement(bonus - (atkPenalty * 2))}]
         <> {damageString}</>
         {/*{" "}{traits.value.length > 0 && <>({printTraitsSeparator(traits, ", ")})</>}*/}
         {/*{GetDamagesInfo(item.system).map(dmg => (<> {dmg.damage} {dmg.damageType}</>))} {attackEffectsString !== "" && <span className="text-green-800 italic"> {attackEffectsString}</span>}*/}
@@ -358,6 +363,31 @@ export function getWeakestStrike(value: StatBlockProp): CreatureItemStrike | und
         return undefined;
 
     return strikes.sort((a, b) => {return a.system.bonus.value - b.system.bonus.value;})[0];
+}
+
+export function getDamageAverage(input: CreatureItemStrike): number
+{
+    const roll = input.system.damageRolls;
+    const keys = Object.keys(roll);
+
+    const damages: DamageRollInfo[] = [];
+
+    let value = 0;
+    
+    for (const key of keys) {
+        const damageRoll = roll[key] as DamageRollInfo;
+        damages.push(damageRoll);
+    }
+    
+    for (const damage of damages)
+    {
+        const dice = GetDice(damage);
+        value += dice.modifier;
+        value += (((dice.diceType??0)+1)/2)*(dice.diceNumber??1);
+    }
+    
+    return value;
+    
 }
 
 function getReactiveStrike(value: StatBlockProp): CreatureItem | undefined

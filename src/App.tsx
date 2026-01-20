@@ -10,6 +10,7 @@ import {
     CaretCircleDownIcon,
     CaretCircleRightIcon,
 } from "@phosphor-icons/react";
+import {newHook} from "./components/Hook.tsx";
 
 // eslint-disable-next-line react-refresh/only-export-components
 export function loadMonsters()
@@ -24,9 +25,12 @@ function App()
 {
     const [currentBaseCreature, setCreature] = useState<StatBlockProp>();
     const [selectedAdjustmentIndexes, setSelectedAdjustments] = useState<number[]>([]);
-    const [isDescriptionOpen, setIsDescriptionOpen] = useState(false);
     const [indexOfOpenCategories, setIndexOfOpenCategories] = useState<boolean[]>([]);
-    const [powerTierVision, setPowerVision] = useState(false);
+    
+    const [isDescriptionOpen, setIsDescriptionOpen] = useState(false);
+    const descriptionOpen = newHook(isDescriptionOpen, setIsDescriptionOpen);
+    const [powerTierVisionValue, setPowerVision] = useState(false);
+    const powerTierVision = newHook(powerTierVisionValue, setPowerVision);
     
     const monsters = loadMonsters();
 
@@ -49,7 +53,7 @@ function App()
             {/* Main Content */}
             <div className="flex flex-4/5 flex-col">
                 <div>{CreatureAdjustmentButtons(selectedAdjustmentIndexes, setSelectedAdjustments, indexOfOpenCategories, setIndexOfOpenCategories)}</div>       
-                <div>{statBlock(adjustedCreature, isDescriptionOpen, setIsDescriptionOpen, powerTierVision, setPowerVision)}</div>
+                <div>{statBlock(adjustedCreature, descriptionOpen, powerTierVision)}</div>
                 <p className="text-xs mt-auto align text-right text-gray-500 pr-1 pb-1">Version 0.1</p>
             </div>
         </div>

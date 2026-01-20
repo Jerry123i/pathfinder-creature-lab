@@ -24,6 +24,7 @@ import {parseAbilityDescription} from "./Parsing.tsx";
 import {EyeIcon, MagnifyingGlassIcon, RadioButtonIcon} from "@phosphor-icons/react";
 import {SquareButtonIcon} from "./UIElements/Buttons.tsx";
 import {PrintACTier, PrintAttributeTier, PrintHPTier, PrintPerceptionTier, PrintSavesTier} from "./GMValuesMarkers.tsx";
+import type {Hook} from "./Hook.tsx";
 
 export interface StatBlockProp {
     _id: string;
@@ -445,8 +446,8 @@ function PrintGenericAbility(abilityItem: CreatureItem) {
 }
 
 function statBlock(value: StatBlockProp | undefined,
-                   isDescriptionOpen: boolean, setIsDescriptionOpen: ((a:boolean)=>void),
-                   powerTierVision: boolean, setPowerVision : ((a:boolean)=>void))
+                   isDescriptionOpen: Hook<boolean>,
+                   powerTierVision: Hook<boolean>)
 {
 
     if(value === undefined)
@@ -460,13 +461,13 @@ function statBlock(value: StatBlockProp | undefined,
                 <span>{value.name}</span>
                 <span>{level}</span>
             </h1>
-                {SquareButtonIcon(<EyeIcon weight="bold"/>, powerTierVision, setPowerVision)}
+                {SquareButtonIcon(<EyeIcon weight="bold"/>, powerTierVision)}
         </div>
         {printTraitsTransformElement(value.system.traits, (s) => {
             return (
                 <p className={`inline-block ${GetTraitColor(s)} text-white border-double border-2 border-[#d5c489] font-semibold text-[1.0em] not-italic px-[5px] text-left indent-0 my-[0.1em]`}>{s.toString()}</p>)
         })}
-        {DescriptionArea(isDescriptionOpen, setIsDescriptionOpen, value)}
+        {DescriptionArea(isDescriptionOpen, value)}
         {value.system.details.languages.value.length > 0 && (<>
             <hr/>
             <b>Languages: </b> {value.system.details.languages.value.sort((a, b) => a.localeCompare(b)).map((l, index) => {
@@ -474,15 +475,15 @@ function statBlock(value: StatBlockProp | undefined,
             }
         )}</>)}{value.system.details.languages?.details && (<>, ({value.system.details.languages?.details})</>)}
         <hr/>
-        {PrintPerceptionLine(value, powerTierVision)}
+        {PrintPerceptionLine(value, powerTierVision.value)}
         <br/>
-        <b>Skills</b> {printSkills(value, value.system.skills, powerTierVision)}<br/>
+        <b>Skills</b> {printSkills(value, value.system.skills, powerTierVision.value)}<br/>
         <hr/>
         <span
-            className="flex gap-1 items-center">{printValue(value.system.attributes.ac, "AC")}{powerTierVision?PrintACTier(level, value.system.attributes.ac.value):null}{";"}{PrintShield(value)}</span>
-        {printValueWithSignal(value.system.saves.fortitude, "Fort")}{powerTierVision?PrintSavesTier(level, value.system.saves.fortitude.value):null}{";"}
-        {printValueWithSignal(value.system.saves.reflex, "Ref")}{powerTierVision?PrintSavesTier(level, value.system.saves.reflex.value):null}{";"}
-        {printValueWithSignal(value.system.saves.will, "Will")}{powerTierVision?PrintSavesTier(level, value.system.saves.will.value):null}
+            className="flex gap-1 items-center">{printValue(value.system.attributes.ac, "AC")}{powerTierVision.value?PrintACTier(level, value.system.attributes.ac.value):null}{";"}{PrintShield(value)}</span>
+        {printValueWithSignal(value.system.saves.fortitude, "Fort")}{powerTierVision.value?PrintSavesTier(level, value.system.saves.fortitude.value):null}{";"}
+        {printValueWithSignal(value.system.saves.reflex, "Ref")}{powerTierVision.value?PrintSavesTier(level, value.system.saves.reflex.value):null}{";"}
+        {printValueWithSignal(value.system.saves.will, "Will")}{powerTierVision.value?PrintSavesTier(level, value.system.saves.will.value):null}
         {value.items.some(i => i.system?.slug === "1-status-to-all-saves-vs-magic") && 
             (
             <span className="text-gray-500 italic"> {" "}
@@ -492,7 +493,7 @@ function statBlock(value: StatBlockProp | undefined,
             </span>
         )}
         <br></br>
-        {PrintHP(value)}{powerTierVision?PrintHPTier(level, value.system.attributes.hp.value):null}
+        {PrintHP(value)}{powerTierVision.value?PrintHPTier(level, value.system.attributes.hp.value):null}
         {isVoidHealing(value) ? ` (void healing)` : null}
         {GetFastHealing(value) !== undefined ? ` (${GetFastHealing(value)?.name})` : null}
         {GetRegeneration(value) !== undefined ? ` (${GetRegeneration(value)?.name})` : null}
@@ -507,38 +508,38 @@ function statBlock(value: StatBlockProp | undefined,
             })
             : null}
         <p>
-            {printMod(value.system.abilities.str, "STR")}{powerTierVision?PrintAttributeTier(level, value.system.abilities.str.mod):null}{";"}
-            {printMod(value.system.abilities.dex, "DEX")}{powerTierVision?PrintAttributeTier(level, value.system.abilities.dex.mod):null}{";"}
-            {printMod(value.system.abilities.con, "CON")}{powerTierVision?PrintAttributeTier(level, value.system.abilities.con.mod):null}{";"}
-            {printMod(value.system.abilities.int, "INT")}{powerTierVision?PrintAttributeTier(level, value.system.abilities.int.mod):null}{";"}
-            {printMod(value.system.abilities.wis, "WIS")}{powerTierVision?PrintAttributeTier(level, value.system.abilities.wis.mod):null}{";"}
-            {printMod(value.system.abilities.cha, "CHA")}{powerTierVision?PrintAttributeTier(level, value.system.abilities.cha.mod):null}
+            {printMod(value.system.abilities.str, "STR")}{powerTierVision.value?PrintAttributeTier(level, value.system.abilities.str.mod):null}{";"}
+            {printMod(value.system.abilities.dex, "DEX")}{powerTierVision.value?PrintAttributeTier(level, value.system.abilities.dex.mod):null}{";"}
+            {printMod(value.system.abilities.con, "CON")}{powerTierVision.value?PrintAttributeTier(level, value.system.abilities.con.mod):null}{";"}
+            {printMod(value.system.abilities.int, "INT")}{powerTierVision.value?PrintAttributeTier(level, value.system.abilities.int.mod):null}{";"}
+            {printMod(value.system.abilities.wis, "WIS")}{powerTierVision.value?PrintAttributeTier(level, value.system.abilities.wis.mod):null}{";"}
+            {printMod(value.system.abilities.cha, "CHA")}{powerTierVision.value?PrintAttributeTier(level, value.system.abilities.cha.mod):null}
         </p>
         <hr/>
         <span className="flex align-middle"><h2>Strikes</h2><span
             className="ml-2 flex">{PrintReactiveStrikeLabel(value)}</span></span>
         <ul className="undottedList">
-            {GetCombinedStrikes(GetStrikes(value)).map(i => <li>{PrintStrike(value, i, powerTierVision)}</li>)}
+            {GetCombinedStrikes(GetStrikes(value)).map(i => <li>{PrintStrike(value, i, powerTierVision.value)}</li>)}
         </ul>
         <ul className="undottedList">
             {GetGenericAbilities(value).map(abilityItem => PrintGenericAbility(abilityItem))}
         </ul>
         {HasSpells(value) ? (<>
             <h2>Spells</h2>
-            {PrintAllSpells(value, level,  powerTierVision)}
+            {PrintAllSpells(value, level,  powerTierVision.value)}
         </>) : <></>}
     </div>)
 }
 
-function DescriptionArea(isDescriptionOpen: boolean, setIsDescriptionOpen: (a: boolean) => void, value: StatBlockProp) 
+function DescriptionArea(descriptionOpen : Hook<boolean>, value : StatBlockProp) 
 {
-    return (isDescriptionOpen ?
+    return (descriptionOpen.value ?
         (<>
             <p className="" dangerouslySetInnerHTML={{__html: value.system.details.publicNotes}}></p>
-            <span className="text-sm italic pl-2 text-gray-400 select-none cursor-pointer" onClick={() => {setIsDescriptionOpen(false)}}>Hide</span>
+            <span className="text-sm italic pl-2 text-gray-400 select-none cursor-pointer" onClick={()=>descriptionOpen.setValue(false)}>Hide</span>
         </>)
         : <><span className="flex items-center gap-0">
-            <span className="line-clamp-1 truncate max-w-xs" dangerouslySetInnerHTML={{__html: value.system.details.publicNotes}}></span> <span className="text-sm italic pl-2 text-gray-400 select-none cursor-pointer" onClick={() => {setIsDescriptionOpen(true)}}>Read More</span>
+            <span className="line-clamp-1 truncate max-w-xs" dangerouslySetInnerHTML={{__html: value.system.details.publicNotes}}></span> <span className="text-sm italic pl-2 text-gray-400 select-none cursor-pointer" onClick={() => {descriptionOpen.setValue(true)}}>Read More</span>
             </span>
         </>);
 }

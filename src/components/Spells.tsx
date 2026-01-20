@@ -14,6 +14,7 @@ import {
     PentagramIcon, PersonIcon,
     SparkleIcon
 } from "@phosphor-icons/react";
+import {PrintSpellDCTier} from "./GMValuesMarkers.tsx";
 
 export type SpellTraditions = "arcane" | "divine" | "primal" | "occult";
 
@@ -200,30 +201,30 @@ export function HasSpells(creature : StatBlockProp){
     return GetSpells(creature).length > 0;
 }
 
-export function PrintAllSpells(creature: StatBlockProp) { 
+export function PrintAllSpells(creature: StatBlockProp, creatureLevel : number, showTier : boolean) { 
     const allSpellLists = GetSpellListsWithSpell(creature);
     
     const spellListsCombination = []
     
     for (const spellList of allSpellLists)
     {
-        spellListsCombination.push(PrintSpellcastingEntry(spellList));
+        spellListsCombination.push(PrintSpellcastingEntry(spellList, creatureLevel, showTier));
     }
     
     return (<span className="space-y-4 flex space-x-2">{spellListsCombination}</span>);
 }
 
-function PrintSpellcastingEntry(value:{spellList:SpellcastingItem, spells: CreatureItemSpell[]})
+function PrintSpellcastingEntry(value:{spellList:SpellcastingItem, spells: CreatureItemSpell[]}, creatureLevel : number, showTier : boolean)
 {
     if (value.spellList.system.prepared.value === "spontaneous")
-        return PrintSpontaneousSpells({spellcaster: value.spellList as SpontaneousSpellcastingItem, spells: value.spells})
+        return PrintSpontaneousSpells({spellcaster: value.spellList as SpontaneousSpellcastingItem, spells: value.spells}, creatureLevel, showTier);
     else if (value.spellList.system.prepared.value === "prepared")
-        return PrintPreparedSpells({spellcaster: value.spellList as PreparedSpellcastingItem, spells: value.spells})
+        return PrintPreparedSpells({spellcaster: value.spellList as PreparedSpellcastingItem, spells: value.spells}, creatureLevel, showTier);
     else
-        return PrintInnateSpells({spellcaster:value.spellList, spells: value.spells})
+        return PrintInnateSpells({spellcaster:value.spellList, spells: value.spells}, creatureLevel, showTier);
 }
 
-function printSpellcastingHeader(spellcaster: SpellcastingItem)
+function printSpellcastingHeader(spellcaster: SpellcastingItem, level: number, showTier : boolean)
 {
     let traditionIcon;
     let preparationIcon;
@@ -262,10 +263,10 @@ function printSpellcastingHeader(spellcaster: SpellcastingItem)
             break;
     }
     
-    return <>{traditionIcon}{preparationIcon} {spellcaster.name} : DC{spellcaster.system.spelldc.dc}</>;
+    return <>{traditionIcon}{preparationIcon} {spellcaster.name} : DC{spellcaster.system.spelldc.dc}{showTier?PrintSpellDCTier(level, spellcaster.system.spelldc.dc):null}</>;
 }
 
-function PrintSpontaneousSpells(value:{spellcaster:SpontaneousSpellcastingItem, spells: CreatureItemSpell[]})
+function PrintSpontaneousSpells(value:{spellcaster:SpontaneousSpellcastingItem, spells: CreatureItemSpell[]}, creatureLevel : number, showTier : boolean)
 {
     const spells = value.spells;
 
@@ -277,7 +278,7 @@ function PrintSpontaneousSpells(value:{spellcaster:SpontaneousSpellcastingItem, 
         <table className="spellTable">
             <thead>
             <tr className="spellCell">
-                <th className="spellTableHeader">{printSpellcastingHeader(value.spellcaster)}</th>
+                <th className="spellTableHeader">{printSpellcastingHeader(value.spellcaster, creatureLevel, showTier)}</th>
             </tr>
             </thead>
             <tbody>
@@ -327,14 +328,14 @@ function PrintSpontaneousSpells(value:{spellcaster:SpontaneousSpellcastingItem, 
     );
 }
 
-function PrintPreparedSpells(value:{spellcaster:PreparedSpellcastingItem, spells: CreatureItemSpell[]}) 
+function PrintPreparedSpells(value:{spellcaster:PreparedSpellcastingItem, spells: CreatureItemSpell[]}, creatureLevel : number, showTier : boolean) 
 {
     const spells = value.spells;
     
     return (<table className="spellTable">
             <thead>
             <tr className="spellCell">
-                <th className="spellTableHeader">{printSpellcastingHeader(value.spellcaster)}</th>
+                <th className="spellTableHeader">{printSpellcastingHeader(value.spellcaster, creatureLevel, showTier)}</th>
             </tr>
             </thead>
             <tbody>
@@ -364,7 +365,7 @@ function PrintPreparedSpells(value:{spellcaster:PreparedSpellcastingItem, spells
     );
 }
 
-function PrintInnateSpells(value:{spellcaster:SpellcastingItem, spells: CreatureItemSpell[]})
+function PrintInnateSpells(value:{spellcaster:SpellcastingItem, spells: CreatureItemSpell[]}, creatureLevel : number, showTier : boolean)
 {
     const spells = value.spells;
 
@@ -376,7 +377,7 @@ function PrintInnateSpells(value:{spellcaster:SpellcastingItem, spells: Creature
         <table className="spellTable">
             <thead>
             <tr className="spellCell">
-                <th className="spellTableHeader">{printSpellcastingHeader(value.spellcaster)}</th>
+                <th className="spellTableHeader">{printSpellcastingHeader(value.spellcaster, creatureLevel, showTier)}</th>
             </tr>
             </thead>
             <tbody>

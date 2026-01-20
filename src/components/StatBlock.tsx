@@ -21,7 +21,7 @@ import {
     PrintWeakness, type Resistance
 } from "./HPItems.tsx";
 import {parseAbilityDescription} from "./Parsing.tsx";
-import {MagnifyingGlassIcon, RadioButtonIcon} from "@phosphor-icons/react";
+import {EyeIcon, MagnifyingGlassIcon, RadioButtonIcon} from "@phosphor-icons/react";
 import {SquareButtonIcon} from "./UIElements/Buttons.tsx";
 import {PrintACTier, PrintAttributeTier, PrintHPTier, PrintPerceptionTier, PrintSavesTier} from "./GMValuesMarkers.tsx";
 
@@ -444,15 +444,15 @@ function PrintGenericAbility(abilityItem: CreatureItem) {
         </li>);
 }
 
-let powerTierVision = true;
-
-function statBlock(value: StatBlockProp | undefined, isDescriptionOpen: boolean, setIsDescriptionOpen: ((a:boolean)=>void) )
+function statBlock(value: StatBlockProp | undefined,
+                   isDescriptionOpen: boolean, setIsDescriptionOpen: ((a:boolean)=>void),
+                   powerTierVision: boolean, setPowerVision : ((a:boolean)=>void))
 {
 
     if(value === undefined)
         return (<p className="italic text-gray-400 px-3 py-1">Select a creature</p>)
     
-    let level = value.system.details.level.value;
+    const level = value.system.details.level.value;
     
     return (<div className="px-3 py-1">
         <div className="flex flex-row whitespace-nowrap items-center justify-between">
@@ -460,7 +460,7 @@ function statBlock(value: StatBlockProp | undefined, isDescriptionOpen: boolean,
                 <span>{value.name}</span>
                 <span>{level}</span>
             </h1>
-                {SquareButtonIcon(<MagnifyingGlassIcon />)}
+                {SquareButtonIcon(<EyeIcon weight="bold"/>, powerTierVision, setPowerVision)}
         </div>
         {printTraitsTransformElement(value.system.traits, (s) => {
             return (
@@ -474,7 +474,7 @@ function statBlock(value: StatBlockProp | undefined, isDescriptionOpen: boolean,
             }
         )}</>)}{value.system.details.languages?.details && (<>, ({value.system.details.languages?.details})</>)}
         <hr/>
-        {PrintPerceptionLine(value)}
+        {PrintPerceptionLine(value, powerTierVision)}
         <br/>
         <b>Skills</b> {printSkills(value, value.system.skills, powerTierVision)}<br/>
         <hr/>
@@ -525,7 +525,7 @@ function statBlock(value: StatBlockProp | undefined, isDescriptionOpen: boolean,
         </ul>
         {HasSpells(value) ? (<>
             <h2>Spells</h2>
-            {PrintAllSpells(value)}
+            {PrintAllSpells(value, level,  powerTierVision)}
         </>) : <></>}
     </div>)
 }
@@ -543,7 +543,7 @@ function DescriptionArea(isDescriptionOpen: boolean, setIsDescriptionOpen: (a: b
         </>);
 }
 
-function PrintPerceptionLine(value: StatBlockProp)
+function PrintPerceptionLine(value: StatBlockProp, powerTierVision : boolean)
 {
     return (<><b>Perception</b> {printNumberWithSignalString(value.system.perception.mod)}{powerTierVision?PrintPerceptionTier(value.system.details.level.value, value.system.perception.mod):null}
         {GetDarknessVision(value.system.perception)&&` ; ${GetDarknessVision(value.system.perception)?.type}`}

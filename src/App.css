@@ -84,7 +84,7 @@
     }
 
     .square-button {
-        @apply aspect-square w-9 h-9 bg-gray-200 rounded-md border border-black;
+        @apply aspect-square w-7 h-7 bg-gray-200 rounded-md border border-black;
     }
 
     .square-button:hover{

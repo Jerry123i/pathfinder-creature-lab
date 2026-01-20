@@ -4,7 +4,7 @@ import {
     getValueTier, hitPointScales,
     perceptionScales,
     savingThrowScales,
-    skillsScales, strikeAttackBonusScales, strikeDamageScales
+    skillsScales, spellDcScales, strikeAttackBonusScales, strikeDamageScales
 } from "../assets/GMTables.tsx";
 import {type CreatureItemStrike, getDamageAverage} from "./Strikes.tsx";
 
@@ -57,4 +57,8 @@ export function PrintStrikeTier(level : number, value : number){
 
 export function PrintDamageTier(level : number, value : CreatureItemStrike){
     return PrintMarker(strikeDamageScales, level,  getDamageAverage(value))
+}
+
+export function PrintSpellDCTier(level: number,  value : number){
+    return PrintMarker(spellDcScales, level,  value);
 }

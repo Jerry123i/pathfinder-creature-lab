@@ -21,10 +21,10 @@ import {
     PrintWeakness, type Resistance
 } from "./HPItems.tsx";
 import {parseAbilityDescription} from "./Parsing.tsx";
-import {EyeIcon, MagnifyingGlassIcon, RadioButtonIcon} from "@phosphor-icons/react";
+import {ArrowsOutLineVerticalIcon, EyeIcon, RadioButtonIcon} from "@phosphor-icons/react";
 import {SquareButtonIcon} from "./UIElements/Buttons.tsx";
 import {PrintACTier, PrintAttributeTier, PrintHPTier, PrintPerceptionTier, PrintSavesTier} from "./GMValuesMarkers.tsx";
-import type {Hook} from "./Hook.tsx";
+import type {Hook, StatBlockControls} from "./Hook.tsx";
 
 export interface StatBlockProp {
     _id: string;
@@ -446,8 +446,7 @@ function PrintGenericAbility(abilityItem: CreatureItem) {
 }
 
 function statBlock(value: StatBlockProp | undefined,
-                   isDescriptionOpen: Hook<boolean>,
-                   powerTierVision: Hook<boolean>)
+                   controls : StatBlockControls)
 {
 
     if(value === undefined)
@@ -461,13 +460,16 @@ function statBlock(value: StatBlockProp | undefined,
                 <span>{value.name}</span>
                 <span>{level}</span>
             </h1>
-                {SquareButtonIcon(<EyeIcon weight="bold"/>, powerTierVision)}
+            <div className="flex flex-row space-x-1">
+            {SquareButtonIcon(<ArrowsOutLineVerticalIcon weight="bold"/>, controls.showLevelerControls)}
+            {SquareButtonIcon(<EyeIcon weight="bold"/>, controls.showPowerTier)}
+            </div>
         </div>
         {printTraitsTransformElement(value.system.traits, (s) => {
             return (
                 <p className={`inline-block ${GetTraitColor(s)} text-white border-double border-2 border-[#d5c489] font-semibold text-[1.0em] not-italic px-[5px] text-left indent-0 my-[0.1em]`}>{s.toString()}</p>)
         })}
-        {DescriptionArea(isDescriptionOpen, value)}
+        {DescriptionArea(controls.isDescriptionOpen, value)}
         {value.system.details.languages.value.length > 0 && (<>
             <hr/>
             <b>Languages: </b> {value.system.details.languages.value.sort((a, b) => a.localeCompare(b)).map((l, index) => {
@@ -475,15 +477,15 @@ function statBlock(value: StatBlockProp | undefined,
             }
         )}</>)}{value.system.details.languages?.details && (<>, ({value.system.details.languages?.details})</>)}
         <hr/>
-        {PrintPerceptionLine(value, powerTierVision.value)}
+        {PrintPerceptionLine(value, controls.showPowerTier.value)}
         <br/>
-        <b>Skills</b> {printSkills(value, value.system.skills, powerTierVision.value)}<br/>
+        <b>Skills</b> {printSkills(value, value.system.skills, controls.showPowerTier.value)}<br/>
         <hr/>
         <span
-            className="flex gap-1 items-center">{printValue(value.system.attributes.ac, "AC")}{powerTierVision.value?PrintACTier(level, value.system.attributes.ac.value):null}{";"}{PrintShield(value)}</span>
-        {printValueWithSignal(value.system.saves.fortitude, "Fort")}{powerTierVision.value?PrintSavesTier(level, value.system.saves.fortitude.value):null}{";"}
-        {printValueWithSignal(value.system.saves.reflex, "Ref")}{powerTierVision.value?PrintSavesTier(level, value.system.saves.reflex.value):null}{";"}
-        {printValueWithSignal(value.system.saves.will, "Will")}{powerTierVision.value?PrintSavesTier(level, value.system.saves.will.value):null}
+            className="flex gap-1 items-center">{printValue(value.system.attributes.ac, "AC")}{controls.showPowerTier.value?PrintACTier(level, value.system.attributes.ac.value):null}{";"}{PrintShield(value)}</span>
+        {printValueWithSignal(value.system.saves.fortitude, "Fort")}{controls.showPowerTier.value?PrintSavesTier(level, value.system.saves.fortitude.value):null}{";"}
+        {printValueWithSignal(value.system.saves.reflex, "Ref")}{controls.showPowerTier.value?PrintSavesTier(level, value.system.saves.reflex.value):null}{";"}
+        {printValueWithSignal(value.system.saves.will, "Will")}{controls.showPowerTier.value?PrintSavesTier(level, value.system.saves.will.value):null}
         {value.items.some(i => i.system?.slug === "1-status-to-all-saves-vs-magic") && 
             (
             <span className="text-gray-500 italic"> {" "}
@@ -493,7 +495,7 @@ function statBlock(value: StatBlockProp | undefined,
             </span>
         )}
         <br></br>
-        {PrintHP(value)}{powerTierVision.value?PrintHPTier(level, value.system.attributes.hp.value):null}
+        {PrintHP(value)}{controls.showPowerTier.value?PrintHPTier(level, value.system.attributes.hp.value):null}
         {isVoidHealing(value) ? ` (void healing)` : null}
         {GetFastHealing(value) !== undefined ? ` (${GetFastHealing(value)?.name})` : null}
         {GetRegeneration(value) !== undefined ? ` (${GetRegeneration(value)?.name})` : null}
@@ -508,25 +510,25 @@ function statBlock(value: StatBlockProp | undefined,
             })
             : null}
         <p>
-            {printMod(value.system.abilities.str, "STR")}{powerTierVision.value?PrintAttributeTier(level, value.system.abilities.str.mod):null}{";"}
-            {printMod(value.system.abilities.dex, "DEX")}{powerTierVision.value?PrintAttributeTier(level, value.system.abilities.dex.mod):null}{";"}
-            {printMod(value.system.abilities.con, "CON")}{powerTierVision.value?PrintAttributeTier(level, value.system.abilities.con.mod):null}{";"}
-            {printMod(value.system.abilities.int, "INT")}{powerTierVision.value?PrintAttributeTier(level, value.system.abilities.int.mod):null}{";"}
-            {printMod(value.system.abilities.wis, "WIS")}{powerTierVision.value?PrintAttributeTier(level, value.system.abilities.wis.mod):null}{";"}
-            {printMod(value.system.abilities.cha, "CHA")}{powerTierVision.value?PrintAttributeTier(level, value.system.abilities.cha.mod):null}
+            {printMod(value.system.abilities.str, "STR")}{controls.showPowerTier.value?PrintAttributeTier(level, value.system.abilities.str.mod):null}{";"}
+            {printMod(value.system.abilities.dex, "DEX")}{controls.showPowerTier.value?PrintAttributeTier(level, value.system.abilities.dex.mod):null}{";"}
+            {printMod(value.system.abilities.con, "CON")}{controls.showPowerTier.value?PrintAttributeTier(level, value.system.abilities.con.mod):null}{";"}
+            {printMod(value.system.abilities.int, "INT")}{controls.showPowerTier.value?PrintAttributeTier(level, value.system.abilities.int.mod):null}{";"}
+            {printMod(value.system.abilities.wis, "WIS")}{controls.showPowerTier.value?PrintAttributeTier(level, value.system.abilities.wis.mod):null}{";"}
+            {printMod(value.system.abilities.cha, "CHA")}{controls.showPowerTier.value?PrintAttributeTier(level, value.system.abilities.cha.mod):null}
         </p>
         <hr/>
         <span className="flex align-middle"><h2>Strikes</h2><span
             className="ml-2 flex">{PrintReactiveStrikeLabel(value)}</span></span>
         <ul className="undottedList">
-            {GetCombinedStrikes(GetStrikes(value)).map(i => <li>{PrintStrike(value, i, powerTierVision.value)}</li>)}
+            {GetCombinedStrikes(GetStrikes(value)).map(i => <li>{PrintStrike(value, i, controls.showPowerTier.value)}</li>)}
         </ul>
         <ul className="undottedList">
             {GetGenericAbilities(value).map(abilityItem => PrintGenericAbility(abilityItem))}
         </ul>
         {HasSpells(value) ? (<>
             <h2>Spells</h2>
-            {PrintAllSpells(value, level,  powerTierVision.value)}
+            {PrintAllSpells(value, level,  controls.showPowerTier.value)}
         </>) : <></>}
     </div>)
 }

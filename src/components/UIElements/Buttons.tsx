@@ -1,4 +1,4 @@
-﻿import type {ReactNode, SetStateAction} from "react";
+﻿import type {ReactNode} from "react";
 import type {Hook} from "../Hook.tsx";
 
 function TogglableButton(contentOn:ReactNode, contentOff:ReactNode, toggleValue : boolean, setValue : ((a:boolean)=>void)):ReactNode

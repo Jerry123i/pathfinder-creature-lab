@@ -14,4 +14,6 @@ export interface StatBlockControls
     isDescriptionOpen : Hook<boolean>;
     showPowerTier : Hook<boolean>;
     showLevelerControls : Hook<boolean>;
+    
+    leveler : Hook<number>;
 }

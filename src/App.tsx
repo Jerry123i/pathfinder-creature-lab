@@ -33,12 +33,15 @@ function App()
     const powerTierVision = newHook(powerTierVisionValue, setPowerVision);
     const [isLevelerOpen, setLevelerOpen] = useState(false);
     const levelerOpen = newHook(isLevelerOpen, setLevelerOpen);
+    const [levelerValue, setLevelerValue] = useState<number>(0);
+    const levelerControls = newHook(levelerValue, setLevelerValue);
     
-    const statBlockControlls : StatBlockControls =
+    const statBlockControls : StatBlockControls =
     {
         isDescriptionOpen : descriptionOpen,
         showPowerTier : powerTierVision,
-        showLevelerControls : levelerOpen
+        showLevelerControls : levelerOpen,
+        leveler : levelerControls
     }
     
     const monsters = loadMonsters();
@@ -50,8 +53,6 @@ function App()
 
     const adjustedCreature = applyAllAdjustments(currentBaseCreature, selectedAdjustments)
 
-    
-    //Criar classe para agrupar os hooks de react
     return (
         <div className="flex bg-gray-50 min-h-screen">
             {/* Sidebar */}
@@ -62,7 +63,7 @@ function App()
             {/* Main Content */}
             <div className="flex flex-4/5 flex-col">
                 <div>{CreatureAdjustmentButtons(selectedAdjustmentIndexes, setSelectedAdjustments, indexOfOpenCategories, setIndexOfOpenCategories)}</div>       
-                <div>{statBlock(adjustedCreature, statBlockControlls)}</div>
+                <div>{statBlock(adjustedCreature, statBlockControls)}</div>
                 <p className="text-xs mt-auto align text-right text-gray-500 pr-1 pb-1">Version 0.1</p>
             </div>
         </div>

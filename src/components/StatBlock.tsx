@@ -25,6 +25,7 @@ import {ArrowsOutLineVerticalIcon, EyeIcon, RadioButtonIcon} from "@phosphor-ico
 import {SquareButtonIcon} from "./UIElements/Buttons.tsx";
 import {PrintACTier, PrintAttributeTier, PrintHPTier, PrintPerceptionTier, PrintSavesTier} from "./GMValuesMarkers.tsx";
 import type {Hook, StatBlockControls} from "./Hook.tsx";
+import {IntFieldWithButtons} from "./UIElements/InputField.tsx";
 
 export interface StatBlockProp {
     _id: string;
@@ -445,10 +446,8 @@ function PrintGenericAbility(abilityItem: CreatureItem) {
         </li>);
 }
 
-function statBlock(value: StatBlockProp | undefined,
-                   controls : StatBlockControls)
+function statBlock(value: StatBlockProp | undefined, controls : StatBlockControls)
 {
-
     if(value === undefined)
         return (<p className="italic text-gray-400 px-3 py-1">Select a creature</p>)
     
@@ -458,7 +457,7 @@ function statBlock(value: StatBlockProp | undefined,
         <div className="flex flex-row whitespace-nowrap items-center justify-between">
             <h1 className=" flex space-x-6 font-semibold">
                 <span>{value.name}</span>
-                <span>{level}</span>
+                <span>{controls.showLevelerControls.value?IntFieldWithButtons(controls.leveler):level}</span>
             </h1>
             <div className="flex flex-row space-x-1">
             {SquareButtonIcon(<ArrowsOutLineVerticalIcon weight="bold"/>, controls.showLevelerControls)}

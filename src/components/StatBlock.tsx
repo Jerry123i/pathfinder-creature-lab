@@ -22,7 +22,7 @@ import {
 } from "./HPItems.tsx";
 import {parseAbilityDescription} from "./Parsing.tsx";
 import {ArrowsOutLineVerticalIcon, EyeIcon, RadioButtonIcon} from "@phosphor-icons/react";
-import {SquareButtonIcon} from "./UIElements/Buttons.tsx";
+import {SquareButtonIcon, SquareButtonIconWithAction} from "./UIElements/Buttons.tsx";
 import {PrintACTier, PrintAttributeTier, PrintHPTier, PrintPerceptionTier, PrintSavesTier} from "./GMValuesMarkers.tsx";
 import type {Hook, StatBlockControls} from "./Hook.tsx";
 import {IntFieldWithButtons} from "./UIElements/InputField.tsx";
@@ -297,6 +297,13 @@ export function NullableValueChange(x : NullableValueHolder, value : number)
     x.value += value;
 }
 
+export function NullableValueSet(x : NullableValueHolder, value : number)
+{
+    if (x.value === null)
+        return;
+    x.value = value;
+}
+
 export function GetValue(x: NullableValueHolder): number {
     if (x.value === null)
         return 0;
@@ -325,6 +332,10 @@ export interface DamageRollInfo {
     damage: string;
     damageType: string;
     category?: string;
+}
+
+export function compareDamageRollInfo(a : DamageRollInfo, b : DamageRollInfo){
+    return (a.damage === b.damage) && (a.category === b.category);
 }
 
 export interface DiceAndModifier {
@@ -457,10 +468,11 @@ function statBlock(value: StatBlockProp | undefined, controls : StatBlockControl
         <div className="flex flex-row whitespace-nowrap items-center justify-between">
             <h1 className=" flex space-x-6 font-semibold">
                 <span>{value.name}</span>
-                <span>{controls.showLevelerControls.value?IntFieldWithButtons(controls.leveler):level}</span>
+                {/*<span>{controls.showLevelerControls.value?IntFieldWithButtonsFunction(controls.leveler, (a)=>{return level-a}):level}</span>*/}
+                <span><span className="inline-block w-8">{level}</span> {IntFieldWithButtons(controls.leveler)}</span>
             </h1>
             <div className="flex flex-row space-x-1">
-            {SquareButtonIcon(<ArrowsOutLineVerticalIcon weight="bold"/>, controls.showLevelerControls)}
+            {SquareButtonIconWithAction(<ArrowsOutLineVerticalIcon weight="bold"/>, controls.showLevelerControls, null, () => {controls.leveler.setValue(0)})}
             {SquareButtonIcon(<EyeIcon weight="bold"/>, controls.showPowerTier)}
             </div>
         </div>

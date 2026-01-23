@@ -2,6 +2,7 @@
 import {ModifyAssociatedSkills} from "./Skills.tsx";
 
 import {ModifyStrikesByAbility} from "./Strikes.tsx";
+import {getScaledAttribute} from "../assets/GMTables.tsx";
 
 export interface Abilities {
     cha: Mod;
@@ -48,4 +49,15 @@ export function ModifyAbilitiesAndRelatedStats(creature : StatBlockProp ,ability
 
     ModifyAssociatedSkills(creature, ability, value);
     ModifyStrikesByAbility(creature,  ability, value);
+}
+
+export function ModifyAbilitiesByLevel(creature : StatBlockProp, baseCreature: StatBlockProp, targetLevel : number)
+{
+    const ab = creature.system.abilities;
+    const keys = Object.keys(ab);
+    
+    for (const key of keys)
+    {
+        ab[key as AbilityName].mod = getScaledAttribute(baseCreature, key.toString() as AbilityName,  targetLevel)    
+    }
 }

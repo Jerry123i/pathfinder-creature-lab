@@ -1,4 +1,15 @@
-﻿import type {GMTable, RangeLevelLookupTable, Range, AttributeTiers} from "../components/LookupTable.tsx";
+﻿import {
+    type GMTable,
+    nextTier,
+    type RangeLevelLookupTable,
+    type Range,
+    type AttributeTiers,
+    previousTier, GetGMTableValue
+} from "../components/LookupTable.tsx";
+import {inLerp, lerp} from "../components/LinearInterpolation.tsx";
+import type {StatBlockProp} from "../components/StatBlock.tsx";
+import type {AbilityName} from "../components/Abilities.tsx";
+import {type CreatureItemStrike, getDamageAverage} from "../components/Strikes.tsx";
 
 export const attributeModifierScales : GMTable<number> =
 {
@@ -6,7 +17,12 @@ export const attributeModifierScales : GMTable<number> =
     high:       [ 3, 3, 4, 4, 4, 5, 5, 5, 6, 6, 6, 7, 7, 7, 8, 8, 8, 9, 9, 9,10,10,10,10,10,12],
     moderate:   [ 2, 2, 3, 3, 3, 3, 4, 4, 4, 4, 4, 5, 5, 5, 5, 5, 6, 6, 6, 6, 6, 7, 7, 8, 8, 9],
     low:        [ 0, 0, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4, 5, 5, 5, 5, 6, 6, 6, 6, 7],
-    terrible:   [ 0, 0, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4, 5, 5, 5, 5, 6, 6, 6, 6, 7],
+    terrible:   Array(26).fill(-4),
+    type : "number"
+}
+
+export function getScaledAttribute(creature : StatBlockProp, attribute : AbilityName, levelTarget : number): number{
+    return getAdjustedLevel(creature.system.details.level.value, levelTarget, creature.system.abilities[attribute].mod, attributeModifierScales)
 }
 
 export const perceptionScales : GMTable<number> =
@@ -15,7 +31,12 @@ export const perceptionScales : GMTable<number> =
     high:       [ 8, 9,10,11,12,14,15,17,18,19,21,22,24,25,26,28,29,30,32,33,35,36,38,39,40,42],
     moderate:   [ 5, 6, 7, 8, 9,11,12,14,15,16,18,19,21,22,23,25,26,28,29,30,32,33,35,36,37,38],
     low:        [ 2, 3, 4, 5, 6, 8, 9,11,12,13,15,16,18,19,20,22,23,25,26,27,29,30,32,33,34,36],
-    terrible:   [ 0, 1, 2, 3, 4, 6, 7, 8,10,11,12,14,15,16,18,19,20,22,23,24,26,27,28,30,31,32]
+    terrible:   [ 0, 1, 2, 3, 4, 6, 7, 8,10,11,12,14,15,16,18,19,20,22,23,24,26,27,28,30,31,32],
+    type : "number"
+}
+
+export function getScaledPerception(creature :StatBlockProp, levelTarget : number): number{
+    return getAdjustedLevel(creature.system.details.level.value, levelTarget, creature.system.perception.mod, perceptionScales)
 }
 
 const skillLowRanges: [number, number][] = [
@@ -31,7 +52,12 @@ export const skillsScales : GMTable<Range|number> =
     high:       [ 5, 6, 7, 8,10,12,13,15,17,18,20,22,23,25,27,28,30,32,33,35,37,38,40,42,43,45],
     moderate:   [ 4, 5, 6, 7, 9,10,12,13,15,16,18,19,21,22,24,25,27,28,30,31,33,34,36,37,38,40],
     low:        skillLowRanges.map(([min, max]) => ({ min, max })),
-    terrible:   Array(26).fill(0)
+    terrible:   Array(26).fill(0),
+    type : "range"
+}
+
+export function getScaledSkill(levelInput :number, levelTarget : number, value : number): number{
+    return getAdjustedLevel(levelInput, levelTarget, value, skillsScales)
 }
  
 export const armorClassScales : GMTable<number> = 
@@ -40,7 +66,12 @@ export const armorClassScales : GMTable<number> =
     high:     [15,16,16,18,19,21,22,24,25,27,28,30,31,33,34,36,37,39,40,42,43,45,46,48,49,51],
     moderate: [14,15,15,17,18,20,21,23,24,26,27,29,30,32,33,35,36,38,39,41,42,44,45,47,48,50],
     low:      [12,13,13,15,16,18,19,21,22,24,25,27,28,30,31,33,34,36,37,39,40,42,43,45,46,48],
-    terrible: Array.from({ length: 26 }, () => 1)
+    terrible: Array.from({ length: 26 }, () => 1),
+    type : "number"
+}
+
+export function getScaledArmor(creature :StatBlockProp, levelTarget : number): number{
+    return getAdjustedLevel(creature.system.details.level.value, levelTarget, creature.system.attributes.ac.value, armorClassScales)
 }
 
 export const savingThrowScales: GMTable<number> = {
@@ -49,7 +80,18 @@ export const savingThrowScales: GMTable<number> = {
     moderate: [ 5, 6, 7, 8, 9,11,12,14,15,16,18,19,21,22,23,25,26,28,29,30,32,33,35,36,37,38 ],
     low:      [ 2, 3, 4, 5, 6, 8, 9,11,12,13,15,16,18,19,20,22,23,25,26,27,29,30,32,33,34,36 ],
     terrible: [ 0, 1, 2, 3, 4, 6, 7, 8,10,11,12,14,15,16,18,19,20,22,23,24,26,27,28,30,31,32 ],
+    type : "number"
 };
+
+export function getScaledWill(creature :StatBlockProp, levelTarget : number): number{
+    return getAdjustedLevel(creature.system.details.level.value, levelTarget, creature.system.saves.will.value, savingThrowScales)
+}
+export function getScaledFortitude(creature :StatBlockProp, levelTarget : number): number{
+    return getAdjustedLevel(creature.system.details.level.value, levelTarget, creature.system.saves.fortitude.value, savingThrowScales)
+}
+export function getScaledReflex(creature :StatBlockProp, levelTarget : number): number{
+    return getAdjustedLevel(creature.system.details.level.value, levelTarget, creature.system.saves.reflex.value, savingThrowScales)
+}
 
 const hpHighRanges: [number, number][] = [
     [9,9],[17,20],[24,26],[36,40],[53,59],[72,78],[91,97],[115,123],
@@ -78,7 +120,12 @@ export const hitPointScales: GMTable<Range|number> = {
     moderate: hpModerateRanges.map(([min, max]) => ({ min, max })),
     low:      hpLowRanges.map(([min, max]) => ({ min, max })),
     extreme:  Array.from({ length: 26 }, () => 999),
+    type : "range"
 };
+
+export function getScaledHP(creature :StatBlockProp, levelTarget : number): number{
+    return getAdjustedLevel(creature.system.details.level.value, levelTarget, creature.system.attributes.hp.value, hitPointScales);
+}
 
 export const strikeAttackBonusScales: GMTable<number> = {
     extreme:  [10,10,11,13,14,16,17,19,20,22,23,25,27,28,29,31,32,34,35,37,38,40,41,43,44,46],
@@ -86,40 +133,63 @@ export const strikeAttackBonusScales: GMTable<number> = {
     moderate: [ 6, 6, 7, 9,10,12,13,15,16,18,19,21,22,24,25,27,28,30,31,33,34,36,37,39,40,42],
     low:      [ 4, 4, 5, 7, 8, 9,11,12,13,15,16,17,19,20,21,23,24,25,27,28,29,31,32,33,35,36],
     terrible: Array.from({ length: 26 }, () => 1),
+    type : "number"
 };
+
+export function getScaledStrikes(levelInput :number, levelTarget : number, value : number): number{
+    return getAdjustedLevel(levelInput, levelTarget, value, strikeAttackBonusScales)
+}
 
 export const strikeDamageScales: GMTable<number> = {
     extreme:  [ 4, 6, 8,11,15,18,20,23,25,28,30,33,35,38,40,43,45,48,50,53,55,58,60,63,65,68 ],
     high:     [ 3, 5, 6, 9,12,14,16,18,20,22,24,26,28,30,32,34,36,37,38,40,42,44,46,48,50,52 ],
     moderate: [ 3, 4, 5, 8,10,12,13,15,17,18,20,22,23,25,27,28,30,31,32,33,35,37,38,40,42,44 ],
     low:      [ 2, 3, 4, 6, 8, 9,11,12,13,15,16,17,19,20,21,23,24,25,26,27,28,29,31,32,33,35 ],
-    terrible: Array.from({ length: 26 }, () => 1)
+    terrible: Array.from({ length: 26 }, () => 1),
+    type : "number"
 };
+
+export const damageDiceNumberScale : number[] = 
+    [1,1,1,1,1,2,2,2,2,2,2,2,2,3,3,3,3,3,3,3,4,4,4,4,4,4];
+
+
+export function getScaledDamage(levelInput :number, levelTarget : number, value : CreatureItemStrike): number{
+    return getAdjustedLevel(levelInput, levelTarget, getDamageAverage(value), strikeDamageScales)
+}
 
 export const spellDcScales: GMTable<number> = {
     low: Array.from({ length: 26 }, () => 1),
     terrible: Array.from({ length: 26 }, () => 1),
     extreme:  [19,19,20,22,23,25,26,27,29,30,32,33,34,36,37,39,40,41,43,44,46,47,48,50,51,52],
     high:     [16,16,17,18,20,21,22,24,25,26,28,29,30,32,33,34,36,37,38,40,41,42,44,45,46,48],
-    moderate: [13,13,14,15,17,18,19,21,22,23,25,26,27,29,30,31,33,34,35,37,38,39,41,42,43,45]
+    moderate: [13,13,14,15,17,18,19,21,22,23,25,26,27,29,30,31,33,34,35,37,38,39,41,42,43,45],
+    type : "number"
 };
+
+export function getScaledSpellDc(levelInput :number, levelTarget : number, value : number): number{
+    return getAdjustedLevel(levelInput, levelTarget, value, spellDcScales)
+}
 
 export const spellAttackScales: GMTable<number> = {
     low: Array.from({ length: 26 }, () => 1),
     terrible: Array.from({ length: 26 }, () => 1),
     extreme:  [11,11,12,14,15,17,18,19,21,22,24,25,26,28,29,31,32,33,35,36,38,39,40,42,43,44],
     high:     [ 8, 8, 9,10,12,13,14,16,17,18,20,21,22,24,25,26,28,29,30,32,33,34,36,37,38,40],
-    moderate: [ 5, 5, 6, 7, 9,10,11,13,14,15,17,18,19,21,22,23,25,26,27,29,30,31,33,34,35,37]
+    moderate: [ 5, 5, 6, 7, 9,10,11,13,14,15,17,18,19,21,22,23,25,26,27,29,30,31,33,34,35,37],
+    type : "number"
 };
+
+export function getScaledSpellAttack(levelInput :number, levelTarget : number, value : number): number{
+    return getAdjustedLevel(levelInput, levelTarget, value, spellAttackScales)
+}
 
 export function getValueTier(table:GMTable<number|Range>, level : number, value:number): AttributeTiers
 {
-    level = level+1;
-    const terribleRef = table.terrible[level];
-    const lowRef = table.low[level];
-    const moderateRef = table.moderate[level];
-    const extremeRef = table.extreme[level];
-    const highRef = table.high[level];
+    const terribleRef = GetGMTableValue(table, "terrible", level);
+    const lowRef = GetGMTableValue (table, "low", level);
+    const moderateRef = GetGMTableValue (table, "moderate", level);
+    const extremeRef = GetGMTableValue (table, "extreme", level);
+    const highRef = GetGMTableValue (table, "high", level);
 
     const comparisons : {label : AttributeTiers, value : number}[] = [
         { label: "terrible", value: Math.abs(compare(terribleRef, value)) },
@@ -132,8 +202,84 @@ export function getValueTier(table:GMTable<number|Range>, level : number, value:
     return comparisons.reduce((best, current) =>
         current.value < best.value ? current : best
     ).label;
+}
+
+function getTerriblePlusValue(table : GMTable<number|Range>, level : number): number|Range
+{
+    const terribleValue = GetGMTableValue(table, "terrible", level);
+    const lowValue = GetGMTableValue(table, "low", level);
     
+    const terribleIsNumber = typeof terribleValue === 'number';
+    const lowIsNumber = typeof lowValue === 'number';
     
+    if (terribleIsNumber && lowIsNumber){
+        const dif = lowValue - terribleValue;
+        return terribleValue - dif;
+    }
+    if (!terribleIsNumber && !lowIsNumber)
+    {
+        const difMin = (lowValue as Range).min - (terribleValue as Range).min;
+        const difMax = (lowValue as Range).max - (terribleValue as Range).max;
+        
+        return {min : terribleValue.min-difMin, max : terribleValue.max-difMax};
+    }
+    
+    let terribleNew : Range;
+    let lowNew : Range;
+    
+    if(!terribleIsNumber)
+        terribleNew = terribleValue as Range;
+    else 
+        terribleNew = {min:terribleValue, max:terribleValue};
+    
+    if (!lowIsNumber)
+        lowNew = lowValue as Range;
+    else 
+        lowNew = {min: lowValue, max:lowValue};
+
+    const difMin = lowNew.min - terribleNew.min;
+    const difMax = lowNew.max - terribleNew.max;
+
+    return {min : terribleNew.min-difMin, max : terribleNew.max-difMax};
+}
+
+function getExtremePlusValue(table : GMTable<number|Range>, level : number): number|Range
+{
+    const extremeValue = GetGMTableValue(table, "extreme", level);
+    const highValue = GetGMTableValue(table, "high", level);
+
+    const extremeIsNumber = typeof extremeValue === 'number';
+    const highIsNumber = typeof highValue === 'number';
+
+    if (extremeIsNumber && highIsNumber){
+        const dif = extremeValue - highValue;
+        return extremeValue + dif;
+    }
+    if (!extremeIsNumber && !highIsNumber)
+    {
+        const difMin = (extremeValue as Range).min - (highValue as Range).min;
+        const difMax = (extremeValue as Range).max - (highValue as Range).max;
+
+        return {min : extremeValue.min + difMin, max : extremeValue.max + difMax};
+    }
+
+    let extremeNew : Range;
+    let highNew : Range;
+
+    if(!extremeIsNumber)
+        extremeNew = extremeValue as Range;
+    else
+        extremeNew = {min:extremeValue, max:extremeValue};
+
+    if (!highIsNumber)
+        highNew = highValue as Range;
+    else
+        highNew = {min: highValue, max:highValue};
+
+    const difMin = extremeNew.min - highNew.min;
+    const difMax = extremeNew.max - highNew.max;
+
+    return {min : extremeNew.min + difMin, max : extremeNew.max + difMax};
 }
 
 function compare(reference:number|Range, value:number)
@@ -150,6 +296,123 @@ function compare(reference:number|Range, value:number)
         
         return value - reference.max;
     }
+}
+
+export function getAdjustedLevel(levelInput:number, levelTarget:number, value:number, table:GMTable<number|Range> ): number
+{
+    const tier = getValueTier(table, levelInput, value);
+    const comparison = compare(GetGMTableValue(table, tier, levelInput), value);
+    
+    const originalTierValue = GetGMTableValue(table, tier, levelInput);
+    const targetTierValue = GetGMTableValue(table, tier, levelTarget);
+    
+    const originalIsNumber = typeof originalTierValue === 'number';
+    const targetIsNumber = typeof targetTierValue === 'number';
+    
+    if (originalIsNumber && targetIsNumber)
+    {
+        if (comparison === 0)
+            return targetTierValue;
+        
+        if(comparison > 0)
+        {
+            const prevValue = originalTierValue;
+            let nextValue;
+            if (tier === "extreme")
+                nextValue = getExtremePlusValue(table, levelInput) as number;
+            else
+                nextValue = GetGMTableValue(table, nextTier(tier), levelInput) as number;
+            
+            const lerpVal = prevValue===nextValue? 0.5 : inLerp(prevValue, nextValue, value);
+            
+            
+            const targetValuePrev = GetGMTableValue(table, tier, levelTarget) as number;
+            let targetValueNext;
+            if (tier === "extreme")
+                targetValueNext = getExtremePlusValue(table, levelTarget) as number;
+            else
+                targetValueNext = GetGMTableValue(table, nextTier(tier), levelTarget) as number;
+            
+            return Math.round(lerp(targetValuePrev, targetValueNext, lerpVal));
+        }
+        
+        if (comparison < 0)
+        {
+            let prevValue;
+            if (tier === "terrible")
+                prevValue = getTerriblePlusValue(table, levelInput) as number;
+            else
+                prevValue = GetGMTableValue(table, previousTier(tier), levelInput) as number;
+            const nextValue = originalTierValue;
+            
+            const lerpVal = prevValue===nextValue?0.5: inLerp(prevValue, nextValue, value);
+            
+            let targetValuePrev;
+            if (tier === "terrible")
+                targetValuePrev = getTerriblePlusValue(table, levelTarget) as number;
+            else
+                targetValuePrev = GetGMTableValue(table, previousTier(tier), levelTarget) as number;
+            
+            const targetValueNext = GetGMTableValue(table, nextTier(tier), levelTarget) as number;
+            
+            return Math.round(lerp(targetValuePrev, targetValueNext, lerpVal));
+        }
+    }
+    else if (!originalIsNumber && !targetIsNumber)
+    {
+        if (comparison === 0)
+        {
+            const lerpVal = originalTierValue.min === originalTierValue.max ? 0.5 : inLerp(originalTierValue.min, originalTierValue.max, value);
+            return Math.round(lerp(targetTierValue.min, targetTierValue.max, lerpVal));
+        }
+        if (comparison > 0)
+        {
+            const prevValue = originalTierValue;
+            let nextValue;
+            if (tier === "extreme")
+                nextValue = getExtremePlusValue(table, levelInput) as Range;
+            else
+                nextValue = GetGMTableValue(table, nextTier(tier), levelInput) as Range;
+
+            const lerpA = prevValue.max??prevValue;
+            const lerpB = nextValue.min??nextValue;
+            const lerpVal = lerpA === lerpB ? 0.5 : inLerp(lerpA, lerpB, value);
+
+            const targetValuePrev = GetGMTableValue(table, tier, levelTarget) as Range;
+            let targetValueNext;
+            if (tier === "extreme")
+                targetValueNext = getExtremePlusValue(table, levelTarget) as Range;
+            else
+                targetValueNext = GetGMTableValue(table, nextTier(tier), levelTarget) as Range;
+
+            return Math.round(lerp(targetValuePrev.max??targetValuePrev, targetValueNext.min??targetValueNext, lerpVal));
+        }
+        if (comparison < 0)
+        {
+            let prevValue;
+            if (tier === "terrible")
+                prevValue = getTerriblePlusValue(table, levelInput) as Range;
+            else
+                prevValue = GetGMTableValue(table, previousTier(tier), levelInput) as Range;
+            const nextValue = originalTierValue;
+
+            const lerpA = prevValue.max??prevValue;
+            const lerpB = nextValue.min??nextValue;
+            
+            const lerpVal = lerpA === lerpB ? 0.5 : inLerp(lerpA, lerpB , value);
+
+            let targetValuePrev;
+            if (tier === "terrible")
+                targetValuePrev = getTerriblePlusValue(table, levelTarget) as Range;
+            else
+                targetValuePrev = GetGMTableValue(table, previousTier(tier), levelTarget) as Range;
+
+            const targetValueNext = GetGMTableValue(table, nextTier(tier), levelTarget) as Range;
+
+            return Math.round(lerp(targetValuePrev.max??targetValuePrev, targetValueNext.min??targetValueNext, lerpVal));
+        }
+    }
+    return 99;
 }
 
 //Remove these
@@ -186,7 +449,6 @@ export const moderateStrikeBonusTable: RangeLevelLookupTable<number> = {
         return x?.value ?? 0;
     }
 };
-
 export const moderateStrikeDamageTable: RangeLevelLookupTable<string> = {
     ranges: [
         { min: -Infinity,  max: -1,  value: "1d4" },
@@ -221,7 +483,6 @@ export const moderateStrikeDamageTable: RangeLevelLookupTable<string> = {
         return x?.value ?? "1d4";
     }
 };
-
 export const moderateSpellDcTable: RangeLevelLookupTable<number> = {
     ranges: [
         { min: -Infinity, max: 0,  value: 13 },
@@ -255,7 +516,6 @@ export const moderateSpellDcTable: RangeLevelLookupTable<number> = {
         return x?.value ?? 0;
     }
 };
-
 export const moderateSpellAttackBonusTable: RangeLevelLookupTable<number> = {
     ranges: [
         { min: -Infinity, max: 0,  value: 5 },

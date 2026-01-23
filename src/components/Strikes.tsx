@@ -8,13 +8,14 @@
     printNumberWithSignalElement,
     type StatBlockProp,
     type StringHolder,
-    NullableValueChange, type ValueHolder
+    NullableValueChange, type ValueHolder, compareDamageRollInfo
 } from "./StatBlock.tsx";
 import {printTraitsSeparator} from "./Traits.tsx";
 import {capitalize} from "./TypeScriptHelpFunctions.tsx";
 import type {AbilityName} from "./Abilities.tsx";
 import {parseAbilityDescription} from "./Parsing.tsx";
 import {PrintDamageTier, PrintStrikeTier} from "./GMValuesMarkers.tsx";
+import {damageDiceNumberScale, getScaledDamage, getScaledStrikes} from "../assets/GMTables.tsx";
 
 export interface CreatureItemStrike extends CreatureItem {
     system: StrikeSystem
@@ -29,8 +30,69 @@ export interface StrikeSystem extends ItemSystem {
     description: {value: string};
 }
 
+export function staticModifyAllStrikes(creature: StatBlockProp, hitValue: number, damageValue: number)
+{
+    const strikes = GetStrikes(creature);
 
-function modifyStrike(strike: CreatureItem, hitValue: number, damageValue: number) 
+    for (let i = 0, len = strikes.baseStrikes.length; i < len; ++i)
+        staticModifyStrike(strikes.baseStrikes[i], hitValue, damageValue);
+
+    for (let i = 0, len = strikes.equipmentStrikes.length; i < len; ++i)
+        staticModifyStrike(strikes.equipmentStrikes[i], hitValue, damageValue);
+}
+
+export function levelModifyAllStrikes(creature: StatBlockProp, baseCreature:StatBlockProp, targetLevel : number)
+{
+    const strikes = GetStrikes(creature);
+    const baseCreatureStrikes = GetStrikes(baseCreature);
+
+    const baseLevel = baseCreature.system.details.level.value;
+    for (let i = 0, len = strikes.baseStrikes.length; i < len; ++i)
+    {
+        const strike = strikes.baseStrikes[i];
+        const baseStrike = baseCreatureStrikes.baseStrikes[i];
+        strike.system.bonus.value = getScaledStrikes(baseLevel, targetLevel, baseStrike.system.bonus.value);
+
+        const rawDamage = GetDamagesInfo(strike.system);
+        const baseRawDamage = GetDamagesInfo(baseStrike.system);
+
+        if (rawDamage.length === 1)
+        {
+            const baseDamage = GetDice(baseRawDamage[0]);
+            const targetDamage = getScaledDamage(baseLevel, targetLevel, strike);
+            const baseDiceNumber = damageDiceNumberScale[baseLevel+1];
+            let targetDiceNumber = damageDiceNumberScale[targetLevel+1];
+            
+            targetDiceNumber += (baseDamage.diceNumber??0) - baseDiceNumber;
+            const staticDamage = Math.floor(targetDamage - targetDiceNumber*(0.5 + (baseDamage.diceType??0)/2));
+            
+            rawDamage[0].damage = DiceString({ diceType:baseDamage.diceType, diceNumber:targetDiceNumber, modifier: staticDamage })
+        }
+        else if (rawDamage.length === 2)
+        {
+            if(compareDamageRollInfo(rawDamage[0], rawDamage[1]))
+            {
+                let baseDamage = GetDice(baseRawDamage[0]);
+                const targetDamage = getScaledDamage(baseLevel, targetLevel, strike);
+                const baseDiceNumber = damageDiceNumberScale[baseLevel+1];
+                let targetDiceNumber = damageDiceNumberScale[targetLevel+1];
+
+                targetDiceNumber += baseDamage.diceNumber??0 - baseDiceNumber;
+                let staticDamage = targetDamage - targetDiceNumber*(baseDamage.diceType??0/2);
+                staticDamage = staticDamage/2;
+                rawDamage[0].damage = DiceString({diceType:baseDamage.diceType, diceNumber:targetDiceNumber, modifier:staticDamage});
+                baseDamage = GetDice(baseRawDamage[1]);
+                rawDamage[0].damage = DiceString({diceType:baseDamage.diceType, diceNumber:targetDiceNumber, modifier:staticDamage});
+            }
+            
+        }
+    }
+    
+    //TODO equipment strikes
+    
+}
+
+function staticModifyStrike(strike: CreatureItem, hitValue: number, damageValue: number) 
 {
     if (strike.type.toLowerCase() === "equipment") {
 
@@ -78,16 +140,6 @@ function modifyStrike(strike: CreatureItem, hitValue: number, damageValue: numbe
     }
 }
 
-export function modifyAllStrikes(creature: StatBlockProp, hitValue: number, damageValue: number) {
-
-    const strikes = GetStrikes(creature);
-    
-    for (let i = 0, len = strikes.baseStrikes.length; i < len; ++i)
-        modifyStrike(strikes.baseStrikes[i], hitValue, damageValue);
-
-    for (let i = 0, len = strikes.equipmentStrikes.length; i < len; ++i)
-        modifyStrike(strikes.equipmentStrikes[i], hitValue, damageValue);
-}
 
 export function GetStrikes(value: StatBlockProp): {baseStrikes : CreatureItemStrike[], equipmentStrikes: CreatureItem[]}
 {
@@ -272,7 +324,7 @@ export function ModifyStrikesByAbility(creature: StatBlockProp, ability: Ability
                 thrown;
 
             if (dexEligible) {
-                modifyStrike(strike, value, 0);
+                staticModifyStrike(strike, value, 0);
             }
             continue;
         }
@@ -285,13 +337,13 @@ export function ModifyStrikesByAbility(creature: StatBlockProp, ability: Ability
                 if (creature.system.abilities.str.mod % 2 === 0 && value % 2 !== 0)
                     propulsiveValue += 1;
                 
-                modifyStrike(strike, 0, propulsiveValue);
+                staticModifyStrike(strike, 0, propulsiveValue);
                 continue;
             }
             
             if (thrown) {
                 const hit = hasBrutal ? value : 0;
-                modifyStrike(strike, hit, value);
+                staticModifyStrike(strike, hit, value);
                 continue;
             }
 
@@ -301,7 +353,7 @@ export function ModifyStrikesByAbility(creature: StatBlockProp, ability: Ability
 
             if (strEligible) {
                 const hit = hasFinesse ? 0 : value;
-                modifyStrike(strike, hit, value);
+                staticModifyStrike(strike, hit, value);
             }
         }
     }
@@ -309,7 +361,7 @@ export function ModifyStrikesByAbility(creature: StatBlockProp, ability: Ability
     for (const strike of strikes.equipmentStrikes)
     {
         if (ability === "str")
-            modifyStrike(strike, value,value);
+            staticModifyStrike(strike, value,value);
     }
     
 }

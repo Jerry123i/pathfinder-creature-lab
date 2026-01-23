@@ -5,8 +5,8 @@
     type StatBlockProp,
     type TypedValue
 } from "../StatBlock.tsx";
-import {modifyAllStrikes} from "../Strikes.tsx";
-import {modifyAllSkills} from "../Skills.tsx";
+import {levelModifyAllStrikes, staticModifyAllStrikes} from "../Strikes.tsx";
+import {levelModifyAllSkills, staticModifyAllSkills} from "../Skills.tsx";
 import {modifySpellDc} from "../Spells.tsx";
 import {
     Catfolk,
@@ -24,6 +24,14 @@ import {actionTooltipRegex, checkRegex, damageRegex, splitDamageDiceRegex} from 
 import {Ghost, Ghoul, Mummy, Shadow, Skeleton, Vampire, Wight, Zombie} from "./UndeadModifiers.tsx";
 import type {Resistance} from "../HPItems.tsx";
 import {Air, Earth, Fire, Metal, Water, Wood} from "./ElementalModifiers.tsx";
+import {
+    getScaledArmor,
+    getScaledFortitude,
+    getScaledHP,
+    getScaledPerception,
+    getScaledReflex, getScaledWill
+} from "../../assets/GMTables.tsx";
+import {ModifyAbilitiesByLevel} from "../Abilities.tsx";
 
 type ModifierType = "Level" | "Ancestry" | "Elemental" | "Undead" | "CreatureType";
 
@@ -52,7 +60,7 @@ export const Elite : CreatureAdjustment = {
         sb.system.attributes.ac.value += 2;
         modifyAllSaves(sb.system, 2);
         sb.system.perception.mod += 2;
-        modifyAllSkills(sb ,sb.system, 2);
+        staticModifyAllSkills(sb ,sb.system, 2);
         let hpIncreaseValue = 30;
         
         if (initLevel <= 1)
@@ -65,7 +73,7 @@ export const Elite : CreatureAdjustment = {
             hpIncreaseValue = 30;
         
         sb.system.attributes.hp.value += hpIncreaseValue;
-        modifyAllStrikes(sb, 2, 2);
+        staticModifyAllStrikes(sb, 2, 2);
         modifySpellDc(sb, 2);
         modifyAbilitiesDcs(sb, 2);
         modifyAbilitiesDamage(sb, 2);
@@ -90,7 +98,7 @@ export const Weak : CreatureAdjustment = {
         sb.system.attributes.ac.value -= 2;
         modifyAllSaves(sb.system, -2);
         sb.system.perception.mod -= 2;
-        modifyAllSkills(sb,sb.system, -2);
+        staticModifyAllSkills(sb,sb.system, -2);
         let hpDecreaseValue = 0;
 
         if (initLevel < 1)
@@ -105,7 +113,7 @@ export const Weak : CreatureAdjustment = {
             hpDecreaseValue = 30;
 
         sb.system.attributes.hp.value -= hpDecreaseValue;
-        modifyAllStrikes(sb, -2, -2);
+        staticModifyAllStrikes(sb, -2, -2);
         modifySpellDc(sb, -2);
         modifyAbilitiesDcs(sb, -2);
         modifyAbilitiesDamage(sb, -2);
@@ -133,6 +141,41 @@ export function applyAllAdjustments(baseCreature : StatBlockProp | undefined, ad
     }
     
     return creature;
+}
+
+export function applyLevelAdjustment(baseCreature : StatBlockProp | undefined, levelVariance : number) : StatBlockProp | undefined
+{
+    if (baseCreature === undefined)
+        return undefined;
+    
+    if (levelVariance === undefined)
+        return baseCreature;
+    
+    if (levelVariance === 0)
+        return baseCreature;
+    
+    const creature = cloneStatBlock(baseCreature);
+    
+    const targetLevel = baseCreature.system.details.level.value + levelVariance;
+    
+    creature.system.details.level.value += levelVariance;
+    
+    creature.system.attributes.hp.value = getScaledHP(baseCreature, targetLevel);
+    creature.system.attributes.ac.value = getScaledArmor(baseCreature, targetLevel); 
+    creature.system.perception.mod = getScaledPerception(baseCreature, targetLevel);
+    
+    creature.system.saves.reflex.value = getScaledReflex(baseCreature, targetLevel);
+    creature.system.saves.fortitude.value = getScaledFortitude(baseCreature, targetLevel);
+    creature.system.saves.will.value = getScaledWill(baseCreature, targetLevel);
+
+    levelModifyAllStrikes(creature, baseCreature, targetLevel);
+    levelModifyAllSkills(creature, baseCreature, targetLevel);
+    ModifyAbilitiesByLevel(creature, baseCreature, targetLevel);
+    
+    //TODO resistances
+    
+    return creature;
+    
 }
 
 export function addLanguages(baseCreature : StatBlockProp, language: string, addOnlyIfSpeaks : boolean) : StatBlockProp

@@ -1,6 +1,40 @@
 ﻿import {inLerp, lerp, remap} from "./LinearInterpolation.tsx";
 
 export type AttributeTiers = "extreme" | "high" | "moderate" | "low" | "terrible";
+type TableType = "number" | "range";
+
+export function nextTier(value : AttributeTiers) : AttributeTiers
+{
+    switch (value) {
+        case "extreme":
+            return "extreme";
+        case "high":
+            return "extreme";
+        case "moderate":
+            return "high";
+        case "low":
+            return "moderate";
+        case "terrible":
+            return "low";
+    }
+}
+
+export function previousTier(value : AttributeTiers) : AttributeTiers
+{
+    switch (value) {
+        case "extreme":
+            return "high";
+        case "high":
+            return "moderate";
+        case "moderate":
+            return "low";
+        case "low":
+            return "terrible";
+        case "terrible":
+            return "terrible";
+    }
+}
+
 
 interface RangeTableLine<T> {
     min: number;
@@ -14,16 +48,16 @@ export interface GMTable<T> {
     moderate: T[];
     low: T[];
     terrible: T[];
+    type : TableType;
 }
 
-export function LookupTable<T>(table: GMTable<T>, tier: AttributeTiers, level:number) : T
-{
-    let l = level+1;
-    if (l<0)
-        l =0;
-    if (l > 25)
-        l = 25;
-    return table[tier][l];    
+export function GetGMTableValue<T>(table: GMTable<T>, tier: AttributeTiers, level : number):T{
+    if (level < -1)
+        level = -1;
+    if (level > 24)
+        level = 24;
+    
+    return table[tier][level+1];
 }
 
 export interface RangeLevelLookupTable<T> {

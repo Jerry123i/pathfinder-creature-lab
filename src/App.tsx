@@ -1,6 +1,6 @@
 
 import type {StatBlockProp} from "./components/StatBlock.tsx";
-import {CreatureAdjustmentList} from "./components/Modifiers/Modifiers.tsx";
+import {applyLevelAdjustment, CreatureAdjustmentList} from "./components/Modifiers/Modifiers.tsx";
 import {applyAllAdjustments} from "./components/Modifiers/Modifiers.tsx";
 import type {CreatureAdjustment} from "./components/Modifiers/Modifiers.tsx";
 import statBlock from "./components/StatBlock.tsx";
@@ -51,7 +51,8 @@ function App()
         selectedAdjustments.push(CreatureAdjustmentList[selectedAdjustmentIndexes[i]])
     }
 
-    const adjustedCreature = applyAllAdjustments(currentBaseCreature, selectedAdjustments)
+    let adjustedCreature = applyAllAdjustments(currentBaseCreature, selectedAdjustments)
+    adjustedCreature = applyLevelAdjustment(adjustedCreature, levelerValue)
 
     return (
         <div className="flex bg-gray-50 min-h-screen">

@@ -1,7 +1,15 @@
 ﻿import {Fragment} from "react";
-import {type CreatureSystems, GetLoreItems, GetValue, NullableValueChange, type StatBlockProp} from "./StatBlock.tsx";
+import {
+    type CreatureSystems,
+    GetLoreItems,
+    GetValue,
+    NullableValueChange,
+    NullableValueSet,
+    type StatBlockProp
+} from "./StatBlock.tsx";
 import type {AbilityName} from "./Abilities.tsx";
 import {PrintSkillTier} from "./GMValuesMarkers.tsx";
+import {getScaledSkill} from "../assets/GMTables.tsx";
 
 export interface Skill {
     base: number;
@@ -31,7 +39,8 @@ export interface SkillList {
 
 type SkillName = keyof SkillList;
 
-export function modifyAllSkills(creatureStats : StatBlockProp ,creatureSystems: CreatureSystems, value: number) {
+export function staticModifyAllSkills(creatureStats : StatBlockProp , creatureSystems: CreatureSystems, value: number) 
+{
     const {skills} = creatureSystems;
     if (!skills) return;
 
@@ -43,10 +52,30 @@ export function modifyAllSkills(creatureStats : StatBlockProp ,creatureSystems: 
     const lores = GetLoreItems(creatureStats);
 
     for (let i = 0; i < lores.length; i++)
-    {
         NullableValueChange(lores[i].system.mod, value);
-    }
+}
+
+export function levelModifyAllSkills(creature : StatBlockProp, baseCreature : StatBlockProp, targetLevel : number)
+{
+    const baseLevel = baseCreature.system.details.level.value;
     
+    const {skills} = creature.system;
+    if (!skills) return;
+    
+    const baseSkills = baseCreature.system.skills;
+    
+    for (const key of Object.keys(skills) as SkillName[])
+    {
+        const skill = skills[key];
+        if (baseSkills[key] === undefined) continue;
+        if (skill) skill.base = getScaledSkill(baseLevel, targetLevel, baseSkills[key].base);
+    }
+
+    const lores = GetLoreItems(creature);
+    const baseLores = GetLoreItems(baseCreature);
+
+    for (let i = 0; i < lores.length; i++)
+        NullableValueSet(lores[i].system.mod, getScaledSkill(baseLevel, targetLevel, baseLores[i].system.mod.value??0))
 }
 
 export function ModifyAssociatedSkills(creature : StatBlockProp,  ability : AbilityName, value: number)

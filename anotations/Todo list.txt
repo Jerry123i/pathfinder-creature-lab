@@ -11,8 +11,13 @@ Roll up quando seleciona outra
 
 Warsworn double ()
 
+TODO:
+- Fix leveler controls
+- Add cooldown abilities toggle (only when needed)
+- Add area abilities toggle
+- Add level balancing to the abilities
+
 Creator:
-- Lens
 - Values Editor
 - Abilities Editor
 - Abilities Transfer
@@ -28,3 +33,5 @@ Créditos:
 
 //Dramofir
 //Caldera Oni
+//Snow Oni
+//Consonite Choir

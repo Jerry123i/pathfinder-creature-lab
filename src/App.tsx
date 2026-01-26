@@ -58,13 +58,18 @@ function App()
         <div className="flex bg-gray-50 min-h-screen">
             {/* Sidebar */}
             <div className="flex flex-1/5 bg-amber-100 border-amber-200 border-r-4 p-3">
-                {SideBar(monsters, setCreature, setSelectedAdjustments)}
+                {SideBar(monsters, (creature)=>{
+                    setCreature(creature);
+                    setSelectedAdjustments([]);
+                    setLevelerValue(0);
+                    setLevelerOpen(false);
+                })}
             </div>
 
             {/* Main Content */}
             <div className="flex flex-4/5 flex-col">
                 <div>{CreatureAdjustmentButtons(selectedAdjustmentIndexes, setSelectedAdjustments, indexOfOpenCategories, setIndexOfOpenCategories)}</div>       
-                <div>{statBlock(adjustedCreature, statBlockControls)}</div>
+                <div>{statBlock(adjustedCreature, currentBaseCreature, statBlockControls)}</div>
                 <p className="text-xs mt-auto align text-right text-gray-500 pr-1 pb-1">Version 0.1</p>
             </div>
         </div>

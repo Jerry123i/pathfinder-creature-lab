@@ -1,4 +1,4 @@
-﻿import {
+import {
     type CreatureItemStrike,
     GetCombinedStrikes,
     GetStrikes,
@@ -457,19 +457,21 @@ function PrintGenericAbility(abilityItem: CreatureItem) {
         </li>);
 }
 
-function statBlock(value: StatBlockProp | undefined, controls : StatBlockControls)
+function statBlock(value: StatBlockProp | undefined, baseValue : StatBlockProp | undefined, controls : StatBlockControls)
 {
     if(value === undefined)
         return (<p className="italic text-gray-400 px-3 py-1">Select a creature</p>)
     
     const level = value.system.details.level.value;
+    let baseLevel = baseValue?.system.details.level.value;
+    if (baseLevel === undefined)
+        baseLevel = 0;
     
     return (<div className="px-3 py-1">
         <div className="flex flex-row whitespace-nowrap items-center justify-between">
             <h1 className=" flex space-x-6 font-semibold">
                 <span>{value.name}</span>
-                {/*<span>{controls.showLevelerControls.value?IntFieldWithButtonsFunction(controls.leveler, (a)=>{return level-a}):level}</span>*/}
-                <span><span className="inline-block w-8">{level}</span> {IntFieldWithButtons(controls.leveler)}</span>
+                <span><span className="inline-block w-8">{level}</span> {controls.showLevelerControls.value?IntFieldWithButtons(controls.leveler, baseLevel):null}</span>
             </h1>
             <div className="flex flex-row space-x-1">
             {SquareButtonIconWithAction(<ArrowsOutLineVerticalIcon weight="bold"/>, controls.showLevelerControls, null, () => {controls.leveler.setValue(0)})}

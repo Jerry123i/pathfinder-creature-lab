@@ -1,4 +1,4 @@
-﻿import {
+import {
     type CreatureItem,
     type DamageRollInfo,
     DiceString,
@@ -55,11 +55,11 @@ export function levelModifyAllStrikes(creature: StatBlockProp, baseCreature:Stat
 
         const rawDamage = GetDamagesInfo(strike.system);
         const baseRawDamage = GetDamagesInfo(baseStrike.system);
-
+        
         if (rawDamage.length === 1)
         {
             const baseDamage = GetDice(baseRawDamage[0]);
-            const targetDamage = getScaledDamage(baseLevel, targetLevel, strike);
+            const targetDamage = getScaledDamage(baseLevel, targetLevel, baseStrike);
             const baseDiceNumber = damageDiceNumberScale[baseLevel+1];
             let targetDiceNumber = damageDiceNumberScale[targetLevel+1];
             
@@ -68,23 +68,128 @@ export function levelModifyAllStrikes(creature: StatBlockProp, baseCreature:Stat
             
             rawDamage[0].damage = DiceString({ diceType:baseDamage.diceType, diceNumber:targetDiceNumber, modifier: staticDamage })
         }
-        else if (rawDamage.length === 2)
+        else
         {
-            if(compareDamageRollInfo(rawDamage[0], rawDamage[1]))
+            const targetDamage = getScaledDamage(baseLevel, targetLevel, baseStrike);
+            let alreadyAlocatedDamage = 0;
+            
+            // Separate instances with and without modifiers
+            const instancesWithoutModifier: number[] = [];
+            const instancesWithModifier: number[] = [];
+            
+            for (let j = 0, len = baseRawDamage.length; j < len; ++j)
             {
-                let baseDamage = GetDice(baseRawDamage[0]);
-                const targetDamage = getScaledDamage(baseLevel, targetLevel, strike);
-                const baseDiceNumber = damageDiceNumberScale[baseLevel+1];
-                let targetDiceNumber = damageDiceNumberScale[targetLevel+1];
-
-                targetDiceNumber += baseDamage.diceNumber??0 - baseDiceNumber;
-                let staticDamage = targetDamage - targetDiceNumber*(baseDamage.diceType??0/2);
-                staticDamage = staticDamage/2;
-                rawDamage[0].damage = DiceString({diceType:baseDamage.diceType, diceNumber:targetDiceNumber, modifier:staticDamage});
-                baseDamage = GetDice(baseRawDamage[1]);
-                rawDamage[0].damage = DiceString({diceType:baseDamage.diceType, diceNumber:targetDiceNumber, modifier:staticDamage});
+                const baseDice = GetDice(baseRawDamage[j]);
+                if ((baseDice.modifier ?? 0) === 0)
+                    instancesWithoutModifier.push(j);
+                else
+                    instancesWithModifier.push(j);
             }
             
+            // Process instances without modifiers first
+            for (const j of instancesWithoutModifier)
+            {
+                const baseDice = GetDice(baseRawDamage[j]);
+                const instanceDamage = baseDice.modifier + ((baseDice.diceNumber??0)*((baseDice.diceType??0)/2 + 0.5));
+                const instanceProportion = instanceDamage / getDamageAverage(baseStrike);
+                const instanceTargetDamage = targetDamage * instanceProportion;
+                
+                // Find best dice combination with same dice type
+                const originalDiceType = baseDice.diceType ?? 4;
+                let bestDiceNumber = 0;
+                let bestDiceType = originalDiceType;
+                let bestDamage = 0;
+                let bestDifference = Infinity;
+                
+                // Try different dice numbers with original dice type
+                for (let diceNum = 0; diceNum <= 20; ++diceNum)
+                {
+                    const testDamage = diceNum * (0.5 + originalDiceType / 2);
+                    const difference = Math.abs(testDamage - instanceTargetDamage);
+                    if (difference < bestDifference)
+                    {
+                        bestDifference = difference;
+                        bestDiceNumber = diceNum;
+                        bestDiceType = originalDiceType;
+                        bestDamage = testDamage;
+                    }
+                }
+                
+                // If difference > 10%, try different dice types (d4 to d12)
+                if (bestDifference > instanceTargetDamage * 0.1)
+                {
+                    const diceTypes = [4, 6, 8, 10, 12];
+                    for (const diceType of diceTypes)
+                    {
+                        for (let diceNum = 0; diceNum <= 20; ++diceNum)
+                        {
+                            const testDamage = diceNum * (0.5 + diceType / 2);
+                            const difference = Math.abs(testDamage - instanceTargetDamage);
+                            if (difference < bestDifference)
+                            {
+                                bestDifference = difference;
+                                bestDiceNumber = diceNum;
+                                bestDiceType = diceType;
+                                bestDamage = testDamage;
+                            }
+                        }
+                    }
+                }
+                
+                // Update the damage instance with best values
+                const updatedDice = GetDice(rawDamage[j]);
+                updatedDice.diceType = bestDiceType;
+                updatedDice.diceNumber = bestDiceNumber;
+                updatedDice.modifier = 0;
+                rawDamage[j].damage = DiceString(updatedDice);
+                
+                alreadyAlocatedDamage += bestDamage;
+            }
+            
+            // Process instances with modifiers
+            for (const j of instancesWithModifier)
+            {
+                const baseDice = GetDice(baseRawDamage[j]);
+                const instanceDamage = baseDice.modifier + ((baseDice.diceNumber??0)*((baseDice.diceType??0)/2 + 0.5));
+                const instanceProportion = instanceDamage / getDamageAverage(baseStrike);
+                const instanceTargetDamage = targetDamage * instanceProportion;
+                
+                // Calculate expected dice number (like lines 63-66)
+                const baseDiceNumber = damageDiceNumberScale[baseLevel+1];
+                let targetDiceNumber = damageDiceNumberScale[targetLevel+1];
+                targetDiceNumber += (baseDice.diceNumber??0) - baseDiceNumber;
+                
+                // Calculate static damage
+                const diceAverage = targetDiceNumber * (0.5 + (baseDice.diceType??0) / 2);
+                const staticDamage = instanceTargetDamage - diceAverage;
+                
+                // Update the damage instance
+                const updatedDice = GetDice(rawDamage[j]);
+                updatedDice.diceNumber = targetDiceNumber;
+                updatedDice.modifier = Math.floor(staticDamage);
+                rawDamage[j].damage = DiceString(updatedDice);
+                
+                alreadyAlocatedDamage += diceAverage + updatedDice.modifier;
+            }
+            
+            // Distribute remaining damage equally on modifiers of instances with modifiers
+            const remainingDamage = targetDamage - alreadyAlocatedDamage;
+            if (remainingDamage !== 0 && instancesWithModifier.length > 0)
+            {
+                const damagePerInstance = Math.floor(remainingDamage / instancesWithModifier.length);
+                const extraDamage = Math.floor(remainingDamage - (damagePerInstance * instancesWithModifier.length));
+                
+                for (let i = 0; i < instancesWithModifier.length; ++i)
+                {
+                    const j = instancesWithModifier[i];
+                    const updatedDice = GetDice(rawDamage[j]);
+                    updatedDice.modifier += damagePerInstance;
+                    // Add extra damage to the first instance
+                    if (i === 0)
+                        updatedDice.modifier += extraDamage;
+                    rawDamage[j].damage = DiceString(updatedDice);
+                }
+            }
         }
     }
     

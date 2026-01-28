@@ -7,7 +7,7 @@
     previousTier, GetGMTableValue
 } from "../components/LookupTable.tsx";
 import {inLerp, lerp} from "../components/LinearInterpolation.tsx";
-import type {StatBlockProp} from "../components/StatBlock.tsx";
+import type {StatsJson} from "../components/StatBlock.tsx";
 import type {AbilityName} from "../components/Abilities.tsx";
 import {type CreatureItemStrike, getDamageAverage} from "../components/Strikes.tsx";
 
@@ -21,7 +21,7 @@ export const attributeModifierScales : GMTable<number> =
     type : "number"
 }
 
-export function getScaledAttribute(creature : StatBlockProp, attribute : AbilityName, levelTarget : number): number{
+export function getScaledAttribute(creature : StatsJson, attribute : AbilityName, levelTarget : number): number{
     return getAdjustedLevel(creature.system.details.level.value, levelTarget, creature.system.abilities[attribute].mod, attributeModifierScales)
 }
 
@@ -35,7 +35,7 @@ export const perceptionScales : GMTable<number> =
     type : "number"
 }
 
-export function getScaledPerception(creature :StatBlockProp, levelTarget : number): number{
+export function getScaledPerception(creature :StatsJson, levelTarget : number): number{
     return getAdjustedLevel(creature.system.details.level.value, levelTarget, creature.system.perception.mod, perceptionScales)
 }
 
@@ -70,7 +70,7 @@ export const armorClassScales : GMTable<number> =
     type : "number"
 }
 
-export function getScaledArmor(creature :StatBlockProp, levelTarget : number): number{
+export function getScaledArmor(creature :StatsJson, levelTarget : number): number{
     return getAdjustedLevel(creature.system.details.level.value, levelTarget, creature.system.attributes.ac.value, armorClassScales)
 }
 
@@ -83,13 +83,13 @@ export const savingThrowScales: GMTable<number> = {
     type : "number"
 };
 
-export function getScaledWill(creature :StatBlockProp, levelTarget : number): number{
+export function getScaledWill(creature :StatsJson, levelTarget : number): number{
     return getAdjustedLevel(creature.system.details.level.value, levelTarget, creature.system.saves.will.value, savingThrowScales)
 }
-export function getScaledFortitude(creature :StatBlockProp, levelTarget : number): number{
+export function getScaledFortitude(creature :StatsJson, levelTarget : number): number{
     return getAdjustedLevel(creature.system.details.level.value, levelTarget, creature.system.saves.fortitude.value, savingThrowScales)
 }
-export function getScaledReflex(creature :StatBlockProp, levelTarget : number): number{
+export function getScaledReflex(creature :StatsJson, levelTarget : number): number{
     return getAdjustedLevel(creature.system.details.level.value, levelTarget, creature.system.saves.reflex.value, savingThrowScales)
 }
 
@@ -123,7 +123,7 @@ export const hitPointScales: GMTable<Range|number> = {
     type : "range"
 };
 
-export function getScaledHP(creature :StatBlockProp, levelTarget : number): number{
+export function getScaledHP(creature :StatsJson, levelTarget : number): number{
     return getAdjustedLevel(creature.system.details.level.value, levelTarget, creature.system.attributes.hp.value, hitPointScales);
 }
 

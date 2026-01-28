@@ -11,7 +11,7 @@ import {
     cloneStatBlock,
     type DamageRollInfo, DiceString,
     GetDice,
-    type StatBlockProp
+    type StatsJson
 } from "../StatBlock.tsx";
 import {AddTrait} from "../Traits.tsx";
 import {type CreatureItemStrike, GetDamagesInfo, GetStrikes} from "../Strikes.tsx";
@@ -23,7 +23,7 @@ import {
     type SpellcastingItem
 } from "../Spells.tsx";
 
-function elementalAdjustments(statblock: StatBlockProp, language: string, name: string, spellsJson: string) : StatBlockProp
+function elementalAdjustments(statblock: StatsJson, language: string, name: string, spellsJson: string) : StatsJson
 {
     let sb = cloneStatBlock(statblock);
     AddTrait(sb,  name);

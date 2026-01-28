@@ -1,4 +1,5 @@
-﻿
+﻿import type {AbilitiesExtraInfoDictionary} from "../App.tsx";
+
 export interface Hook<T>
 {
     value : T;
@@ -14,6 +15,7 @@ export interface StatBlockControls
     isDescriptionOpen : Hook<boolean>;
     showPowerTier : Hook<boolean>;
     showLevelerControls : Hook<boolean>;
+    abilitiesInfo : Hook<AbilitiesExtraInfoDictionary>;
     
     leveler : Hook<number>;
 }

@@ -1,6 +1,6 @@
 ﻿import {capitalize} from "./TypeScriptHelpFunctions.tsx";
 import {Fragment} from "react";
-import type {StatBlockProp} from "./StatBlock.tsx";
+import type {StatsJson} from "./StatBlock.tsx";
 
 export interface Traits {
     rarity: string;
@@ -8,21 +8,21 @@ export interface Traits {
     value: string[];
 }
 
-export function AddTrait(creature: StatBlockProp, value: string) {
+export function AddTrait(creature: StatsJson, value: string) {
     if (creature.system.traits.value.includes(value))
         return;
 
     creature.system.traits.value.push(value)
 }
 
-export function RemoveTrait(creature: StatBlockProp, value: string) {
+export function RemoveTrait(creature: StatsJson, value: string) {
     if (!creature.system.traits.value.includes(value))
         return;
 
     creature.system.traits.value = creature.system.traits.value.filter(x => x != value);
 }
 
-export function ReplaceTrait(creature : StatBlockProp, valueToRemove : string, valueToPlace : string)
+export function ReplaceTrait(creature : StatsJson, valueToRemove : string, valueToPlace : string)
 {
     if (!creature.system.traits.value.includes(valueToRemove))
     {

@@ -1,6 +1,22 @@
 import type {Hook} from "../Hook.tsx";
 import type {ReactNode} from "react";
 
+export function ToggleWithTextAndIcon(checkValue : boolean, onChangeValue : (a:boolean)=>void, text: string, icon : ReactNode)
+{   
+    return <>
+        <div className="mx-1">
+            <div className="flex items-center gap-1">
+                {icon}
+                <span className="select-none">{text}</span>
+                <input
+                    type="checkbox"
+                    value={checkValue?1:0}
+                    onChange={(e) => onChangeValue(e.target.checked)}
+                />
+            </div>
+        </div>
+    </>
+}
 
 export function IntFieldWithButtons(hook : Hook<number>, level : number) : ReactNode
 {

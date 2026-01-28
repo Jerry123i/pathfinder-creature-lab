@@ -6,7 +6,7 @@ import {
     GetDice,
     type ItemSystem,
     printNumberWithSignalElement,
-    type StatBlockProp,
+    type StatsJson,
     type StringHolder,
     NullableValueChange, type ValueHolder, compareDamageRollInfo
 } from "./StatBlock.tsx";
@@ -30,7 +30,7 @@ export interface StrikeSystem extends ItemSystem {
     description: {value: string};
 }
 
-export function staticModifyAllStrikes(creature: StatBlockProp, hitValue: number, damageValue: number)
+export function staticModifyAllStrikes(creature: StatsJson, hitValue: number, damageValue: number)
 {
     const strikes = GetStrikes(creature);
 
@@ -41,7 +41,7 @@ export function staticModifyAllStrikes(creature: StatBlockProp, hitValue: number
         staticModifyStrike(strikes.equipmentStrikes[i], hitValue, damageValue);
 }
 
-export function levelModifyAllStrikes(creature: StatBlockProp, baseCreature:StatBlockProp, targetLevel : number)
+export function levelModifyAllStrikes(creature: StatsJson, baseCreature:StatsJson, targetLevel : number)
 {
     const strikes = GetStrikes(creature);
     const baseCreatureStrikes = GetStrikes(baseCreature);
@@ -246,7 +246,7 @@ function staticModifyStrike(strike: CreatureItem, hitValue: number, damageValue:
 }
 
 
-export function GetStrikes(value: StatBlockProp): {baseStrikes : CreatureItemStrike[], equipmentStrikes: CreatureItem[]}
+export function GetStrikes(value: StatsJson): {baseStrikes : CreatureItemStrike[], equipmentStrikes: CreatureItem[]}
 {
 
     const meleeTag = value.items.filter(item => item.type === "melee") as CreatureItemStrike[];
@@ -260,7 +260,7 @@ export function GetCombinedStrikes(value: {baseStrikes : CreatureItemStrike[], e
     return [...value.baseStrikes, ...value.equipmentStrikes];
 }
 
-export function GetStrikesFromEquipment(value: StatBlockProp) : CreatureItem[]
+export function GetStrikesFromEquipment(value: StatsJson) : CreatureItem[]
 {
     const allEquipment = value.items.filter(item => item.type === "equipment");
 
@@ -306,7 +306,7 @@ export function GetDamagesInfo(value: StrikeSystem): DamageRollInfo[] {
     return damages;
 }
 
-export function PrintStrike(creature: StatBlockProp,item: CreatureItem, showTier :boolean){
+export function PrintStrike(creature: StatsJson, item: CreatureItem, showTier :boolean){
     
     if (item.type === "melee")
         return PrintStrike_StrikeType(creature, item as CreatureItemStrike, showTier);
@@ -317,7 +317,7 @@ export function PrintStrike(creature: StatBlockProp,item: CreatureItem, showTier
     return <></>;
 }
 
-export function PrintStrike_StrikeType(creature: StatBlockProp,item: CreatureItemStrike, showTier : boolean) {
+export function PrintStrike_StrikeType(creature: StatsJson, item: CreatureItemStrike, showTier : boolean) {
     if (item.system.weaponType === undefined) {
         item.system.weaponType = {value: "melee"};
 
@@ -361,7 +361,7 @@ export function PrintStrike_StrikeType(creature: StatBlockProp,item: CreatureIte
     </>)
 }
 
-export function PrintStrike_EquipmentType(creature: StatBlockProp,item: CreatureItem, showTier : boolean){
+export function PrintStrike_EquipmentType(creature: StatsJson, item: CreatureItem, showTier : boolean){
 
     let atkPenalty = 5;
 
@@ -404,7 +404,7 @@ export function PrintStrike_EquipmentType(creature: StatBlockProp,item: Creature
     
 }
 
-export function ModifyStrikesByAbility(creature: StatBlockProp, ability: AbilityName, value: number)
+export function ModifyStrikesByAbility(creature: StatsJson, ability: AbilityName, value: number)
 {
     if (ability !== "str" && ability !== "dex")
         return;
@@ -482,7 +482,7 @@ function isThrow(value: CreatureItemStrike) : boolean
     return false;
 }
 
-export function PrintReactiveStrikeLabel(value: StatBlockProp)
+export function PrintReactiveStrikeLabel(value: StatsJson)
 {
     const reactiveStrike = getReactiveStrike(value);
     
@@ -504,7 +504,7 @@ export function PrintReactiveStrikeLabel(value: StatBlockProp)
             </>
 }
 
-export function getStrongerStrike(value: StatBlockProp): CreatureItemStrike | undefined
+export function getStrongerStrike(value: StatsJson): CreatureItemStrike | undefined
 {
     const strikes = GetStrikes(value).baseStrikes;
     if (strikes.length === 0)
@@ -513,7 +513,7 @@ export function getStrongerStrike(value: StatBlockProp): CreatureItemStrike | un
     return strikes.sort((a, b) => {return a.system.bonus.value - b.system.bonus.value;})[strikes.length-1];    
 }
 
-export function getWeakestStrike(value: StatBlockProp): CreatureItemStrike | undefined
+export function getWeakestStrike(value: StatsJson): CreatureItemStrike | undefined
 {
     const strikes = GetStrikes(value).baseStrikes;
     if (strikes.length === 0)
@@ -547,7 +547,7 @@ export function getDamageAverage(input: CreatureItemStrike): number
     
 }
 
-function getReactiveStrike(value: StatBlockProp): CreatureItem | undefined
+function getReactiveStrike(value: StatsJson): CreatureItem | undefined
 {
     const reactiveStrike = value.items.filter(v => {return v.system.slug === "reactive-strike" || v.system.slug === "attack-of-opportunity"});
     if (reactiveStrike.length === 0)

@@ -1,4 +1,4 @@
-﻿import type {Mod, StatBlockProp} from "./StatBlock.tsx";
+﻿import type {Mod, StatsJson} from "./StatBlock.tsx";
 import {ModifyAssociatedSkills} from "./Skills.tsx";
 
 import {ModifyStrikesByAbility} from "./Strikes.tsx";
@@ -15,7 +15,7 @@ export interface Abilities {
 
 export type AbilityName = keyof Abilities;
 
-export function ModifyAbilitiesAndRelatedStats(creature : StatBlockProp ,ability : AbilityName, value : number)
+export function ModifyAbilitiesAndRelatedStats(creature : StatsJson , ability : AbilityName, value : number)
 {
     const allAbilities = creature.system.abilities;
     
@@ -51,7 +51,7 @@ export function ModifyAbilitiesAndRelatedStats(creature : StatBlockProp ,ability
     ModifyStrikesByAbility(creature,  ability, value);
 }
 
-export function ModifyAbilitiesByLevel(creature : StatBlockProp, baseCreature: StatBlockProp, targetLevel : number)
+export function ModifyAbilitiesByLevel(creature : StatsJson, baseCreature: StatsJson, targetLevel : number)
 {
     const ab = creature.system.abilities;
     const keys = Object.keys(ab);

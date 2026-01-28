@@ -5,7 +5,7 @@ import {
     GetValue,
     NullableValueChange,
     NullableValueSet,
-    type StatBlockProp
+    type StatsJson
 } from "./StatBlock.tsx";
 import type {AbilityName} from "./Abilities.tsx";
 import {PrintSkillTier} from "./GMValuesMarkers.tsx";
@@ -39,7 +39,7 @@ export interface SkillList {
 
 type SkillName = keyof SkillList;
 
-export function staticModifyAllSkills(creatureStats : StatBlockProp , creatureSystems: CreatureSystems, value: number) 
+export function staticModifyAllSkills(creatureStats : StatsJson , creatureSystems: CreatureSystems, value: number) 
 {
     const {skills} = creatureSystems;
     if (!skills) return;
@@ -55,7 +55,7 @@ export function staticModifyAllSkills(creatureStats : StatBlockProp , creatureSy
         NullableValueChange(lores[i].system.mod, value);
 }
 
-export function levelModifyAllSkills(creature : StatBlockProp, baseCreature : StatBlockProp, targetLevel : number)
+export function levelModifyAllSkills(creature : StatsJson, baseCreature : StatsJson, targetLevel : number)
 {
     const baseLevel = baseCreature.system.details.level.value;
     
@@ -78,7 +78,7 @@ export function levelModifyAllSkills(creature : StatBlockProp, baseCreature : St
         NullableValueSet(lores[i].system.mod, getScaledSkill(baseLevel, targetLevel, baseLores[i].system.mod.value??0))
 }
 
-export function ModifyAssociatedSkills(creature : StatBlockProp,  ability : AbilityName, value: number)
+export function ModifyAssociatedSkills(creature : StatsJson, ability : AbilityName, value: number)
 {
     const creatureSkills = creature.system.skills;
     
@@ -126,7 +126,7 @@ export function TryModifySkill(skills: SkillList, name: SkillName, value: number
     skill.base += value;
 }
 
-export function TryModifyLore(creature: StatBlockProp, value: number) {
+export function TryModifyLore(creature: StatsJson, value: number) {
 
     const lores  = GetLoreItems(creature);
 
@@ -136,7 +136,7 @@ export function TryModifyLore(creature: StatBlockProp, value: number) {
     
 }
 
-export function AddSkill(creature: StatBlockProp, name:SkillName, value: number) 
+export function AddSkill(creature: StatsJson, name:SkillName, value: number) 
 {
     if (creature.system.skills === undefined)
         creature.system.skills = {};
@@ -168,7 +168,7 @@ function GetSpecialSkills(skill: Skill) {
     return (<>({stringValue})</>);
 }
 
-export function getHighestSkill(creature:StatBlockProp) : {name: SkillName, value: number}
+export function getHighestSkill(creature:StatsJson) : {name: SkillName, value: number}
 {
     let higherValue = 0;
     let higherSkill : SkillName | null = null ;
@@ -191,7 +191,7 @@ export function getHighestSkill(creature:StatBlockProp) : {name: SkillName, valu
     
 }
 
-export function printSkills(creature:StatBlockProp,list: SkillList, showPowerMarkers : boolean) {
+export function printSkills(creature:StatsJson, list: SkillList, showPowerMarkers : boolean) {
     
     if (list === undefined)
         return <></>;

@@ -1,12 +1,13 @@
-import {type StatBlockProp} from "./components/StatBlock.tsx";
+import {type StatsJson} from "./components/StatBlock.tsx";
 import {useState} from "react";
 import {capitalize} from "./components/TypeScriptHelpFunctions.tsx";
 import {ArrowFatDownIcon, ArrowFatUpIcon} from "@phosphor-icons/react";
+import {type Hook, newHook} from "./components/Hook.tsx";
 
 
-export function DropDown(list: StatBlockProp[], onValueChange: (i: number) => void) {
+export function DropDown(list: StatsJson[], onValueChange: (i: number) => void) {
     return (<select className="bg-amber-50 p-1 pb-2 justify-center rounded-md" onChange={(e) => onValueChange(Number(e.target.value))}>
-        {list.map((item: StatBlockProp, index) =>
+        {list.map((item: StatsJson, index) =>
             (<option value={index} key={item._id}>{item.name}</option>))
         })
     </select>)
@@ -20,9 +21,15 @@ export type FilterValues = {
     traitsArray: string[];
 }
 
-export function SideBar(allCreatures: StatBlockProp[], OnSetCreature: (creature: StatBlockProp) => void)
+export interface SidebarProps{
+    allCreatures: StatsJson[],
+    OnSetCreature: (creature: StatsJson) => void
+}
+
+export function SideBar({allCreatures, OnSetCreature} : SidebarProps)
 {
     const [filters, setFilters] = useState<FilterValues>({min: -1, max: 30, sort: "LevelUp", nameFilter: "", traitsArray: []});
+    const filtersHook = newHook<FilterValues>(filters, setFilters);
     
     return(
     <div className="grow sticky top-3 flex-col flex max-h-[97vh] bg-amber-200 rounded-xl space-y-2 p-2">
@@ -35,20 +42,21 @@ export function SideBar(allCreatures: StatBlockProp[], OnSetCreature: (creature:
             </div>
         </div>
         <div className="flex  gap-4">
-            {LevelMinMaxArea(setFilters, filters)}
+            <LevelMinMaxArea {...filtersHook} />
         </div>
         <div className=" flex">
-            {TraitsArea(filters, setFilters)}
+            <TraitsArea {...filtersHook} />
         </div>
         <div className=" flex gap-2 justify-around">
-            {SortArea(filters, setFilters)}
+            <SortArea {...filtersHook} />
         </div>
-        <div
-            className=" flex-[8] overflow-y-scroll border-1 border-gray-300">{CreaturesArea(FilterAndSortCreatures(allCreatures, filters), OnSetCreature)}</div>
+        <div className=" flex-[8] overflow-y-scroll border-1 border-gray-300">
+            <CreaturesList creatures={filterAndSortCreatures(allCreatures, filters)} onSetCreature={OnSetCreature}/>
+        </div>
     </div>);
 }
 
-function SortArea(filter : FilterValues, filterSetter : (value : FilterValues) => void)
+function SortArea(filtersHook : Hook<FilterValues>)
 {
     return (
         <div className="p-2 flex space-x-2 w-full">
@@ -58,23 +66,23 @@ function SortArea(filter : FilterValues, filterSetter : (value : FilterValues) =
             <div
                 className="bg-gray-300 hover:bg-gray-600 hover:text-white rounded-3xl p-1 w-1/3 select-none flex items-center justify-center space-x-0"
                 onClick={() => {
-                    switch (filter.sort) {
+                    switch (filtersHook.value.sort) {
                         case "LevelUp":
-                            filterSetter({ ...filter, sort: "LevelDown" });
+                            filtersHook.setValue({ ...filtersHook.value, sort: "LevelDown" });
                             break;
                         case "LevelDown":
-                            filterSetter({ ...filter, sort: "LevelUp" });
+                            filtersHook.setValue({ ...filtersHook.value, sort: "LevelUp" });
                             break;
                         default:
-                            filterSetter({ ...filter, sort: "LevelUp" });
+                            filtersHook.setValue({ ...filtersHook.value, sort: "LevelUp" });
                             break;
                     }
                 }}
             >
                 {/* fixed-width icon placeholder */}
                 <div className="w-5 flex justify-center">
-                    {filter.sort === "LevelUp" && <ArrowFatDownIcon weight="fill" />}
-                    {filter.sort === "LevelDown" && <ArrowFatUpIcon weight="fill" />}
+                    {filtersHook.value.sort === "LevelUp" && <ArrowFatDownIcon weight="fill" />}
+                    {filtersHook.value.sort === "LevelDown" && <ArrowFatUpIcon weight="fill" />}
                 </div>
                 <span>Level</span>
             </div>
@@ -83,22 +91,22 @@ function SortArea(filter : FilterValues, filterSetter : (value : FilterValues) =
             <div
                 className="bg-gray-300 hover:bg-gray-600 hover:text-white rounded-3xl p-1 w-1/3 select-none flex items-center justify-center space-x-0"
                 onClick={() => {
-                    switch (filter.sort) {
+                    switch (filtersHook.value.sort) {
                         case "NameUp":
-                            filterSetter({ ...filter, sort: "NameDown" });
+                            filtersHook.setValue({ ...filtersHook.value, sort: "NameDown" });
                             break;
                         case "NameDown":
-                            filterSetter({ ...filter, sort: "NameUp" });
+                            filtersHook.setValue({ ...filtersHook.value, sort: "NameUp" });
                             break;
                         default:
-                            filterSetter({ ...filter, sort: "NameUp" });
+                            filtersHook.setValue({ ...filtersHook.value, sort: "NameUp" });
                             break;
                     }
                 }}
             >
                 <div className="w-5 flex justify-center">
-                    {filter.sort === "NameUp" && <ArrowFatDownIcon weight="fill" />}
-                    {filter.sort === "NameDown" && <ArrowFatUpIcon weight="fill" />}
+                    {filtersHook.value.sort === "NameUp" && <ArrowFatDownIcon weight="fill" />}
+                    {filtersHook.value.sort === "NameDown" && <ArrowFatUpIcon weight="fill" />}
                 </div>
                 <span>Name</span>
             </div>
@@ -107,7 +115,7 @@ function SortArea(filter : FilterValues, filterSetter : (value : FilterValues) =
 
 }
 
-function LevelMinMaxArea(setFilters: (value: (((prevState: FilterValues) => FilterValues) | FilterValues)) => void, filters: FilterValues) {
+function LevelMinMaxArea(filtersHook : Hook<FilterValues>) {
     return <>
         <div className="flex gap-4">
             <div className="text-xs">Min lvl.</div>
@@ -116,7 +124,7 @@ function LevelMinMaxArea(setFilters: (value: (((prevState: FilterValues) => Filt
                 let val = -1;
                 if (e.target.value !== "")
                     val = Number.parseInt(e.target.value);
-                setFilters({...filters, min: val})
+                filtersHook.setValue({...filtersHook.value, min: val})
             }}></input>
         </div>
         <div className="flex gap-4">
@@ -126,7 +134,7 @@ function LevelMinMaxArea(setFilters: (value: (((prevState: FilterValues) => Filt
                 let val = 25;
                 if (e.target.value !== "")
                     val = Number.parseInt(e.target.value);
-                setFilters({...filters, max: val})
+                filtersHook.setValue({...filtersHook.value, max: val})
             }}></input>
         </div>
     </>;
@@ -152,7 +160,7 @@ const traits = ["Air", "Fire", "Earth", "Metal", "Water", "Wood", "Human", "Drag
 //     ["Troop"]
 //     ]
 
-function TraitsArea(filter : FilterValues,filterSetter : (f : FilterValues) => void){
+function TraitsArea(filterHook : Hook<FilterValues>) {
     return(<div className="gap-2">
         <p>Traits:</p>
         {traits.map(value => {
@@ -160,12 +168,12 @@ function TraitsArea(filter : FilterValues,filterSetter : (f : FilterValues) => v
                     <label>
                         <input type="checkbox" onChange = {
                             (e)=>{
-                                const newValue = structuredClone(filter);
+                                const newValue = structuredClone(filterHook.value);
                                 if (e.target.checked)
                                     newValue.traitsArray.push(value);    
                                 else
                                     newValue.traitsArray = newValue.traitsArray.filter(v => v !== value);
-                                filterSetter(newValue);
+                                filterHook.setValue(newValue);
                             }
                         }></input>
                         <span className="px-1 select-none">{value}</span>
@@ -175,7 +183,7 @@ function TraitsArea(filter : FilterValues,filterSetter : (f : FilterValues) => v
     </div>);
 } 
 
-function FilterAndSortCreatures(creatures: StatBlockProp[], filter: FilterValues) : StatBlockProp[] 
+function filterAndSortCreatures(creatures: StatsJson[], filter: FilterValues) : StatsJson[] 
 {
     let creaturesToShow = creatures;
     
@@ -221,13 +229,18 @@ function FilterAndSortCreatures(creatures: StatBlockProp[], filter: FilterValues
     return creaturesToShow;
 }
 
-function CreaturesArea(creatures : StatBlockProp[], OnSetCreature : (creature: StatBlockProp) => void)
+interface CreaturesListProps{
+    creatures : StatsJson[],
+    onSetCreature : (creature: StatsJson) => void
+}
+
+function CreaturesList({creatures, onSetCreature} : CreaturesListProps)
 {
     return(<div className="">
             {creatures.map(value => {
                 return(<div className="border-1 border-gray-400 p-2 rounded-2xl bg-gray-200 m-2 select-none hover:bg-gray-600 hover:text-white " key={value._id}
                             onClick={()=> { 
-                                OnSetCreature(value)
+                                onSetCreature(value)
                             }}>
                     <p>{value.name}     {value.system.details.level.value}</p>
                     {value.system.traits.value.map((value, i) =>{return(<span className="text-gray-500 text-xs" key={i}>{capitalize(value)} | </span>);} )}

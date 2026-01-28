@@ -4,6 +4,8 @@ Depois ancestralidade (ajuste de atributo)
 
 werebear
 
+spirit binder 2actions strike
+
 Levaloch tem spells // Ritual
 Elder Wyrmwraith / Tarn Linnorm / Tor Linnorm
 
@@ -12,7 +14,6 @@ Roll up quando seleciona outra
 Warsworn double ()
 
 TODO:
-- Fix leveler controls
 - Add cooldown abilities toggle (only when needed)
 - Add area abilities toggle
 - Add level balancing to the abilities

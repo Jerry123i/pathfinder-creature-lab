@@ -2,7 +2,7 @@
     cloneStatBlock,
     GetGenericAbilities,
     modifyAllSaves,
-    type StatBlockProp,
+    type StatsJson,
     type TypedValue
 } from "../StatBlock.tsx";
 import {levelModifyAllStrikes, staticModifyAllStrikes} from "../Strikes.tsx";
@@ -42,7 +42,7 @@ export interface CreatureAdjustment {
     priority: number;
     type : ModifierType;
 
-    apply: (statblock: StatBlockProp) => StatBlockProp;
+    apply: (statblock: StatsJson) => StatsJson;
 }
 
 export const Elite : CreatureAdjustment = {
@@ -51,7 +51,7 @@ export const Elite : CreatureAdjustment = {
     description: "Sometimes you’ll want a creature that’s just a bit more powerful than normal so that you can present a challenge that would otherwise be trivial or show that one enemy is stronger than its kin.", 
     priority: 9,
     type: "Level",
-    apply: (statblock: StatBlockProp) =>
+    apply: (statblock: StatsJson) =>
     {
 
         const sb = cloneStatBlock(statblock);
@@ -90,7 +90,7 @@ export const Weak : CreatureAdjustment = {
     description: "Sometimes you’ll want a creature that’s weaker than normal so you can use a creature that would otherwise be too challenging or show that one enemy is weaker than its kin.",
     priority: 9,
     type: "Level",
-    apply: (statblock: StatBlockProp) =>
+    apply: (statblock: StatsJson) =>
     {
         const sb = cloneStatBlock(statblock);
         const initLevel = statblock.system.details.level.value;
@@ -124,7 +124,7 @@ export const Weak : CreatureAdjustment = {
     }
 }
 
-export function applyAllAdjustments(baseCreature : StatBlockProp | undefined, adjustments : CreatureAdjustment[]) : StatBlockProp | undefined
+export function applyAllAdjustments(baseCreature : StatsJson | undefined, adjustments : CreatureAdjustment[]) : StatsJson | undefined
 {
     if(baseCreature === undefined)
         return undefined;
@@ -143,7 +143,7 @@ export function applyAllAdjustments(baseCreature : StatBlockProp | undefined, ad
     return creature;
 }
 
-export function applyLevelAdjustment(baseCreature : StatBlockProp | undefined, levelVariance : number) : StatBlockProp | undefined
+export function applyLevelAdjustment(baseCreature : StatsJson | undefined, levelVariance : number) : StatsJson | undefined
 {
     if (baseCreature === undefined)
         return undefined;
@@ -178,7 +178,7 @@ export function applyLevelAdjustment(baseCreature : StatBlockProp | undefined, l
     
 }
 
-export function addLanguages(baseCreature : StatBlockProp, language: string, addOnlyIfSpeaks : boolean) : StatBlockProp
+export function addLanguages(baseCreature : StatsJson, language: string, addOnlyIfSpeaks : boolean) : StatsJson
 {
     if (addOnlyIfSpeaks && baseCreature.system.details.languages.value.length === 0)
         return baseCreature;
@@ -192,7 +192,7 @@ export function addLanguages(baseCreature : StatBlockProp, language: string, add
     return sb;
 }
 
-export function addSpeed(baseCreature : StatBlockProp, value: TypedValue)
+export function addSpeed(baseCreature : StatsJson, value: TypedValue)
 {
     if (baseCreature.system.attributes.speed.otherSpeeds === undefined)
         baseCreature.system.attributes.speed.otherSpeeds = [];
@@ -211,13 +211,13 @@ export function addSpeed(baseCreature : StatBlockProp, value: TypedValue)
     baseCreature.system.attributes.speed.otherSpeeds.push(value);
 }
 
-export function addResistances(sb: StatBlockProp, resistances: string[], value: number) {
+export function addResistances(sb: StatsJson, resistances: string[], value: number) {
     for (const trait of resistances) {
         addResistance(sb, {type:trait,  value:value});
     }
 }
 
-export function addResistance(baseCreature : StatBlockProp, value: TypedValue | Resistance)
+export function addResistance(baseCreature : StatsJson, value: TypedValue | Resistance)
 {
     if (baseCreature.system.attributes.resistances === undefined)
         baseCreature.system.attributes.resistances = [];
@@ -231,13 +231,13 @@ export function addResistance(baseCreature : StatBlockProp, value: TypedValue | 
     baseCreature.system.attributes.resistances.push(value);
 }
 
-export function addWeaknesses(sb: StatBlockProp, weaknesses: string[], value: number){
+export function addWeaknesses(sb: StatsJson, weaknesses: string[], value: number){
     for (const weakness of weaknesses) {
         addWeakness(sb, {type:weakness, value:value});
     }
 }
 
-export function addWeakness(baseCreature : StatBlockProp, value: TypedValue)
+export function addWeakness(baseCreature : StatsJson, value: TypedValue)
 {
     if (baseCreature.system.attributes.weaknesses === undefined)
         baseCreature.system.attributes.weaknesses = [];
@@ -251,20 +251,20 @@ export function addWeakness(baseCreature : StatBlockProp, value: TypedValue)
     baseCreature.system.attributes.weaknesses.push(value);
 }
 
-export function addImmunities(baseCreature : StatBlockProp, value: string[]){
+export function addImmunities(baseCreature : StatsJson, value: string[]){
     for (const trait of value) {
         addImmunity(baseCreature, trait);
     }
 }
 
-export function addImmunity(baseCreature : StatBlockProp, value: string)
+export function addImmunity(baseCreature : StatsJson, value: string)
 {
     if (baseCreature.system.attributes.immunities === undefined)
         baseCreature.system.attributes.immunities = [];
     baseCreature.system.attributes.immunities.push({exceptions:[], type:value});
 }
 
-export function changeSize(baseCreature : StatBlockProp, value: ("tiny"|"small"|"medium"|"large"|"huge"|"gargantuan")) : StatBlockProp
+export function changeSize(baseCreature : StatsJson, value: ("tiny"|"small"|"medium"|"large"|"huge"|"gargantuan")) : StatsJson
 {
     if (baseCreature.system.traits.value.includes("troop"))
         return baseCreature;
@@ -274,7 +274,7 @@ export function changeSize(baseCreature : StatBlockProp, value: ("tiny"|"small"|
     return sb;
 }
 
-export function modifyAbilitiesDcs(creature : StatBlockProp, value : number)
+export function modifyAbilitiesDcs(creature : StatsJson, value : number)
 {
     const abilities = GetGenericAbilities(creature);
 
@@ -296,7 +296,7 @@ export function modifyAbilitiesDcs(creature : StatBlockProp, value : number)
     }
 }
 
-export function modifyAbilitiesDamage(creature : StatBlockProp, valueToIncrease : number)
+export function modifyAbilitiesDamage(creature : StatsJson, valueToIncrease : number)
 {
     const abilities = GetGenericAbilities(creature);
 

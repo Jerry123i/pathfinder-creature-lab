@@ -1,4 +1,4 @@
-﻿import {AddDarkVision, cloneStatBlock, type CreatureItem, type StatBlockProp} from "../StatBlock.tsx";
+﻿import {AddDarkVision, cloneStatBlock, type CreatureItem, type StatsJson} from "../StatBlock.tsx";
 import {ModifyAbilitiesAndRelatedStats} from "../Abilities.tsx";
 import {AddTrait, RemoveTrait, ReplaceTrait} from "../Traits.tsx";
 import {addLanguages, addSpeed, changeSize, type CreatureAdjustment} from "./Modifiers.tsx";
@@ -27,7 +27,7 @@ export interface CustomAncestryCreatureAdjustment extends CreatureAdjustment {
 }
 
 // eslint-disable-next-line react-refresh/only-export-components
-function AncestryAdjustmentFunction(ancestry : CustomAncestryCreatureAdjustment, statBlock : StatBlockProp) : StatBlockProp{
+function AncestryAdjustmentFunction(ancestry : CustomAncestryCreatureAdjustment, statBlock : StatsJson) : StatsJson{
     let sb = cloneStatBlock(statBlock);
 
     for (const [key, value] of Object.entries(ancestry.abilityModifiers)) {

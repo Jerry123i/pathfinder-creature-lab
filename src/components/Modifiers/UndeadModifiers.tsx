@@ -3,7 +3,7 @@
     cloneStatBlock,
     type CreatureItem, GetDice,
     modifyAllSaves,
-    type StatBlockProp
+    type StatsJson
 } from "../StatBlock.tsx";
 import {
     addImmunities,
@@ -48,7 +48,7 @@ const undeadWeaknessTable: RangeLevelLookupTable<number> = {
     }
 };
 
-function applyBaseUndead(statblock: StatBlockProp): StatBlockProp {
+function applyBaseUndead(statblock: StatsJson): StatsJson {
     const sb = cloneStatBlock(statblock);
 
     ReplaceTrait(sb, "humanoid", "undead");
@@ -67,7 +67,7 @@ export const Zombie: CreatureAdjustment = {
     description: "A zombified creature is a mindless, rotting corpse that attacks everything it perceives.",
     priority: 1,
     type: "Undead",
-    apply: (statblock: StatBlockProp) => 
+    apply: (statblock: StatsJson) => 
     {
         let sb = cloneStatBlock(statblock);
         sb = applyBaseUndead(sb);
@@ -131,7 +131,7 @@ export const Skeleton: CreatureAdjustment = {
     description: "A skeleton is an animated pile of bones, typically under the command of a more powerful undead.",
     priority: 1,
     type: "Undead",
-    apply: (statblock: StatBlockProp) => {
+    apply: (statblock: StatsJson) => {
         let sb = cloneStatBlock(statblock);
         sb = applyBaseUndead(sb);
 
@@ -186,7 +186,7 @@ export const Ghost: CreatureAdjustment = {
     description: "The ephemeral form of a ghostly creature lets it pass through solid objects and float in the air. For simplicity, a creature with these adjustments isn't truly incorporeal, nor does it necessarily return after being destroyed.",
     priority: 1,
     type: "Undead",
-    apply: (statblock: StatBlockProp) => {
+    apply: (statblock: StatsJson) => {
         let sb = cloneStatBlock(statblock);
         sb = applyBaseUndead(sb);
         AddTrait(sb, "spirit");
@@ -233,7 +233,7 @@ export const Ghoul: CreatureAdjustment = {
     description: "Ghoul creatures are typically hairless and gaunt with blue or purple skin and pointed ears.",
     priority: 1,
     type: "Undead",
-    apply: (statblock: StatBlockProp) => {
+    apply: (statblock: StatsJson) => {
         let sb = cloneStatBlock(statblock);
         sb = applyBaseUndead(sb);
         AddTrait(sb, "ghoul");
@@ -304,7 +304,7 @@ export const Mummy: CreatureAdjustment = {
     description: "All types of creatures can have their corpses preserved and rise as mummies.",
     priority: 1,
     type: "Undead",
-    apply: (statblock: StatBlockProp) => {
+    apply: (statblock: StatsJson) => {
         let sb = cloneStatBlock(statblock);
         sb = applyBaseUndead(sb);
         AddTrait(sb, "mummy");
@@ -329,7 +329,7 @@ export const Shadow: CreatureAdjustment = {
     priority: 1,
     type: "Undead",
 
-    apply: (statblock: StatBlockProp) => {
+    apply: (statblock: StatsJson) => {
         let sb = cloneStatBlock(statblock);
 
         sb = applyBaseUndead(sb);
@@ -411,7 +411,7 @@ export const Vampire: CreatureAdjustment = {
     description: "A vampiric creature consumes the blood of the living for sustenance. It might also possess the compulsions and revulsions of a specific vampire bloodline.",
     priority: 1,
     type: "Undead",
-    apply: (statblock: StatBlockProp) =>
+    apply: (statblock: StatsJson) =>
     {
         const resistanceTable: RangeLevelLookupTable<number> = {
             ranges: [
@@ -512,7 +512,7 @@ export const Wight: CreatureAdjustment = {
     description: "All wights can drain life through their unarmed attacks, but some can draw life force through weapons as well.",
     priority: 1,
     type: "Undead",
-    apply: (statblock: StatBlockProp) =>
+    apply: (statblock: StatsJson) =>
     {
         let sb = cloneStatBlock(statblock);
         sb = applyBaseUndead(sb);

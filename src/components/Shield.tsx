@@ -1,4 +1,4 @@
-﻿import type {CreatureItem, ItemSystem, StatBlockProp} from "./StatBlock.tsx";
+﻿import type {CreatureItem, ItemSystem, StatsJson} from "./StatBlock.tsx";
 import {ShieldCheckeredIcon, ShieldIcon, ShieldPlusIcon} from "@phosphor-icons/react";
 
 interface ShieldItem extends CreatureItem
@@ -14,7 +14,7 @@ interface ShieldSystem extends ItemSystem
     
 }
 
-export function GetShield(creatureStatBlock : StatBlockProp) : ShieldSystem | undefined
+export function GetShield(creatureStatBlock : StatsJson) : ShieldSystem | undefined
 {
     const value = creatureStatBlock.items.filter(v => {return v.type === "shield"});
     
@@ -26,7 +26,7 @@ export function GetShield(creatureStatBlock : StatBlockProp) : ShieldSystem | un
     return shield.system;
 }
 
-export function PrintShield(value: StatBlockProp) {
+export function PrintShield(value: StatsJson) {
     const shield = GetShield(value);
     const shieldBlock = hasShieldBlock(value);
 
@@ -59,7 +59,7 @@ export function PrintShield(value: StatBlockProp) {
     );
 }
 
-function hasShieldBlock(value :StatBlockProp) : boolean
+function hasShieldBlock(value :StatsJson) : boolean
 {
     const shieldBlock = value.items.filter(v => v.system.slug === "shield-block"); 
     return shieldBlock.length > 0;

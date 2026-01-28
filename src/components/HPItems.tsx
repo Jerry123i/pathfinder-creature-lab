@@ -1,5 +1,5 @@
 ﻿import {capitalize} from "./TypeScriptHelpFunctions.tsx";
-import {printValue, type StatBlockProp} from "./StatBlock.tsx";
+import {printValue, type StatsJson} from "./StatBlock.tsx";
 import {printFourSquares} from "./PhosphorIcons.tsx";
 
 export interface Resistance
@@ -10,7 +10,7 @@ export interface Resistance
     doubleVs?: string[];
 }
 
-export function PrintResistances(value: StatBlockProp) {
+export function PrintResistances(value: StatsJson) {
     return <>
         {value.system.attributes.resistances === undefined ? null : (
             <>
@@ -25,7 +25,7 @@ export function PrintResistances(value: StatBlockProp) {
     </>;
 }
 
-export function PrintImmunity(value: StatBlockProp) {
+export function PrintImmunity(value: StatsJson) {
     return <>
         {value.system.attributes.immunities === undefined || value.system.attributes.immunities.length === 0 ? null : (
             <>
@@ -38,7 +38,7 @@ export function PrintImmunity(value: StatBlockProp) {
     </>;
 }
 
-export function PrintWeakness(value: StatBlockProp) 
+export function PrintWeakness(value: StatsJson) 
 {
     return <>
         {value.system.attributes.weaknesses === undefined ? null : (
@@ -52,13 +52,13 @@ export function PrintWeakness(value: StatBlockProp)
     </>;
 }
 
-export function isVoidHealing(value: StatBlockProp) 
+export function isVoidHealing(value: StatsJson) 
 {
     const voidHealing = value.items.filter(k => k.system.slug === "negative-healing" || k.system.slug === "void-healing");
     return voidHealing.length > 0;
 }
 
-export function GetFastHealing(value: StatBlockProp)
+export function GetFastHealing(value: StatsJson)
 {
     const item = value.items.filter(i => i.system.slug === "fast-healing");
     
@@ -66,7 +66,7 @@ export function GetFastHealing(value: StatBlockProp)
     return item[0];
 }
 
-export function GetRegeneration(value: StatBlockProp)
+export function GetRegeneration(value: StatsJson)
 {
     const item = value.items.filter(i => i.system.slug === "regeneration");
 
@@ -74,7 +74,7 @@ export function GetRegeneration(value: StatBlockProp)
     return item[0];    
 }
 
-export function PrintTroopThresholds(value: StatBlockProp)
+export function PrintTroopThresholds(value: StatsJson)
 {
     const troopItem = value.items.filter(i => i.system.slug === "troop-defenses");
     if(troopItem.length === 0) return undefined;
@@ -97,7 +97,7 @@ export function PrintTroopThresholds(value: StatBlockProp)
     );
 }
 
-export function PrintHP(value: StatBlockProp) 
+export function PrintHP(value: StatsJson) 
 {
     const troopItem = value.items.filter(i => i.system.slug === "troop-defenses");
     if(troopItem.length === 0){

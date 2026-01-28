@@ -21,13 +21,20 @@ import {
     PrintWeakness, type Resistance
 } from "./HPItems.tsx";
 import {parseAbilityDescription} from "./Parsing.tsx";
-import {ArrowsOutLineVerticalIcon, EyeIcon, RadioButtonIcon} from "@phosphor-icons/react";
+import {
+    ArrowsOutLineVerticalIcon,
+    ClockCountdownIcon,
+    EyeIcon,
+    RadioButtonIcon,
+    SphereIcon
+} from "@phosphor-icons/react";
 import {SquareButtonIcon, SquareButtonIconWithAction} from "./UIElements/Buttons.tsx";
 import {PrintACTier, PrintAttributeTier, PrintHPTier, PrintPerceptionTier, PrintSavesTier} from "./GMValuesMarkers.tsx";
 import type {Hook, StatBlockControls} from "./Hook.tsx";
-import {IntFieldWithButtons} from "./UIElements/InputField.tsx";
+import {IntFieldWithButtons, ToggleWithTextAndIcon} from "./UIElements/InputField.tsx";
+import {type AbilitiesExtraInfoDictionary, GetAdjustedIsArea, GetAdjustedIsCooldown} from "../App.tsx";
 
-export interface StatBlockProp {
+export interface StatsJson {
     _id: string;
     name: string;
     system: CreatureSystems;
@@ -45,10 +52,10 @@ export interface CreatureSystems {
     traits: Traits;
 }
 
-export interface Perception{
-    details : string;
-    mod : number;
-    senses : Sense[];
+export interface Perception {
+    details: string;
+    mod: number;
+    senses: Sense[];
 }
 
 export interface Sense {
@@ -57,67 +64,59 @@ export interface Sense {
     acuity?: SensePrecision;
 }
 
-export function AddDarkVision(sb: StatBlockProp, value : ("darkvision" | "low-light-vision"))
-{
+export function AddDarkVision(sb: StatsJson, value: ("darkvision" | "low-light-vision")) {
     const perception = sb.system.perception;
-    
+
     const currentVision = GetDarknessVision(perception);
     if (currentVision?.type === value)
         return;
-    
+
     if (currentVision?.type === "darkvision")
         return;
-    
+
     if (currentVision === undefined)
-        perception.senses.push({type:value})    
-    else if (currentVision.type ===  "low-light-vision" && value === "darkvision")
+        perception.senses.push({type: value})
+    else if (currentVision.type === "low-light-vision" && value === "darkvision")
         currentVision.type = value;
 }
 
-export function GetDarknessVision(value: Perception): Sense | undefined
-{
+export function GetDarknessVision(value: Perception): Sense | undefined {
     for (const sense of value.senses) {
-        
+
         if (sense.type === "darkvision" || sense.type === "greater-darkvision" || sense.type === "low-light-vision")
             return sense;
     }
     return undefined;
 }
 
-export function GetSpecialSenses(value: Perception): Sense[]
-{
+export function GetSpecialSenses(value: Perception): Sense[] {
     const specialSenses: Sense[] = [];
-    for (const sense of value.senses)
-    {
+    for (const sense of value.senses) {
         if (sense.type === "darkvision" || sense.type === "greater-darkvision" || sense.type === "low-light-vision")
             continue;
-        
+
         specialSenses.push(sense);
     }
     return specialSenses;
 }
 
-export function AddSpecialSenses(value : Perception, sense : Sense)
-{
-    for (const x of value.senses)
-    {
-        if (x.type === sense.type)
-        {
-            if (x.acuity === sense.acuity)
-            {
-                if (x.range === undefined){
+export function AddSpecialSenses(value: Perception, sense: Sense) {
+    for (const x of value.senses) {
+        if (x.type === sense.type) {
+            if (x.acuity === sense.acuity) {
+                if (x.range === undefined) {
                     x.range = sense.range;
                     return
                 }
-                x.range = Math.max(x.range, sense.range??0);    
+                x.range = Math.max(x.range, sense.range ?? 0);
             }
         }
-    }   
-    
+    }
+
     value.senses.push(sense);
 }
 
-export type SensePrecision = "precise"|"imprecise"|"vague";
+export type SensePrecision = "precise" | "imprecise" | "vague";
 
 export function modifyAllSaves(creature: CreatureSystems, value: number) {
     creature.saves.reflex.value += value;
@@ -132,7 +131,7 @@ export interface Attributes {
     speed: SpeedValue;
     resistances: Resistance[];
     weaknesses: TypedValue[];
-    immunities : {exceptions:string[], type: string}[];
+    immunities: { exceptions: string[], type: string }[];
 }
 
 export interface CreatureItem {
@@ -145,11 +144,11 @@ export interface CreatureItem {
     _stats?: Stats
 }
 
-export interface CreatureItemLore extends CreatureItem{
-    system : LoreItemSystem;
+export interface CreatureItemLore extends CreatureItem {
+    system: LoreItemSystem;
 }
 
-export function GetGenericAbilities(value: StatBlockProp): CreatureItem[] {
+export function GetGenericAbilities(value: StatsJson): CreatureItem[] {
     const spells = GetSpells(value);
     const strikes = GetStrikes(value);
 
@@ -203,8 +202,8 @@ export function GetGenericAbilities(value: StatBlockProp): CreatureItem[] {
             passive: 2
         };
 
-        const aType : string = a.system.actionType?.value.toLowerCase() ?? "";
-        const bType : string = b.system.actionType?.value.toLowerCase() ?? "";
+        const aType: string = a.system.actionType?.value.toLowerCase() ?? "";
+        const bType: string = b.system.actionType?.value.toLowerCase() ?? "";
 
         // Compare type first
         if (typeRank[aType as keyof typeof typeRank] !== typeRank[bType as keyof typeof typeRank]) {
@@ -224,22 +223,23 @@ export function GetGenericAbilities(value: StatBlockProp): CreatureItem[] {
         // 3) Alphabetical fallback
         return a.name.localeCompare(b.name);
     });
-    
+
     return selectedItems;
-    
+
 }
 
-export function GetLoreItems(value : StatBlockProp) {
+export function GetLoreItems(value: StatsJson) {
     return value.items.filter(item => item.type === "lore") as CreatureItemLore[];
 }
 
-export function GetAbilityNameFromSlug(creature: StatBlockProp,slug: string): string
-{
-    const match = creature.items.filter(item => {return item.system.slug === slug});
-    
+export function GetAbilityNameFromSlug(creature: StatsJson, slug: string): string {
+    const match = creature.items.filter(item => {
+        return item.system.slug === slug
+    });
+
     if (match.length === 0)
         return slug;
-    
+
     return match[0].name;
 }
 
@@ -248,8 +248,8 @@ export interface ItemSystem {
     traits: Traits,
     slug: string,
     actions: NullableValueHolder | null,
-    actionType : StringHolder,
-    rules : Rule[]
+    actionType: StringHolder,
+    rules: Rule[]
 }
 
 export interface Rule {
@@ -263,14 +263,13 @@ export interface Rule {
     radius?: number;
 }
 
-export function getAuraRules(item: ItemSystem): Rule | undefined
-{
-    const rule = item.rules.find(x=> x.key.toLowerCase() === "aura")
+export function getAuraRules(item: ItemSystem): Rule | undefined {
+    const rule = item.rules.find(x => x.key.toLowerCase() === "aura")
     return rule;
 }
 
 export interface Damage {
-    base: {damageType: string, dice: number, die: string}
+    base: { damageType: string, dice: number, die: string }
 }
 
 export interface LoreItemSystem extends ItemSystem {
@@ -290,15 +289,13 @@ export interface NullableValueHolder {
     value: number | null;
 }
 
-export function NullableValueChange(x : NullableValueHolder, value : number)
-{
+export function NullableValueChange(x: NullableValueHolder, value: number) {
     if (x.value === null)
         return;
     x.value += value;
 }
 
-export function NullableValueSet(x : NullableValueHolder, value : number)
-{
+export function NullableValueSet(x: NullableValueHolder, value: number) {
     if (x.value === null)
         return;
     x.value = value;
@@ -310,7 +307,7 @@ export function GetValue(x: NullableValueHolder): number {
     return x.value;
 }
 
-export interface ValueHolder{
+export interface ValueHolder {
     value: number;
 }
 
@@ -334,7 +331,7 @@ export interface DamageRollInfo {
     category?: string;
 }
 
-export function compareDamageRollInfo(a : DamageRollInfo, b : DamageRollInfo){
+export function compareDamageRollInfo(a: DamageRollInfo, b: DamageRollInfo) {
     return (a.damage === b.damage) && (a.category === b.category);
 }
 
@@ -344,15 +341,13 @@ export interface DiceAndModifier {
     modifier: number;
 }
 
-export function GetDice(value: DamageRollInfo): DiceAndModifier
-{
+export function GetDice(value: DamageRollInfo): DiceAndModifier {
     const dicePattern = /(\d+)d(\d+)([+-]\d+)?/i;
     const staticDamagePattern = /(\d+)/;
-    
+
     const matchDice = value.damage.toString().match(dicePattern);
 
-    if (matchDice)
-    {
+    if (matchDice) {
         const diceNumber = parseInt(matchDice[1], 10);
         const diceType = parseInt(matchDice[2], 10);
         const modifier = matchDice[3] ? parseInt(matchDice[3], 10) : 0;
@@ -363,11 +358,10 @@ export function GetDice(value: DamageRollInfo): DiceAndModifier
             modifier
         };
     }
-    
+
     const matchStatic = value.damage.toString().match(staticDamagePattern);
-    
-    if(matchStatic)
-    {
+
+    if (matchStatic) {
         return {
             diceType: null,
             diceNumber: null,
@@ -378,50 +372,48 @@ export function GetDice(value: DamageRollInfo): DiceAndModifier
     throw new Error(`Invalid dice format: ${value.damage}`);
 }
 
-export function DiceString(value: DiceAndModifier): string 
-{
+export function DiceString(value: DiceAndModifier): string {
     if (value.diceNumber !== null && value.diceType !== null)
         return (value.diceNumber.toString() + "d" + value.diceType.toString() + (value.modifier === 0 ? "" : printNumberWithSignalString(value.modifier)));
-    else 
+    else
         return (value.modifier === 0 ? "" : printNumberWithSignalString(value.modifier));
 }
 
 export interface Details {
-    level: {value: number};
+    level: { value: number };
     publicNotes: string;
-    languages: {details : string, value : string[]}
+    languages: { details: string, value: string[] }
 }
 
 
-function GetActionIcon(value: CreatureItem) 
-{
-    if(value.system.traits.value.some(x=> x === "aura")){
-        return (<span><RadioButtonIcon weight="bold" /></span>)
+function GetActionIcon(value: CreatureItem) {
+    if (value.system.traits.value.some(x => x === "aura")) {
+        return (<span><RadioButtonIcon weight="bold"/></span>)
     }
-    
+
     if (value.system.actionType === undefined)
         return null;
     if (value.system.actionType.value === undefined)
         return null;
-    
+
     if (value.system.actionType.value === "reaction")
         return (<span className="pathfinder-action">R</span>);
 
     if (value.system.actionType.value === "free")
         return (<span className="pathfinder-action">F</span>);
-    
+
     if (value.system.actionType.value === "passive")
         return null;
-    
+
     if (value.system.actions === undefined)
         return null;
     if (value.system.actions?.value === undefined)
         return null;
-    
+
     if (value.system.actions.value === 0)
         return null;
-    
-    switch (value.system.actions.value){
+
+    switch (value.system.actions.value) {
         case 1:
             return (<span className="pathfinder-action">A</span>);
         case 2:
@@ -457,7 +449,14 @@ function PrintGenericAbility(abilityItem: CreatureItem) {
         </li>);
 }
 
-function statBlock(value: StatBlockProp | undefined, baseValue : StatBlockProp | undefined, controls : StatBlockControls)
+interface StatBlockProps
+{
+    value: StatsJson | undefined,
+    baseValue : StatsJson | undefined,
+    controls : StatBlockControls
+}
+
+function StatBlock({value , baseValue  , controls} : StatBlockProps)
 {
     if(value === undefined)
         return (<p className="italic text-gray-400 px-3 py-1">Select a creature</p>)
@@ -546,7 +545,7 @@ function statBlock(value: StatBlockProp | undefined, baseValue : StatBlockProp |
     </div>)
 }
 
-function DescriptionArea(descriptionOpen : Hook<boolean>, value : StatBlockProp) 
+function DescriptionArea(descriptionOpen : Hook<boolean>, value : StatsJson) 
 {
     return (descriptionOpen.value ?
         (<>
@@ -559,7 +558,7 @@ function DescriptionArea(descriptionOpen : Hook<boolean>, value : StatBlockProp)
         </>);
 }
 
-function PrintPerceptionLine(value: StatBlockProp, powerTierVision : boolean)
+function PrintPerceptionLine(value: StatsJson, powerTierVision : boolean)
 {
     return (<><b>Perception</b> {printNumberWithSignalString(value.system.perception.mod)}{powerTierVision?PrintPerceptionTier(value.system.details.level.value, value.system.perception.mod):null}
         {GetDarknessVision(value.system.perception)&&` ; ${GetDarknessVision(value.system.perception)?.type}`}
@@ -567,7 +566,7 @@ function PrintPerceptionLine(value: StatBlockProp, powerTierVision : boolean)
     </>);
 }
 
-export function cloneStatBlock(statBlock: StatBlockProp): StatBlockProp 
+export function cloneStatBlock(statBlock: StatsJson): StatsJson 
 {
     return {
         _id: crypto.randomUUID(), // give the clone a new id
@@ -617,7 +616,7 @@ export function printNumberWithSignalString(value: number | null) {
     return ((val < 0 ? "" : "+") + (val));
 }
 
-export default statBlock;
+export default StatBlock;
 
 
 

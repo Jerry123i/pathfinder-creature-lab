@@ -1,7 +1,7 @@
 ﻿import {
     type CreatureItem,
     type ItemSystem,
-    type StatBlockProp,
+    type StatsJson,
     type NullableValueHolder,
 } from "./StatBlock.tsx";
 import {Fragment} from "react";
@@ -131,11 +131,11 @@ export interface PreparedSpellcasterEntrySystem extends SpellcasterEntrySystem{
     slots: PreparedSpellList;
 }
 
-export function GetSpells(value: StatBlockProp): CreatureItemSpell[] {
+export function GetSpells(value: StatsJson): CreatureItemSpell[] {
     return value.items.filter(item => item.type === "spell") as CreatureItemSpell[];
 }
 
-function GetSpellListsWithSpell(value: StatBlockProp): {spellList:SpellcastingItem, spells: CreatureItemSpell[]}[]
+function GetSpellListsWithSpell(value: StatsJson): {spellList:SpellcastingItem, spells: CreatureItemSpell[]}[]
 {
     const spellcastingEntries = value.items.filter(item => item.type === "spellcastingEntry") as SpellcastingItem[];
     const spells = value.items.filter(item => item.type === "spell") as CreatureItemSpell[];
@@ -155,7 +155,7 @@ function GetSpellListsWithSpell(value: StatBlockProp): {spellList:SpellcastingIt
     return finalList
 }
 
-export function GetSpellcastingEntry(value: StatBlockProp) : SpellcastingItem | null
+export function GetSpellcastingEntry(value: StatsJson) : SpellcastingItem | null
 {
     for (let i = 0; i < value.items.length; i++)
     {
@@ -166,7 +166,7 @@ export function GetSpellcastingEntry(value: StatBlockProp) : SpellcastingItem | 
     return null;
 }
 
-export function modifySpellDc(creature : StatBlockProp, value : number)
+export function modifySpellDc(creature : StatsJson, value : number)
 {
     if (!HasSpells(creature))
         return;
@@ -197,11 +197,11 @@ export function GetActiveLevel(spell : SpellSystem): number{
     return (spell.level.value ?? 0)
 }
 
-export function HasSpells(creature : StatBlockProp){
+export function HasSpells(creature : StatsJson){
     return GetSpells(creature).length > 0;
 }
 
-export function PrintAllSpells(creature: StatBlockProp, creatureLevel : number, showTier : boolean) { 
+export function PrintAllSpells(creature: StatsJson, creatureLevel : number, showTier : boolean) { 
     const allSpellLists = GetSpellListsWithSpell(creature);
     
     const spellListsCombination = []
